@@ -1,1 +1,0 @@
-Error[22.09.2012]: Table 'test.access_roles' doesn't existPPHP\tools\classes\standard\storage\database\QueryException[C:\WebServers\home\Delphinum\www\PPHP\tools\classes\standard\storage\database\PDO.php - 25]: Table 'test.access_roles' doesn't exist
