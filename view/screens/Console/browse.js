@@ -106,7 +106,7 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
             button.before('<span>,</span>')
           }
           value = value || '';
-          var newArg = $('<input type="text" value="'+value+'"/>');
+          var newArg = $('<input type="text" value="' + value + '"/>');
           button.before(newArg);
           newArg.focus();
           newArg.keyup();
@@ -130,7 +130,7 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
 
         commandsPanel.add = function(modulesName){
           $(modulesName).each(function(){
-            commandsPanel.append('<div>'+this+'</div>');
+            commandsPanel.append('<div>' + this + '</div>');
           });
         }
 
@@ -140,6 +140,7 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
       },
 
       initListeners = function(){
+        // Набор модуля
         console.module.on('keyup', function(e){
           if(this.value.length > 8){
             $(this).css('width', (this.value.length + 1) * 9 + 'px');
@@ -153,7 +154,7 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
             this.value = this.value.substr(0, 1).toUpperCase() + this.value.substr(1);
           }
         });
-
+        // Набор метода
         console.action.on('keyup', function(e){
           if(this.value.length > 13){
             $(this).css('width', (this.value.length + 1) * 9 + 'px');
@@ -167,7 +168,7 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
             this.value = this.value.substr(0, 1).toLowerCase() + this.value.substr(1);
           }
         });
-
+        // Набор аргумента
         console.args.on('keyup', function(e){
           if(e.target.value.length > 0){
             $(e.target).css('width', (e.target.value.length + 1) * 9 + 'px');
@@ -176,37 +177,38 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
             $(e.target).css('width', '9px');
           }
         });
-
+        // Ручное добавление аргумента
         console.args.plusArg.on('click', function(e){
           if(!e.ctrlKey){
             console.args.addInput();
-          }else{
+          }
+          else{
             var n = parseInt(prompt('Введите количество аргументов.'));
             if(!isNaN(n) && n > 0){
-              for(var i=0; i<n;i++){
+              for(var i = 0; i < n; i++){
                 console.args.addInput();
                 console.args.children('input[type=text]').get(0).focus();
               }
             }
           }
         });
-
+        // Фокус модуля
         console.module.on('focus', function(e){
-            PJS.query('Console', 'getModulesNames', function(answer){
-              console.moduleYUI.ac.set('source', answer);
+          PJS.query('Console', 'getModulesNames', function(answer){
+            console.moduleYUI.ac.set('source', answer);
 
-              commandsPanel.clear();
-              commandsPanel.add(answer);
-            });
+            commandsPanel.clear();
+            commandsPanel.add(answer);
+          });
         });
-
+        // Фокус метода
         console.action.on('focus', function(e){
           commandsPanel.clear();
 
           var value = console.module.get(0).value;
           if(value != ''){
             PJS.query('Console', 'getModuleActions', {
-              module: value
+              module:value
             }, function(answer){
               console.actionYUI.ac.set('source', answer);
 
@@ -214,7 +216,7 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
             });
           }
         });
-
+        // Выбор метода из выпадающего списка и отображение аргументов
         console.actionYUI.ac.on('select', function(data){
           var module = console.module.get(0).value,
             action = data.result.text;
@@ -222,21 +224,23 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
           if(module != '' && action != ''){
             console.args.clearArgs();
             PJS.query('Console', 'getMethodArgs', {
-              module: module,
-              action: action
+              module:module,
+              action:action
             }, function(answer){
               if(answer.length > 0){
                 $(answer).each(function(){
                   console.args.addInput(this);
                 });
-                console.args.children('input[type=text]').get(0).focus();
+                var firstArg = console.args.children('input[type=text]').get(0);
+                firstArg.focus();
+                firstArg.select();
               }
             });
           }
         });
-
+        // Отправка команды
         console.on('keypress', function(e){
-          if(e.keyCode == 13){
+          if(e.keyCode == 13 && e.ctrlKey){
             if(console.module.get(0).value != '' && console.action.get(0).value != ''){
               var command = new Command(console.module.get(0).value, console.action.get(0).value);
               var args = $('#argsCommand input[type=text]');
@@ -278,7 +282,7 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
         });
         uploader.on("uploadcomplete", function(event){
           uploader.set("fileList", []);
-          setCommandInConsole('< '+Y.JSON.parse(event.data).answer, 'silver');
+          setCommandInConsole('< ' + Y.JSON.parse(event.data).answer, 'silver');
           uploadButton.hide();
           selectButton.show();
           upload = false;
