@@ -240,7 +240,7 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
         });
         // Отправка команды
         console.on('keypress', function(e){
-          if(e.keyCode == 13 && e.ctrlKey){
+          if((e.keyCode == 13 || e.keyCode == 10) && e.ctrlKey){
             if(console.module.get(0).value != '' && console.action.get(0).value != ''){
               var command = new Command(console.module.get(0).value, console.action.get(0).value);
               var args = $('#argsCommand input[type=text]');
