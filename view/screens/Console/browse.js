@@ -3,11 +3,98 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
 
   PJS.controllers.Console.browse = function(){
     /*
-     * @field Поле вывода консоли.
-     * @private
-     * @type JQueryNode
+     * @function Метод добавляет аргумент в команду.
+     * @public
+     * @param {string} arg Добавляемая команда.
      */
-    var screen,
+    Command.prototype.addArg = function(arg){
+      this.args.push(arg.trim());
+    }
+
+    Command.prototype.toString = function(){
+      return this.module + '::' + this.action + '(' + this.args + ')';
+    }
+
+    /*
+     * @field Объект, отвечающий за работу области вывода.
+     * @private
+     * @type Object
+     */
+    var screen = (function(){
+        // Private properties
+        /*
+         * @field Общее число сообщений.
+         * @private
+         * @type integer
+         */
+        var countCommands = 0,
+        /*
+           * @field Ссылка на узел области вывода консоли.
+           * @private
+           * @type jQueryNode
+           */
+          node = $('#consoleScreen');
+
+        // Private methods
+        /*
+         * @function Метод добавляет сообщений в область вывода.
+         * @private
+         * @param {DOMNode} message Добавляемый узел с сообщением.
+         */
+        var addMessage = function(message){
+          countCommands++;
+          node.append(message);
+
+          if(countCommands > 20){
+            var superfluous = $(node.children().get(0));
+            $('#consoleBox').prepend(superfluous);
+            superfluous.hide('normal', function(e){
+              $(this).remove();
+            });
+          }
+        };
+
+        // Init
+        node.delegate('.Console_commandScreen', 'click', function(e){
+          var command = this.command;
+          console.module.value = command.module;
+          console.action.value = command.action;
+
+          var args = command.args;
+          for(var i in args){
+            console.args.addInput(args[i]);
+          }
+        });
+
+        return {
+          /*
+           * @function Метод добавляет введеную команду в область вывода консоли.
+           * @private
+           * @param {Command} command Добавляемая команда.
+           */
+          addCommand: function(command){
+            var messageNode = $('<div class="Console_messageScreen Console_commandScreen" style="color: white; cursor: pointer">' + countCommands+ '. > ' + command + ';</div>');
+            messageNode.get(0).command = command;
+            addMessage(messageNode);
+          },
+          /*
+           * @function Метод добавляет полученный ответ от сервера в область вывода консоли.
+           * @private
+           * @param {string} answer Добавляемое сообщение.
+           */
+          addAnswer: function(answer){
+            addMessage($('<div class="Console_messageScreen" style="color: silver">' + countCommands+ '. < ' + answer + ';</div>'));
+          },
+          /*
+           * @function Метод добавляет полученную от сервера ошибку в область вывода консоли.
+           * @private
+           * @param {string} error Добавляемое сообщение.
+           */
+          addError: function(error){
+            addMessage($('<div class="Console_messageScreen" style="color: red">' + countCommands+ '. < ' + error + ';</div>'));
+          }
+        }
+      })(),
     /*
      * @field Область ввода консоли.
      * @private
@@ -18,35 +105,17 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
       commandsPanel;
 
     /*
-     * @function Метод записывает строку сообщения в вывод консоли.
-     * @private
-     * @param {string} message Записываемое сообщение.
-     * @param {string} color Цвет сообщения.
-     */
-    var setCommandInConsole = function(message, color){
-        color = color || 'white';
-        screen.countCommand++;
-        screen.append('<div style="color: ' + color + '">' + screen.countCommand + '. ' + message + ';</div>');
-        if(screen.countCommand > 20){
-          var superfluous = $(screen.children().get(0));
-          $('#consoleBox').prepend(superfluous);
-          superfluous.hide('normal', function(e){
-            $(this).remove();
-          });
-        }
-      },
-    /*
      * @function Метод передает команду серверу.
      * @private
      * @param {Command} command Выполняемая команда.
      */
-      send = function(command){
+      var send = function(command){
         console.args.clearArgs();
-        console.module.get(0).value = '';
-        console.action.get(0).value = '';
+        console.module.value = '';
+        console.action.value = '';
         console.module.focus();
 
-        setCommandInConsole('> ' + command);
+        screen.addCommand(command);
         PJS.query(command.module, command.action, command.args,
           function(answer){
             if(typeof answer == 'object'){
@@ -58,10 +127,10 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
               answer = objInfo;
             }
 
-            setCommandInConsole('< ' + answer, 'silver');
+            screen.addAnswer(answer);
           },
           function(error){
-            setCommandInConsole('< ' + error.message, 'red');
+            screen.addError(error.message);
           });
       };
 
@@ -77,26 +146,12 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
       this.args = [];
     }
 
-    /*
-     * @function Метод добавляет аргумент в команду.
-     * @public
-     * @param {string} arg Добавляемая команда.
-     */
-    Command.prototype.addArg = function(arg){
-      this.args.push(arg.trim());
-    }
-
-    Command.prototype.toString = function(){
-      return this.module + '::' + this.action + '(' + this.args + ')';
-    }
-
     var initVars = function(){
-        screen = $('#consoleScreen');
         console = $('#console');
         commandsPanel = $('#commands');
 
-        console.module = $('#module');
-        console.action = $('#action');
+        console.module = $('#module').get(0);
+        console.action = $('#action').get(0);
         console.args = $('#argsCommand');
         console.args.plusArg = $('#argsCommand input[type=button]');
 
@@ -141,7 +196,7 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
 
       initListeners = function(){
         // Набор модуля
-        console.module.on('keyup', function(e){
+        $(console.module).on('keyup', function(e){
           if(this.value.length > 8){
             $(this).css('width', (this.value.length + 1) * 9 + 'px');
           }
@@ -155,7 +210,7 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
           }
         });
         // Набор метода
-        console.action.on('keyup', function(e){
+        $(console.action).on('keyup', function(e){
           if(this.value.length > 13){
             $(this).css('width', (this.value.length + 1) * 9 + 'px');
           }
@@ -193,7 +248,7 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
           }
         });
         // Фокус модуля
-        console.module.on('focus', function(e){
+        $(console.module).on('focus', function(e){
           PJS.query('Console', 'getModulesNames', function(answer){
             console.moduleYUI.ac.set('source', answer);
 
@@ -202,10 +257,10 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
           });
         });
         // Фокус метода
-        console.action.on('focus', function(e){
+        $(console.action).on('focus', function(e){
           commandsPanel.clear();
 
-          var value = console.module.get(0).value;
+          var value = console.module.value;
           if(value != ''){
             PJS.query('Console', 'getModuleActions', {
               module:value
@@ -218,7 +273,7 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
         });
         // Выбор метода из выпадающего списка и отображение аргументов
         console.actionYUI.ac.on('select', function(data){
-          var module = console.module.get(0).value,
+          var module = console.module.value,
             action = data.result.text;
 
           if(module != '' && action != ''){
@@ -241,8 +296,8 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
         // Отправка команды
         console.on('keypress', function(e){
           if((e.keyCode == 13 || e.keyCode == 10) && e.ctrlKey){
-            if(console.module.get(0).value != '' && console.action.get(0).value != ''){
-              var command = new Command(console.module.get(0).value, console.action.get(0).value);
+            if(console.module.value != '' && console.action.value != ''){
+              var command = new Command(console.module.value, console.action.value);
               var args = $('#argsCommand input[type=text]');
               args.each(function(k, v){
                 command.addArg(v.value);
@@ -282,7 +337,7 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
         });
         uploader.on("uploadcomplete", function(event){
           uploader.set("fileList", []);
-          setCommandInConsole('< ' + Y.JSON.parse(event.data).answer, 'silver');
+          screen.addAnswer(Y.JSON.parse(event.data).answer);
           uploadButton.hide();
           selectButton.show();
           upload = false;
