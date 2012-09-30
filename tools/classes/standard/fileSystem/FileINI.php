@@ -76,10 +76,10 @@ class FileINI{
   /**
    * Метод возвращает все содержимое указанной секции.
    * @param string $section Имя целевой секции.
-   * @return array|boolean Массив значений секции или false - если файл не разделен на секции.
+   * @return array|boolean Массив значений секции или false - если файл не разделен на секции или заданной секции не существует.
    */
   public function getSection($section){
-    if(!$this->isSection){
+    if(!$this->isSection || !isset($this->content[$section])){
       return false;
     }
     return $this->content[$section];

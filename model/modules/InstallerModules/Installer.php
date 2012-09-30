@@ -17,6 +17,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * - dir - адрес каталога, в котором должен быть размещен модуль;
    * - namespace - корневая область видимости модуля;
    * - installer - true - если модуль содержит Installer класс, иначе - false.
+   * - access - массив, имеющий следующую структуру: [имяМетодаКонтроллера => [имяРоли, имяРоли,...], ...]
    * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если модуль не содержит обязательных компонентов или его архив не найден.
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если недостаточно данных для установки модуля.
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\DuplicationException Выбрасывается в случае, если модуль с данным именем уже установлен в системе.
@@ -37,13 +38,13 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     // Получение имени модуля.
     $zip->extractTo($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/InstallerModules/temp', ['conf.ini']);
     $confFile = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/InstallerModules/temp/conf.ini');
-    $conf = new \PPHP\tools\classes\standard\fileSystem\FileINI($confFile, false);
-    if(!$conf->isDataExists('name')){
+    $conf = new \PPHP\tools\classes\standard\fileSystem\FileINI($confFile, true);
+    if(!$conf->isDataExists('name', 'module')){
       $confFile->delete();
       $zip->close();
       throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Нарушена структура описательного файла модуля.');
     }
-    $data['name'] = $conf->get('name');
+    $data['name'] = $conf->get('name', 'module');
 
     // Проверка на дублирование модуля.
     $moduleRouter = \PPHP\services\modules\ModulesRouter::getInstance();
@@ -54,7 +55,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     }
 
     // Определение родительского модуля.
-    $data['parentModule'] = ($conf->isDataExists('parent'))? $conf->get('parent') : false;
+    $data['parentModule'] = ($conf->isDataExists('parent', 'module'))? $conf->get('parent', 'module') : false;
 
     // Определение namespace модуля и его физического адреса.
     if($data['parentModule']){
@@ -79,6 +80,9 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     // Определение инсталятора.
     $data['installer'] = ($zip->statName('Installer.php') !== false);
 
+    // Определение прав доступа
+    $data['access'] = $conf->getSection('access');
+
     // Удаление временных файлов
     $confFile->delete();
 
@@ -94,7 +98,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * Модуль так же может содержать следующие компоненты:
    * - Внутренний инсталятор модуля (Installer.php), который представляет собой PHP класс с определенным статичным методом install, содержащим скрипт для постустановки модуля и настройки системы.
    * @param string $archiveAddress Полуный адрес архива модуля.
-   * @throws \Exception Выбрасывается в случае возникновения ошибки при выполнении внутреннего инсталятора модуля.
+   * @throws \Exception|\PPHP\tools\classes\standard\baseType\exceptions\DuplicationException Выбрасывается в случае возникновения ошибки при выполнении внутреннего инсталятора модуля.
    * @return string Результаты выполнения установки.
    */
   public function installModule($archiveAddress){
@@ -125,6 +129,26 @@ use \PPHP\tools\patterns\singleton\TSingleton;
         $dirModule->delete();
         $moduleRouter->removeController($installData['name']);
         throw $exc;
+      }
+    }
+
+    // Управление доступом
+    if($installData['access'] && $moduleRouter->isModuleExists('Access')){
+      $accessManager = $moduleRouter->getController('Access');
+      $accessManager = $accessManager::getInstance();
+      foreach($installData['access'] as $method => $roles){
+        $roles = explode(',', $roles);
+        foreach($roles as $role){
+          if(($role = $accessManager->getOIDRole($role)) !== false){
+            try{
+              $rule = $accessManager->addRule($installData['name'], $method);
+            }
+            catch(\PPHP\tools\classes\standard\baseType\exceptions\DuplicationException $exc){
+              $rule = $accessManager->getRuleFromPurpose($installData['name'], $method)->getOID();
+            }
+            $accessManager->expandRole($role, $rule);
+          }
+        }
       }
     }
 
@@ -186,6 +210,22 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     $installerModule = $namespaceModule . '\Installer';
     if(file_exists($_SERVER['DOCUMENT_ROOT'] . str_replace('\\', '/', $installerModule) . '.php')){
       $installerModule::getInstance()->uninstall();
+    }
+
+    // Управление доступом
+    if($moduleRouter->isModuleExists('Access')){
+      $accessManager = $moduleRouter->getController('Access');
+      $accessManager = $accessManager::getInstance();
+      $controllerModule = $module::getInstance();
+      $reflectControllerModule = $controllerModule::getReflectionClass();
+      foreach($controllerModule::getAllReflectionMethods() as $method){
+        if($method->isPublic() && !$method->isStatic() && $method->getDeclaringClass()->getName() == $reflectControllerModule->getName()){
+          $rule = $accessManager->getRuleFromPurpose($moduleName, $method->getName());
+          if($rule){
+            $accessManager->deleteRule($rule->getOID());
+          }
+        }
+      }
     }
 
     // Удаление каталога модуля.
