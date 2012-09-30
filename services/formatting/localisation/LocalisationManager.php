@@ -56,7 +56,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     if(!is_string($message)){
       throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $message);
     }
-    $addressLocaliseFile = $_SERVER['DOCUMENT_ROOT'] . '/' . $class->getName() . '_' . $this->currentLocalise . '.ini';
+    $addressLocaliseFile = $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $class->getName()) . '_' . $this->currentLocalise . '.ini';
     $localiseData = $this->buffer->getLocaliseData($addressLocaliseFile);
     if(isset($localiseData[$message])){
       return $localiseData[$message];
