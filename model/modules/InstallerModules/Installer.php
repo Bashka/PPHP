@@ -120,9 +120,9 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     $moduleRouter->setController($installData['name'], $controllerModule::getReflectionClass());
 
     // Выполнение внутреннего инсталлятора
+    $installResult = '';
     if($installData['installer']){
       $installer = $installData['namespace'] . '\Installer';
-      $installResult = '';
       try{
         $installResult = $installer::getInstance()->install();
       }
