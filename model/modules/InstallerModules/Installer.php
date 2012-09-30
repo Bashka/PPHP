@@ -122,8 +122,9 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     // Выполнение внутреннего инсталлятора
     if($installData['installer']){
       $installer = $installData['namespace'] . '\Installer';
+      $installResult = '';
       try{
-        $installer::getInstance()->install();
+        $installResult = $installer::getInstance()->install();
       }
       catch(\Exception $exc){
         $dirModule->delete();
@@ -162,7 +163,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
       $archiveFile->delete();
     }
 
-    return 'The unit "' . $installData['name'] . '" is successfully installed';
+    return 'The unit "' . $installData['name'] . '" is successfully installed. Installer: '.$installResult;
   }
 
   /**
