@@ -19,7 +19,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
   /**
    * Максимальный размер буфера
    */
-  const bufferSize = 10;
+  const bufferSize = 50;
   /**
    * Буфер данных для локализации
    * @var LocaliseBuffer
@@ -32,9 +32,21 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    */
   private $currentLocalise;
 
+  /**
+   * Метод возвращает маски всех возможных языков локализации.
+   * @static
+   * @return string[] Массив масок всех возможных языков локализации.
+   */
+  public static function getLanguages(){
+    return [self::ENGLISH, self::RUSSIA];
+  }
+
+  public static function getDefaultLanguage(){
+    return \PPHP\services\configuration\Configurator::getInstance()->get('Localisation', 'DefaultLanguage');
+  }
+
   private function __construct(){
     $this->buffer = new LocaliseBuffer(self::bufferSize);
-    $this->currentLocalise = self::ENGLISH;
   }
 
   /**
@@ -49,15 +61,20 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * Метод локализует данное сообщение в соответствии с файлом локализации данного класса
    * @param \PPHP\tools\patterns\metadata\reflection\ReflectionClass $class Класс-владелец файла локализации
    * @param string $message Локализуемое сообщение
-   * @return string Локализованное сообщение или входящее сообщение, если для него не определены данные для локализации
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если передано значение аргумента неожиданного типа или требуемого файла локализации не существует
+   * @return string Локализованное сообщение или входящее сообщение, если для него не определены данные для локализации или файла локализации не найдено.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если передано значение аргумента неожиданного типа.
    */
   public function localiseMessage(\PPHP\tools\patterns\metadata\reflection\ReflectionClass $class, $message){
     if(!is_string($message)){
       throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $message);
     }
     $addressLocaliseFile = $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $class->getName()) . '_' . $this->currentLocalise . '.ini';
-    $localiseData = $this->buffer->getLocaliseData($addressLocaliseFile);
+    try{
+      $localiseData = $this->buffer->getLocaliseData($addressLocaliseFile);
+    }
+    catch(\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException $exc){
+      return $message;
+    }
     if(isset($localiseData[$message])){
       return $localiseData[$message];
     }
