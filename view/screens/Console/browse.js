@@ -61,6 +61,7 @@ YUI().use('JQuery-core', 'PJS', 'tabview', 'uploader', 'json-parse', 'autocomple
           console.action.value = command.action;
 
           var args = command.args;
+          console.args.clearArgs();
           for(var i in args){
             console.args.addInput(args[i]);
           }

@@ -12,7 +12,7 @@ PJS.localisation = function(){
    * Текущая локализация.
    * @var string
    */
-  localise = 'en';
+  localise;
 
   return {
     /*
@@ -58,6 +58,3 @@ PJS.localisation = function(){
     }
   }
 }();
-
-// @todo: Реализовать механизм определения локализации
-PJS.localisation.setLanguage('ru');
