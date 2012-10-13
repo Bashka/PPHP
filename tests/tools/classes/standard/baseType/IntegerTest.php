@@ -33,23 +33,23 @@ class IntegerTest extends \PHPUnit_Framework_TestCase{
    * @covers PPHP\tools\classes\standard\baseType\Integer::is
    */
   public function testIs(){
-    $this->assertTrue($this->object->is(10));
-    $this->assertTrue($this->object->is(-10));
-    $this->assertTrue($this->object->is(1.0));
-    $this->assertTrue($this->object->is(-1.0));
-    $this->assertFalse($this->object->is(1.5));
-    $this->assertFalse($this->object->is(-1.5));
-    $this->assertTrue($this->object->is(true));
-    $this->assertTrue($this->object->is(false));
-    $this->assertTrue($this->object->is('5'));
-    $this->assertTrue($this->object->is('-5'));
-    $this->assertTrue($this->object->is('1.0'));
-    $this->assertTrue($this->object->is('-1.0'));
-    $this->assertFalse($this->object->is('1.5'));
-    $this->assertFalse($this->object->is('-1.5'));
-    $this->assertFalse($this->object->is('5a'));
-    $this->assertFalse($this->object->is('1.0a'));
-    $this->assertFalse($this->object->is('1.5a'));
+    $this->assertTrue(\PPHP\tools\classes\standard\baseType\Integer::is(10));
+    $this->assertTrue(\PPHP\tools\classes\standard\baseType\Integer::is(-10));
+    $this->assertTrue(\PPHP\tools\classes\standard\baseType\Integer::is(1.0));
+    $this->assertTrue(\PPHP\tools\classes\standard\baseType\Integer::is(-1.0));
+    $this->assertFalse(\PPHP\tools\classes\standard\baseType\Integer::is(1.5));
+    $this->assertFalse(\PPHP\tools\classes\standard\baseType\Integer::is(-1.5));
+    $this->assertTrue(\PPHP\tools\classes\standard\baseType\Integer::is(true));
+    $this->assertTrue(\PPHP\tools\classes\standard\baseType\Integer::is(false));
+    $this->assertTrue(\PPHP\tools\classes\standard\baseType\Integer::is('5'));
+    $this->assertTrue(\PPHP\tools\classes\standard\baseType\Integer::is('-5'));
+    $this->assertTrue(\PPHP\tools\classes\standard\baseType\Integer::is('1.0'));
+    $this->assertTrue(\PPHP\tools\classes\standard\baseType\Integer::is('-1.0'));
+    $this->assertFalse(\PPHP\tools\classes\standard\baseType\Integer::is('1.5'));
+    $this->assertFalse(\PPHP\tools\classes\standard\baseType\Integer::is('-1.5'));
+    $this->assertFalse(\PPHP\tools\classes\standard\baseType\Integer::is('5a'));
+    $this->assertFalse(\PPHP\tools\classes\standard\baseType\Integer::is('1.0a'));
+    $this->assertFalse(\PPHP\tools\classes\standard\baseType\Integer::is('1.5a'));
   }
 
   /**

@@ -23,7 +23,7 @@ class Float extends wrapper{
    * @param mixed $val
    * @return boolean true - если данные являются дробным числом или могут быть приведены к типу float без потери данных, иначе - false.
    */
-  public function is($val){
+  public static function is($val){
     if(is_integer($val) || is_float($val) || is_bool($val)){
       return true;
     }

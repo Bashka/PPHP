@@ -64,12 +64,12 @@ class StringTest extends \PHPUnit_Framework_TestCase{
    * @covers PPHP\tools\classes\standard\baseType\String::is
    */
   public function testIs(){
-    $this->assertTrue($this->object->is('test'));
-    $this->assertTrue($this->object->is(5));
-    $this->assertTrue($this->object->is(5.5));
-    $this->assertTrue($this->object->is(true));
-    $this->assertFalse($this->object->is([]));
-    $this->assertFalse($this->object->is(new stdClass));
+    $this->assertTrue(\PPHP\tools\classes\standard\baseType\String::is('test'));
+    $this->assertTrue(\PPHP\tools\classes\standard\baseType\String::is(5));
+    $this->assertTrue(\PPHP\tools\classes\standard\baseType\String::is(5.5));
+    $this->assertTrue(\PPHP\tools\classes\standard\baseType\String::is(true));
+    $this->assertFalse(\PPHP\tools\classes\standard\baseType\String::is([]));
+    $this->assertFalse(\PPHP\tools\classes\standard\baseType\String::is(new stdClass));
   }
 
   /**
@@ -189,5 +189,33 @@ class StringTest extends \PHPUnit_Framework_TestCase{
     $this->assertEquals('Test string тестовая строка +/', $this->object->prevent(0,30, '')->getVal());
     $this->assertEquals('Tes sring тестовая строка +/`', $this->object->prevent(0,33, '\t#')->getVal());
     $this->assertEquals('Test string тестовая строка +', $this->object->prevent(0,30, '\/')->getVal());
+  }
+
+  /**
+   * @covers PPHP\tools\classes\standard\baseType\String::getPoint
+   */
+  public function testGetPoint(){
+    $this->assertEquals(0, $this->object->getPoint());
+  }
+
+  /**
+   * @covers PPHP\tools\classes\standard\baseType\String::setPoint
+   */
+  public function testSetPoint(){
+    $this->object->setPoint(5);
+    $this->assertEquals(5, $this->object->getPoint());
+    $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\LogicException');
+    $this->object->setPoint(48);
+    $this->object->setPoint(-1);
+  }
+
+  /**
+   * @covers PPHP\tools\classes\standard\baseType\String::nextComponent
+   */
+  public function testNextComponent(){
+    $this->assertEquals('Test', $this->object->nextComponent(' ')->getVal());
+    $this->assertEquals('string', $this->object->nextComponent(' ')->getVal());
+    $this->assertEquals('тест', $this->object->nextComponent('о')->getVal());
+    $this->assertEquals('вая строка ', $this->object->nextComponent('+')->getVal());
   }
 }

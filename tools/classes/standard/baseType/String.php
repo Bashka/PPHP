@@ -8,6 +8,12 @@ class String extends wrapper implements \ArrayAccess{
   protected static $type = 'string';
 
   /**
+   * Внутренний указатель компонента.
+   * @var integer
+   */
+  protected $point = 0;
+
+  /**
    * Метод приводит переданные данные к типу обертки.
    * @param mixed $val Приводимые данные.
    * @return mixed Приведенные данные.
@@ -22,7 +28,7 @@ class String extends wrapper implements \ArrayAccess{
    * @param mixed $string Проверяемые данные.
    * @return boolean true - если данные являются строкой или могут быть приведены к строковому типу без потери данных, иначе - false.
    */
-  public function is($string){
+  public static function is($string){
     return (is_string($string) || is_numeric($string) || is_bool($string));
   }
 
@@ -325,4 +331,38 @@ class String extends wrapper implements \ArrayAccess{
     $illegalChars = preg_replace('/([\\\#\/\]\[])/', '\\\${1}', $illegalChars);
     return new static(preg_replace('/[' . $illegalChars . ']+/u', '', $val));
   }
+
+  /**
+   * @param integer $point
+   * @throws exceptions\LogicException Выбрасывается в случае, если указанного символа не существует.
+   */
+  public function setPoint($point){
+    if($point < 0 || $point > $this->length()){
+      throw new \PPHP\tools\classes\standard\baseType\exceptions\LogicException('Недопустимый индекс массива.');
+    }
+    $this->point = $point;
+  }
+
+  /**
+   * @return integer
+   */
+  public function getPoint(){
+    return $this->point;
+  }
+
+  /**
+   * Метод возвращает следующий компонент от текущей позиции указателя компонента до указанного ограничителя.
+   * @param string $delimiter Ограничитель компонента.
+   * @return boolean|\PPHP\tools\classes\standard\baseType\String Компонента или false - если указанный ограничитель не найден.
+   */
+  public function nextComponent($delimiter){
+    $positionDelimiter = strpos($this->val, $delimiter, $this->point);
+    if($positionDelimiter < 0){
+      return false;
+    }
+    $component = substr($this->val, $this->point, $positionDelimiter-$this->point);
+    $this->point += strlen($component)+strlen($delimiter);
+    return new static($component);
+  }
+
 }

@@ -37,13 +37,20 @@ class CentralController{
 
     $method = $viewMessage['active'];
     if(!method_exists($controller, $method)){
-      $send->exception = new \PPHP\services\modules\ModuleNotFoundException('Запрашиваемый интерфейс модуля отсутствует.');
+      $send->exception = new \PPHP\services\modules\ModuleNotFoundException('Запрашиваемый интерфейс '.$method.' модуля '.$viewMessage['module'].' отсутствует.');
     }
     else{
       // Проверка прав доступа к методу модуля
       if(AccessManager::getInstance()->isResolved($viewMessage['module'], $viewMessage['active'], self::$moduleRouter)){
         try{
-          $viewMessage['message'] = (isset($viewMessage['message']))? $viewMessage['message'] : [];
+          // Верификация данных
+          if(isset($viewMessage['message'])){
+            VerifierData::verifyArgs($controller->getReflectionMethod($method), $viewMessage['message']);
+          }
+          else{
+            $viewMessage['message'] = [];
+          }
+
           $send->answer = call_user_func_array([$controller, $method], $viewMessage['message']);
         }
         catch(\Exception $e){

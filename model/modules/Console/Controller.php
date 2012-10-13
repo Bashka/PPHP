@@ -76,11 +76,11 @@ class Controller extends \PPHP\model\classes\ModuleController{
 
   /**
    * Метод возвращает полный физический адрес к файлу по его идентификатору.
-   * @param integer $fileID Идентификатор файла.
+   * @param \PPHP\tools\classes\standard\baseType\Integer $fileID Идентификатор файла.
    * @return string Полный физический адрес к файлу.
    */
-  public function getAddressFile($fileID){
-    $fileID = (int)$fileID;
+  public function getAddressFile(\PPHP\tools\classes\standard\baseType\Integer $fileID){
+    $fileID = $fileID->getVal();
     $file = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files/'.$fileID);
     if(!$file->isExists()){
       return 'The file is not found';
@@ -90,11 +90,11 @@ class Controller extends \PPHP\model\classes\ModuleController{
 
   /**
    * Метод удаляет указанный файл из системы.
-   * @param integer $fileID Идентификатор файла.
+   * @param \PPHP\tools\classes\standard\baseType\Integer $fileID Идентификатор файла.
    * @return string
    */
-  public function removeFile($fileID){
-    $fileID = (int)$fileID;
+  public function removeFile(\PPHP\tools\classes\standard\baseType\Integer $fileID){
+    $fileID = $fileID->getVal();
     $file = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files/'.$fileID);
     if(!$file->isExists()){
       return 'The file is not found';
@@ -119,12 +119,13 @@ class Controller extends \PPHP\model\classes\ModuleController{
 
   /**
    * Метод переименовывает указанный файл.
-   * @param integer $fileID Идентификатор файла.
-   * @param string $newName Новое имя файла.
+   * @param \PPHP\tools\classes\standard\baseType\Integer $fileID Идентификатор файла.
+   * @param \PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemName $newName Новое имя файла.
    * @return string
    */
-  public function renameFile($fileID, $newName){
-    $fileID = (int)$fileID;
+  public function renameFile(\PPHP\tools\classes\standard\baseType\Integer $fileID, \PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemName $newName){
+    $fileID = $fileID->getVal();
+    $newName = $newName->getVal();
     $file = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files/'.$fileID);
     if(!$file->isExists()){
       return 'The file is not found';
@@ -135,17 +136,18 @@ class Controller extends \PPHP\model\classes\ModuleController{
 
   /**
    * Метод перемещает указанный файл.
-   * @param integer $fileID Идентификатор перемещаемого файла.
-   * @param string $newAddress Новый адрес файла.
+   * @param \PPHP\tools\classes\standard\baseType\Integer $fileID Идентификатор перемещаемого файла.
+   * @param \PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress $newAddress Новый адрес файла относительно корневого каталога сайта.
    * @return string
    */
-  public function moveFile($fileID, $newAddress){
-    $fileID = (int)$fileID;
+  public function moveFile(\PPHP\tools\classes\standard\baseType\Integer $fileID, \PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress $newAddress){
+    $fileID = $fileID->getVal();
+    $newAddress = ($newAddress->getIsRoot())? $newAddress->getVal(): '/'.$newAddress->getVal();
     $file = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files/'.$fileID);
     if(!$file->isExists()){
       return 'The file is not found';
     }
-    $file->move(\PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($newAddress));
+    $file->move(\PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . $newAddress));
     return 'The file is moved';
   }
 
@@ -159,10 +161,11 @@ class Controller extends \PPHP\model\classes\ModuleController{
 
   /**
    * Метод определяет доступные для данного модуля методы контроллера.
-   * @param string $module Имя целевого модуля.
+   * @param \PPHP\tools\classes\standard\baseType\special\Name $module Имя целевого модуля.
    * @return array Массив доступных методов контроллера данного модуля.
    */
-  public function getModuleActions($module){
+  public function getModuleActions(\PPHP\tools\classes\standard\baseType\special\Name $module){
+    $module = $module->getVal();
     $actions = \PPHP\services\modules\ModulesRouter::getInstance()->getModuleActions($module);
     if(!$actions){
       return [];
@@ -172,12 +175,14 @@ class Controller extends \PPHP\model\classes\ModuleController{
 
   /**
    * Метод возвращает имена аргументов метода контроллера.
-   * @param string $module Целевой модуль.
-   * @param string $method Целевой метод.
+   * @param \PPHP\tools\classes\standard\baseType\special\Name $module Целевой модуль.
+   * @param \PPHP\tools\classes\standard\baseType\special\Name $method Целевой метод.
    * @return array Массив имен аргументов метода.
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если заданного метода не существует.
    */
-  public function getMethodArgs($module, $method){
+  public function getMethodArgs(\PPHP\tools\classes\standard\baseType\special\Name $module, \PPHP\tools\classes\standard\baseType\special\Name $method){
+    $module = $module->getVal();
+    $method = $method->getVal();
     $controller = \PPHP\services\modules\ModulesRouter::getInstance()->getController($module);
     $controller = new \ReflectionClass($controller);
     if(!$controller->hasMethod($method)){
@@ -190,7 +195,16 @@ class Controller extends \PPHP\model\classes\ModuleController{
     $params = $action->getParameters();
     $result = [];
     foreach($params as $param){
-      $result[] = $param->getName();
+      // Определение допустимого типа аргумента
+      $classParam = $param->getClass();
+      if($classParam){
+        $classParam = $classParam->getName();
+        $classParam = ':'.substr($classParam, strrpos($classParam, '\\')+1);
+      }
+      else{
+        $classParam = '';
+      }
+      $result[] = $param->getName().$classParam;
     }
     return $result;
   }

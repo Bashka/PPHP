@@ -23,7 +23,7 @@ class Integer extends wrapper{
    * @param mixed $val
    * @return boolean true - если данные являются целым числом или могут быть приведены к типу integer без потери данных, иначе - false.
    */
-  public function is($val){
+  public static function is($val){
     if(is_integer($val)){
       return true;
     }

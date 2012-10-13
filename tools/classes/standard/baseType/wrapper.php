@@ -31,7 +31,9 @@ abstract class wrapper{
    * @param mixed $val
    * @return boolean true - если данные являются допустимым типом или могут быть приведены к этому типу без потери данных, иначе - false.
    */
-  public abstract function is($val);
+  public static function is($val){
+    return true;
+  }
 
   /**
    * Метод возвращает текущее значение обертки.
@@ -42,8 +44,8 @@ abstract class wrapper{
   }
 
   function __construct($val){
-    if(!$this->is($val)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException(self::$type, $val);
+    if(!static::is($val)){
+      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException(static::$type, $val);
     }
     $this->val = $this->transform($val);
   }
