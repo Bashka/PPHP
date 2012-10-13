@@ -18,7 +18,7 @@ class AccessManager implements \PPHP\tools\patterns\singleton\Singleton{
   public function isResolved($module, $active, \PPHP\services\modules\ModulesRouter $modulesRouter){
     if($modulesRouter->isModuleExists('Access')){
       $accessController = $modulesRouter->getController('Access');
-      return $accessController::getInstance()->isResolved($module, $active);
+      return $accessController::getInstance()->isResolved(new \PPHP\tools\classes\standard\baseType\special\Name($module), new \PPHP\tools\classes\standard\baseType\special\Name($active));
     }
     else{
       return true;

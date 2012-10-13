@@ -4,7 +4,7 @@ namespace PPHP\model\modules\InstallerModules;
 class Controller extends \PPHP\model\classes\ModuleController{
   /**
    * Метод устанавливает указанный локальный модуль.
-   * @param \PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress $archiveAddress Полуный адрес архива модуля относительно относительно корневого каталога сайта.
+   * @param \PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress $archiveAddress Полный адрес архива модуля относительно корневого каталога сайта.
    * @return string Результаты выполнения установки.
    */
   public function installModule(\PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress $archiveAddress){
