@@ -140,14 +140,14 @@ use \PPHP\tools\patterns\singleton\TSingleton;
       foreach($installData['access'] as $method => $roles){
         $roles = explode(',', $roles);
         foreach($roles as $role){
-          if(($role = $accessManager->getOIDRole($role)) !== false){
+          if(($role = $accessManager->getOIDRole(new \PPHP\tools\classes\standard\baseType\special\Alias($role))) !== false){
             try{
-              $rule = $accessManager->addRule($installData['name'], $method);
+              $rule = $accessManager->addRule(new \PPHP\tools\classes\standard\baseType\special\Name($installData['name']), new \PPHP\tools\classes\standard\baseType\special\Name($method));
             }
             catch(\PPHP\tools\classes\standard\baseType\exceptions\DuplicationException $exc){
-              $rule = $accessManager->getRuleFromPurpose($installData['name'], $method)->getOID();
+              $rule = $accessManager->getRuleFromPurpose(new \PPHP\tools\classes\standard\baseType\special\Name($installData['name']), new \PPHP\tools\classes\standard\baseType\special\Name($method))->getOID();
             }
-            $accessManager->expandRole($role, $rule);
+            $accessManager->expandRole(new \PPHP\tools\classes\standard\baseType\Integer($role), new \PPHP\tools\classes\standard\baseType\Integer($rule));
           }
         }
       }
@@ -221,9 +221,9 @@ use \PPHP\tools\patterns\singleton\TSingleton;
       $reflectControllerModule = $controllerModule::getReflectionClass();
       foreach($controllerModule::getAllReflectionMethods() as $method){
         if($method->isPublic() && !$method->isStatic() && $method->getDeclaringClass()->getName() == $reflectControllerModule->getName()){
-          $rule = $accessManager->getRuleFromPurpose($moduleName, $method->getName());
+          $rule = $accessManager->getRuleFromPurpose(new \PPHP\tools\classes\standard\baseType\special\Name($moduleName), new \PPHP\tools\classes\standard\baseType\special\Name($method->getName()));
           if($rule){
-            $accessManager->deleteRule($rule->getOID());
+            $accessManager->deleteRule(new \PPHP\tools\classes\standard\baseType\Integer($rule->getOID()));
           }
         }
       }
