@@ -207,6 +207,9 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     $module = $moduleRouter->getController($moduleName);
     $namespaceModule = substr($module, 0, strrpos($module, '\Controller'));
 
+    // Удаление информации о модуле из роутера.
+    $moduleRouter->removeController($moduleName);
+
     // Деинсталяция модуля.
     $installerModule = $namespaceModule . '\Installer';
     if(file_exists($_SERVER['DOCUMENT_ROOT'] . str_replace('\\', '/', $installerModule) . '.php')){
@@ -236,8 +239,6 @@ use \PPHP\tools\patterns\singleton\TSingleton;
       $dirModule->delete();
     }
 
-    // Удаление информации о модуле из роутера.
-    $moduleRouter->removeController($moduleName);
     return 'The module is removed';
   }
 }

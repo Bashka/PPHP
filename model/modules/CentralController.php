@@ -54,6 +54,7 @@ class CentralController{
           $send->answer = call_user_func_array([$controller, $method], $viewMessage['message']);
         }
         catch(\Exception $e){
+          \PPHP\services\log\LogManager::getInstance()->setMessage(\PPHP\services\log\Message::createError($e->getMessage(), $e));
           $send->exception = $e;
         }
       }
@@ -78,6 +79,7 @@ class CentralController{
     if(!$causingModule->isMetadataExists('ParentModule')){
       throw new \PPHP\tools\patterns\metadata\EmptyMetadataException('Информация о зависимости модуля отсутствует.');
     }
+    self::$moduleRouter = \PPHP\services\modules\ModulesRouter::getInstance();
     $controllerParentModule = self::$moduleRouter->getController($causingModule->getMetadata('ParentModule'));
     $message = func_get_args();
     array_shift($message);
