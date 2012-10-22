@@ -18,6 +18,11 @@ body {
     width: 100%;
 }
 
+.Console_messageScreen{
+    height: 16px;
+    overflow: auto;
+}
+
 #console input[type=text]{
     background: #222;
     color: white;
