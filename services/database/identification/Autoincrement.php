@@ -37,7 +37,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
   }
 
   /**
-   * Метод устанавливает счетчик в заданное значеение.
+   * Метод устанавливает счетчик в заданное значение.
    * @param integer $OID Новое значение счетчика.
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если аргумент имеет неверный тип или меньше 1.
    */

@@ -1,6 +1,11 @@
 <?php
 namespace PPHP\tools\patterns\metadata\reflection;
 
+/**
+ * Классическая реализация интерфейса PPHP\tools\patterns\metadata\reflection\Reflect.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\metadata\reflection
+ */
 trait TReflect{
   /**
    * Отражение класса.
@@ -22,8 +27,8 @@ trait TReflect{
    * Метод возвращает представление свойства класса.
    * @static
    * @param string $propertyName Имя свойства.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если в качестве аргумента передан неверный тип, пустая строка или данного члена класса не существует.
-   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionProperty
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionProperty Отображение свойства класса.
    */
   static public function &getReflectionProperty($propertyName){
     if(!is_string($propertyName) || empty($propertyName) || !property_exists(get_called_class(), $propertyName)){
@@ -43,9 +48,9 @@ trait TReflect{
   /**
    * Метод возвращает представление метода класса.
    * @static
-   * @param $methodName Имя метода.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если в качестве аргумента передан неверный тип, пустая строка или данного члена класса не существует.
-   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionMethod
+   * @param string $methodName Имя метода.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionMethod Отображение метода класса.
    */
   static public function &getReflectionMethod($methodName){
     if(!is_string($methodName) || empty($methodName) || !method_exists(get_called_class(), $methodName)){
@@ -65,7 +70,7 @@ trait TReflect{
   /**
    * Метод возвращает представление класса.
    * @static
-   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionClass
+   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionClass Отображение класса.
    */
   static public function &getReflectionClass(){
     if(!isset(self::$reflectionClass[get_called_class()])){
@@ -77,8 +82,7 @@ trait TReflect{
   /**
    * Метод возвращает представление родительского класса.
    * @static
-   * @abstract
-   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionClass|null Представление родительского класса или null - если данный класс является вершиной иерархии наследования.
+   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionClass|null Отображение родительского класса или null - если данный класс является вершиной иерархии наследования.
    */
   static public function getParentReflectionClass(){
     $parentClass = static::getReflectionClass()->getParentClass();
@@ -96,9 +100,9 @@ trait TReflect{
   }
 
   /**
-   * Метод возвращает отображения всех свойств класса, в том числе видимые свойства родительского класса.
+   * Метод возвращает отображения всех свойств класса, в том числе видимых свойств родительского класса.
    * @static
-   * @return \SplObjectStorage
+   * @return \SplObjectStorage Отображение всех свойств класса.
    */
   static public function getAllReflectionProperties(){
     $reflectionProperties = new \SplObjectStorage();
@@ -110,9 +114,9 @@ trait TReflect{
   }
 
   /**
-   * Метод возвращает отображения всех методов класса, в том числе видимые методы родительского класса.
-   * @static
-   * @return \SplObjectStorage
+   * Метод возвращает отображения всех методов класса, в том числе видимых методов родительского класса.
+   * @status
+   * @return \SplObjectStorage Отображение всех методов класса.
    */
   static public function getAllReflectionMethods(){
     $reflectionMethods = new \SplObjectStorage();

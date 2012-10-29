@@ -2,7 +2,9 @@
 namespace PPHP\tools\patterns\observer;
 
 /**
- * Данная реализация добавляет механизмы регистрации и оповещения подписчиков.
+ * Классическая реализация интерфейса SplObserver.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\observer
  */
 trait TSubject{
   /**
@@ -56,20 +58,5 @@ trait TSubject{
     foreach($this->observers as $observer){
       $observer->update($this);
     }
-  }
-}
-
-class ExampleObserver implements \SplObserver{
-  /**
-   * (PHP 5 &gt;= 5.1.0)<br/>
-   * Receive update from subject
-   * @link http://php.net/manual/en/splobserver.update.php
-   * @param \SplSubject $subject <p>
-   * The <b>SplSubject</b> notifying the observer of an update.
-   * </p>
-   * @return void
-   */
-  public function update(\SplSubject $subject){
-    echo 'Реакция подписчика на оповещение';
   }
 }

@@ -3,6 +3,8 @@ namespace PPHP\tools\patterns\database\query;
 
 /**
  * Класс представляет логическое выражение.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\database\query
  */
 abstract class QueryCondition implements Condition{
   /**
@@ -17,7 +19,7 @@ abstract class QueryCondition implements Condition{
 
   /**
    * Метод добавляет логическую операцию в выражение.
-   * @param Condition $condition
+   * @param Condition $condition Логический оператор.
    */
   public function addCondition(Condition $condition){
     $this->conditions->attach($condition);

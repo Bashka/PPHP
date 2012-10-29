@@ -3,6 +3,8 @@ namespace PPHP\tools\patterns\database\query;
 
 /**
  * Класс представляет SQL запрос для обновления данных в БД.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\database\query
  */
 class Update implements ComponentQuery{
   /**
@@ -27,7 +29,7 @@ class Update implements ComponentQuery{
   private $where;
 
   /**
-   * @param Table $table
+   * @param Table $table Целевая таблица.
    */
   function __construct(Table $table){
     $this->fields = new \SplObjectStorage();
@@ -46,9 +48,9 @@ class Update implements ComponentQuery{
   /**
    * Метод добавляет данные в запрос.
    * @param Field $field Целевое поле.
-   * @throws StandardException Выбрасывается в случае, если заданный компонент уже включен в запрос.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если один из аргументов имеет недопустимое значение.
-   * @param string|number|boolean $value Значение поля.
+   * @param string|number|boolean $value Значение целевого поля.
+   * @throws StandardException Выбрасывается в случае, если указанное поле уже присутствует в запросе.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   public function addData(Field $field, $value){
     if($this->fields->offsetExists($field)){
@@ -65,7 +67,7 @@ class Update implements ComponentQuery{
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
    * @param string|null $driver Используемая СУБД.
-   * @throws StandardException Выбрасывается в случае, если компонент запроса не имеет достаточно данных для формирования запроса.
+   * @throws StandardException Выбрасывается в случае, если отсутствуют обязательные компоненты запроса.
    * @return string Представление элемента в виде части SQL запроса.
    */
   public function interpretation($driver=null){

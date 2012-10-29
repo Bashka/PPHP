@@ -3,6 +3,8 @@ namespace PPHP\tools\patterns\database\query;
 
 /**
  * Логический оператор сравнения.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\database\query
  */
 class LogicOperation implements Condition{
   /**
@@ -11,21 +13,21 @@ class LogicOperation implements Condition{
    */
   private $field;
   /**
-   * Оператор сравнения
-   * @var string =, !=, >=, <=, >, <
+   * Оператор сравнения. Одно из следующих значений: =, !=, >=, <=, >, <.
+   * @var string
    */
   private $operator;
   /**
-   * Левый операнд.
+   * Правый операнд.
    * @var string|number|boolean|Field
    */
   private $value;
 
   /**
-   * @param Field $field
-   * @param string $operator =, !=, >=, <=, >, <
-   * @param string|number|boolean|Field $value
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если один из аргументов имеет недопустимое значение.
+   * @param Field $field Сравниваемое поле.
+   * @param string $operator Оператор сравнения. Одно из следующих значений: =, !=, >=, <=, >, <.
+   * @param string|number|boolean|Field $value Правый операнд.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct(Field $field, $operator, $value){
     if(array_search($operator, ['=', '>=', '<=', '!=', '>', '<']) == -1){

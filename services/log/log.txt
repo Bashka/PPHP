@@ -1,0 +1,3 @@
+Error[28.10.2012]: Требуемой для работы утилиты X не найдено.PPHP\model\modules\utilities\UtilityNotFoundException[C:\WebServers\home\Delphinum\www\PPHP\model\modules\InstallerUtilities\Installer.php - 62]: Требуемой для работы утилиты X не найдено.
+й для работы утилиты Обязательной утилиты X не найдено. не найдено.
+�аталог не найден.

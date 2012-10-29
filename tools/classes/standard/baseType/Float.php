@@ -3,8 +3,14 @@ namespace PPHP\tools\classes\standard\baseType;
 
 /**
  * Класс-обертка служит для предоставления дополнительной логики дробным числам.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\baseType
  */
 class Float extends wrapper{
+  /**
+   * Тип данной обертки.
+   * @var string
+   */
   protected static $type = 'float';
 
   /**
@@ -20,7 +26,7 @@ class Float extends wrapper{
   /**
    * Метод определяет, является ли указанное значение дробным числом.
    * @static
-   * @param mixed $val
+   * @param mixed $val Проверяемые данные.
    * @return boolean true - если данные являются дробным числом или могут быть приведены к типу float без потери данных, иначе - false.
    */
   public static function is($val){

@@ -3,6 +3,8 @@ namespace PPHP\tools\patterns\database\query;
 
 /**
  * Множественное логическое выражение.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\database\query
  */
 class MultiCondition implements Condition{
   /**
@@ -16,16 +18,16 @@ class MultiCondition implements Condition{
    */
   private $rightOperand;
   /**
-   * Логический оператор.
+   * Логический оператор. Одно из следующих значений: AND, OR.
    * @var string
    */
   private $logicOperator;
 
   /**
-   * @param Condition $leftOperand
-   * @param string $logicOperator AND, OR
-   * @param Condition $rightOperand
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если один из аргументов имеет недопустимое значение.
+   * @param Condition $leftOperand Левый логический операнд.
+   * @param string $logicOperator Логический оператор. Одно из следующих значений: AND, OR.
+   * @param Condition $rightOperand Правый логический операнд.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct(Condition $leftOperand, $logicOperator, Condition $rightOperand){
     if(array_search($logicOperator, ['AND', 'OR']) == -1){

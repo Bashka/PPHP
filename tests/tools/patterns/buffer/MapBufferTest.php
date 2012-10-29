@@ -31,7 +31,7 @@ class MapBufferTest extends \PHPUnit_Framework_TestCase{
   }
 
   /**
-   * @covers PPHP\tools\patterns\buffer\MapBuffer::getDate
+   * @covers PPHP\tools\patterns\buffer\MapBuffer::getData
    */
   public function testGetDate(){
     $this->assertEquals('testKey', $this->object->get('testKey'));
@@ -69,7 +69,7 @@ class MapBufferTest extends \PHPUnit_Framework_TestCase{
   }
 
   /**
-   * @covers PPHP\tools\patterns\buffer\MapBuffer::getDate
+   * @covers PPHP\tools\patterns\buffer\MapBuffer::getData
    */
   public function testGetDateForFullBuffer(){
     $this->object->setMaxSizeBuffer(2);

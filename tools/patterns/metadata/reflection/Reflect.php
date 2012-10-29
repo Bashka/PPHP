@@ -3,6 +3,11 @@ namespace PPHP\tools\patterns\metadata\reflection;
 
 /**
  * Класс, реализующий данный интерфейс, способен возвращать отображения своих членов.
+ *
+ * Данный интерфейс свидетельствует о возможности класса возвращать свое отображение, и отображения своих членов с устойчивым состоянием.
+ * Возвращаемые отображения являются уникальными для каждого класса и члена, что означает использование одного объекта отражения для одного класса или члена.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\metadata\reflection
  */
 interface Reflect{
   /**
@@ -10,8 +15,8 @@ interface Reflect{
    * @static
    * @abstract
    * @param string $propertyName Имя свойства.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если в качестве аргумента передан неверный тип, пустая строка или данного члена класса не существует.
-   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionProperty
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionProperty Отображение свойства класса.
    */
   static public function &getReflectionProperty($propertyName);
 
@@ -20,8 +25,8 @@ interface Reflect{
    * @static
    * @abstract
    * @param string $methodName Имя метода.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если в качестве аргумента передан неверный тип, пустая строка или данного члена класса не существует.
-   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionMethod
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionMethod Отображение метода класса.
    */
   static public function &getReflectionMethod($methodName);
 
@@ -29,7 +34,7 @@ interface Reflect{
    * Метод возвращает представление класса.
    * @static
    * @abstract
-   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionClass
+   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionClass Отображение класса.
    */
   static public function &getReflectionClass();
 
@@ -37,23 +42,23 @@ interface Reflect{
    * Метод возвращает представление родительского класса.
    * @static
    * @abstract
-   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionClass|null Представление родительского класса или null - если данный класс является вершиной иерархии наследования.
+   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionClass|null Отображение родительского класса или null - если данный класс является вершиной иерархии наследования.
    */
   static public function getParentReflectionClass();
 
   /**
-   * Метод возвращает отображения всех свойств класса, в том числе видимые свойства родительского класса.
+   * Метод возвращает отображения всех свойств класса, в том числе видимых свойств родительского класса.
    * @static
    * @abstract
-   * @return \ArrayAccess
+   * @return \SplObjectStorage Отображение всех свойств класса.
    */
   static public function getAllReflectionProperties();
 
   /**
-   * Метод возвращает отображения всех методов класса, в том числе видимые методы родительского класса.
+   * Метод возвращает отображения всех методов класса, в том числе видимых методов родительского класса.
    * @static
    * @abstract
-   * @return \ArrayAccess
+   * @return \SplObjectStorage Отображение всех методов класса.
    */
   static public function getAllReflectionMethods();
 }

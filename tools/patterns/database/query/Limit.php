@@ -2,7 +2,9 @@
 namespace PPHP\tools\patterns\database\query;
 
 /**
- * Ограничитель выборки.
+ * Ограничитель выборки. Платформо-зависимый компонент.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\database\query
  */
 class Limit implements ComponentQuery{
 
@@ -14,7 +16,7 @@ class Limit implements ComponentQuery{
 
   /**
    * @param $countRow Число отбираемых записей.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если значение аргумента имеет неверный тип.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($countRow){
     if(!is_int($countRow)){
@@ -26,7 +28,7 @@ class Limit implements ComponentQuery{
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
    * @param string|null $driver Используемая СУБД.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если значение аргумента имеет неверный тип или недопустимое значение.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @return string Представление элемента в виде части SQL запроса.
    */
   public function interpretation($driver=null){

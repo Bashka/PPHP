@@ -3,9 +3,13 @@ namespace PPHP\tools\classes\standard\essence\access\authenticated;
 
 /**
  * Класс представляет аутентифицируемую сущность.
- * Восстановить состояние такой сущность возможно только при получении правильной ключевой пары.
+ *
+ * Аутентифицируемая сущность, представляемая данным классам, является доступной только при получении правильной ключевой пары.
+ * Механизм аутентификации не является частью класса сущности, он вынесен в менеджер аутентификации и используется совместно с экземплярами данного класса и его потомков.
  * Все дочерние классы используют получаемую ключевую пару, для аутентификации запроса.
  * Класс может использоваться как родительский для таких сущностей, как: Учетная запись, Доступный по паролю файл, Доступный по паролю контент и т.д.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\essence\access\authenticated
  */
 abstract class AuthenticatedEntity extends \PPHP\tools\patterns\database\LongObject{
   /**
@@ -16,8 +20,9 @@ abstract class AuthenticatedEntity extends \PPHP\tools\patterns\database\LongObj
 
 
   /**
-   * @param string $password
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException
+   * Метод устанавливает пароль сущности.
+   * @param string $password Устанавливаемый пароль.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   public function setPassword($password){
     if(!is_string($password) || empty($password)){

@@ -60,9 +60,9 @@ class ConnectionManagerTest extends \PHPUnit_Framework_TestCase{
    */
   public function testSetAttribute(){
     $connectManager = \PPHP\services\database\ConnectionManager::getInstance();
-    $rewriteAttributeValue = $this->object->getAttribute('User');
-    $connectManager->setAttribute('User', 'Test');
-    $this->assertEquals('Test', $this->object->getAttribute('User'));
-    $connectManager->setAttribute('User', $rewriteAttributeValue);
+    $rewriteAttributeValue = $this->object->getAttribute('Article');
+    $connectManager->setAttribute('Article', 'Test');
+    $this->assertEquals('Test', $this->object->getAttribute('Article'));
+    $connectManager->setAttribute('Article', $rewriteAttributeValue);
   }
 }

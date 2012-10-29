@@ -15,7 +15,7 @@ abstract class EssenceManager implements \PPHP\tools\patterns\singleton\Singleto
   protected $dataMapper;
 
   /**
-   * Метод устанавливает заданный Data Mapper объекту или получает новый, если в качестве параметра ничего не переданно.
+   * Метод устанавливает Data Mapper объекту или получает новый, если в качестве параметра ничего не передано.
    * Если на момент вызова метода Data Mapper уже был установлен и в качестве аргумента ничего не переданно, то метод игнорируется.
    * @param \PPHP\tools\classes\standard\storage\database\DataMapper|null $dataMapper
    * @return static Вызываемый объект.
@@ -170,7 +170,7 @@ abstract class EssenceManager implements \PPHP\tools\patterns\singleton\Singleto
   }
 
   /**
-   * Метод восстанавливает множество сущностей используя множественную ассоциацию.
+   * Метод восстанавливает множество сущностей, используя множественную ассоциацию.
    * @param \PPHP\tools\patterns\database\associations\LongAssociation $assoc Целевая ассоциация (proxy).
    * @param \PPHP\tools\patterns\metadata\reflection\ReflectionMethod $getterEssence Отражение getter метода, ответственного за возврат требуемой сущности из ассоциации.
    * @return \SplObjectStorage Множество восстановленных сущностей (proxy).
@@ -202,7 +202,7 @@ abstract class EssenceManager implements \PPHP\tools\patterns\singleton\Singleto
   }
 
   /**
-   * Метод восстанавливает множество сущностей используя не идентифицированную множественную ассоциацию.
+   * Метод восстанавливает множество сущностей, используя не идентифицированную множественную ассоциацию.
    * @param \PPHP\tools\patterns\metadata\reflection\ReflectionClass $assocClass Отражение класса ассоциации.
    * @param \PPHP\tools\patterns\metadata\reflection\ReflectionProperty $key Отражение свойства ключа в классе ассоциации.
    * @param \PPHP\tools\patterns\database\LongObject $essence Связанная сущность (proxy).

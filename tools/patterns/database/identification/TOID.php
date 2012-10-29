@@ -1,12 +1,21 @@
 <?php
 namespace PPHP\tools\patterns\database\identification;
 
+/**
+ * Классическая реализация интерфейса \PPHP\tools\patterns\database\identification\OID
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\database\identification
+ */
 trait TOID{
+  /**
+   * Целочисленный идентификатор объекта или null - если объект не идентифицирован.
+   * @var integer|null
+   */
   protected $OID;
 
   /**
    * Метод возвращает идентификатор объекта.
-   * @return integer
+   * @return integer|null Идентификатор объекта или null - если объект не идентифицирован.
    */
   public function getOID(){
     return $this->OID;
@@ -14,23 +23,25 @@ trait TOID{
 
   /**
    * Метод устанавливает идентификатор нового объекта.
-   * @param integer $OID
+   * @param integer $OID Идентификатор объекта.
    * @throws UpdatingOIDException Выбрасывается при попытке изменения идентификатора.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @return void
    */
   public function setOID($OID){
     if(!empty($this->OID)){
       throw new UpdatingOIDException();
     }
-    else{
-      $this->OID = $OID;
+    $OID = (integer)$OID;
+    if(!is_integer($OID)){
+      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('integer', $OID);
     }
+    $this->OID = $OID;
   }
 
   /**
-   * Метод проверяет, определен ли идентификатор для объекта.
-   * @abstract
-   * @return boolean true - если идентификатор определен, иначе - false.
+   * Метод проверяет, идентифицирован ли объект.
+   * @return boolean true - если объект идентифицирован, иначе - false
    */
   public function isOID(){
     return !is_null($this->getOID());
@@ -38,21 +49,31 @@ trait TOID{
 
   /**
    * Метод возвращает ссылку на объект в виде строки.
-   * @abstract
-   * @return string Ссылка формата $ИмяКласса:OID
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если на момент вызова метода объект не был идентифицирован.
+   * @return string Ссылка формата $ИмяКласса:ЗначениеИдентификатора.
    */
   public function getLinkOID(){
+    if(!$this->isOID()){
+      throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Невозможно получить строковую ссылку на неидентифицированный объект.');
+    }
     return '$/' . str_replace('\\', '/', get_class($this)) . ':' . $this->getOID();
   }
 
   /**
-   * Метод возвращает фиктивный объект, готовый к восстановлению по OID.
+   * Метод возвращает фиктивный (proxy), идентифицированный объект.
+   *
+   * Фиктивный объект, возвращаемый данным методом, не имеет состояния, но идентифицирован по средствам установки указанного целочисленного идентификатора.
+   * Такого рода объект может быть использован как объектная ссылка на свое состояние для последующего восстановления.
    * @static
-   * @abstract
    * @param integer $OID Идентификатор объекта.
-   * @return static
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @return static Фиктивный (proxy) объект.
    */
   public static function getProxy($OID){
+    $OID = (integer)$OID;
+    if(!is_integer($OID)){
+      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('integer', $OID);
+    }
     $proxy = new static;
     $proxy->setOID($OID);
     return $proxy;

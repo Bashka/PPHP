@@ -3,6 +3,8 @@ namespace PPHP\tools\patterns\database\query;
 
 /**
  * Класс представляет поле таблицы в запросе.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\database\query
  */
 class Field implements ComponentQuery{
   /**
@@ -17,8 +19,8 @@ class Field implements ComponentQuery{
   private $table;
 
   /**
-   * @param string $name
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если аргумент имеет неверный тип.
+   * @param string $name Имя поля.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($name){
     if(!is_string($name) || empty($name)){
@@ -28,7 +30,8 @@ class Field implements ComponentQuery{
   }
 
   /**
-   * @param Table $table Таблица, к будет относится поле.
+   * Метод определяет таблицу, к которой относится данное поле.
+   * @param Table $table Таблица, к которой будет относится поле.
    */
   public function setTable(Table $table){
     $this->table = $table;

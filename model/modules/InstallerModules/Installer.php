@@ -10,59 +10,76 @@ use \PPHP\tools\patterns\singleton\TSingleton;
   /**
    * Метод возвращает информацию, необходимую для установки модуля.
    * @param string $archiveAddress Полный адрес до архива модуля.
+   * @throws \PPHP\model\modules\utilities\UtilityNotFoundException Выбрасывается в случае отсутствия требуемой для работы модуля утилиты.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если модуль не содержит обязательных компонентов или его архив не найден.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если недостаточно данных для установки модуля.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\DuplicationException Выбрасывается в случае, если модуль с данным именем уже установлен в системе.
    * @return array Информация для установки модуля, включающая следующие пункты:
-   * - archive - экземпляр класса ZipArchive, открытого на чтение архива модуля;
+   * - utility - ссылка на контроллер утилиты ConfigInstaller;
    * - name - имя модуля;
    * - parentModule - имя родительского модуля или false - если модуль не имеет зависимостей;
    * - dir - адрес каталога, в котором должен быть размещен модуль;
    * - namespace - корневая область видимости модуля;
-   * - installer - true - если модуль содержит Installer класс, иначе - false.
-   * - access - массив, имеющий следующую структуру: [имяМетодаКонтроллера => [имяРоли, имяРоли,...], ...]
-   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если модуль не содержит обязательных компонентов или его архив не найден.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если недостаточно данных для установки модуля.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\DuplicationException Выбрасывается в случае, если модуль с данным именем уже установлен в системе.
+   * - installer - true - если модуль содержит Installer класс, иначе - false;
+   * - access - массив, имеющий следующую структуру: [имяМетодаКонтроллера => [имяРоли, имяРоли,...], ...];
+   * - utilities - массив обязательных для данного модуля утилит.
    */
   protected function getDataModule($archiveAddress){
     if(!file_exists($archiveAddress)){
       throw new \PPHP\tools\classes\standard\fileSystem\NotExistsException('Требуемого архива модуля не существует в системе.');
     }
     $data = [];
-    $zip = new \ZipArchive;
-    $data['archive'] = $zip;
+    $confUtility = \PPHP\model\modules\CentralController::getUtility('ConfigInstaller');
+    if(!$confUtility){
+      throw new \PPHP\model\modules\utilities\UtilityNotFoundException('ConfigInstaller');
+    }
+    $confUtility->open($archiveAddress);
 
-    $zip->open($archiveAddress);
-    if(!($zip->statName('conf.ini') && $zip->statName('Controller.php'))){
+    // Проверка наличия контроллера модуля.
+    if(!$confUtility->isFilesExists(['Controller.php'])){
+      $confUtility->close();
       throw new \PPHP\tools\classes\standard\fileSystem\NotExistsException('Нарушена структура модуля.');
     }
 
     // Получение имени модуля.
-    $zip->extractTo($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/InstallerModules/temp', ['conf.ini']);
-    $confFile = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/InstallerModules/temp/conf.ini');
-    $conf = new \PPHP\tools\classes\standard\fileSystem\FileINI($confFile, true);
-    if(!$conf->isDataExists('name', 'module')){
-      $confFile->delete();
-      $zip->close();
+    if(!$confUtility->isDataExists([['module', 'name']])){
+      $confUtility->close();
       throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Нарушена структура описательного файла модуля.');
     }
-    $data['name'] = $conf->get('name', 'module');
+    $data['name'] = $confUtility->getConf()->get('name', 'module');
 
     // Проверка на дублирование модуля.
     $moduleRouter = \PPHP\services\modules\ModulesRouter::getInstance();
     if($moduleRouter->isModuleExists($data['name'])){
-      $confFile->delete();
-      $zip->close();
+      $confUtility->close();
       throw new \PPHP\tools\classes\standard\baseType\exceptions\DuplicationException('Модуль с заданным именем уже установлен. Дальнейшая установка невозможна.');
     }
 
+    // Проверка наличия обязательных утилит.
+    if($confUtility->isDataExists([['module', 'utilities']])){
+      $data['utilities'] = $confUtility->getConf()->get('utilities', 'module');
+      $data['utilities'] = explode(',', $data['utilities']);
+      $utilitiesRouter = \PPHP\services\utilities\UtilitiesRouter::getInstance();
+      foreach($data['utilities'] as $utility){
+        if(!$utilitiesRouter->isUtilityExists($utility)){
+          throw new \PPHP\model\modules\utilities\UtilityNotFoundException('Обязательной для данного модуля утилиты '.$utility.' не найдено.');
+        }
+      }
+    }
+
     // Определение родительского модуля.
-    $data['parentModule'] = ($conf->isDataExists('parent', 'module'))? $conf->get('parent', 'module') : false;
+    if($confUtility->isDataExists([['module', 'parent']])){
+      $data['parentModule'] = $confUtility->getConf()->get('parent', 'module');
+    }
+    else{
+      $data['parentModule'] = false;
+    }
 
     // Определение namespace модуля и его физического адреса.
     if($data['parentModule']){
       $moduleRouter = \PPHP\services\modules\ModulesRouter::getInstance();
       if(!$moduleRouter->isModuleExists($data['parentModule'])){
-        $confFile->delete();
-        $zip->close();
+        $confUtility->close();
         throw new \PPHP\tools\classes\standard\fileSystem\NotExistsException('Требуемого родительского модуля (' . $data['parentModule'] . ') не существует.');
       }
       $data['namespace'] = $moduleRouter->getController($data['parentModule']);
@@ -78,13 +95,12 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     $data['dir'] = $_SERVER['DOCUMENT_ROOT'] . $data['dir'];
 
     // Определение инсталятора.
-    $data['installer'] = ($zip->statName('Installer.php') !== false);
+    $data['installer'] = ($confUtility->isFilesExists(['Installer.php']) !== false);
 
     // Определение прав доступа
-    $data['access'] = $conf->getSection('access');
+    $data['access'] = $confUtility->getConf()->getSection('access');
 
-    // Удаление временных файлов
-    $confFile->delete();
+    $data['utility'] = $confUtility;
 
     return $data;
   }
@@ -94,7 +110,11 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * Для установки модуля необходимы следующие компоненты:
    * - Контроллер модуля (Controller.php);
    * - Конфигурационный файл модуля (conf.ini).
-   * Конфигурационный файл модуля должен содержать свойство name, определяющее имя модуля, а так же свойство parent, определяющее имя родительского модуля, если данный модуль является зависимым.
+   * Конфигурационный файл модуля должен содержать свойство name, определяющее имя модуля. Так же этот файл может включать следующие необязательные свойства:
+   * - parent - определяет имя родительского модуля, если данный модуль является зависимым;
+   * - utilities - список обязательных утилит.
+   * и секции:
+   * - access - массив свойств, именами которых являются имена запрещаемых методов контроллера, а значениями, список ролей модуля Access, для которых доступ запрещен.
    * Модуль так же может содержать следующие компоненты:
    * - Внутренний инсталятор модуля (Installer.php), который представляет собой PHP класс с определенным статичным методом install, содержащим скрипт для постустановки модуля и настройки системы.
    * @param string $archiveAddress Полуный адрес архива модуля.
@@ -106,14 +126,11 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     $moduleRouter = \PPHP\services\modules\ModulesRouter::getInstance();
 
     // Формирование каталога модуля.
-    $dirModule = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/InstallerModules/temp/' . $installData['name']);
+    $dirModule = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($installData['dir'] . '/' . $installData['name']);
     $dirModule->create();
 
     // Распаковка модуля.
-    $installData['archive']->extractTo($dirModule->getAddress());
-
-    // Перемещение модуля по постоянному адресу.
-    $dirModule->move(\PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($installData['dir']));
+    $installData['utility']->moveFiles($dirModule);
 
     // Регистрация модуля в роутере.
     $controllerModule = $installData['namespace'] . '\Controller';
@@ -153,17 +170,14 @@ use \PPHP\tools\patterns\singleton\TSingleton;
       }
     }
 
-    // Удаление инсталяционных файлов.
-    $dirModule->getFile('conf.ini')->delete();
-
     // Удаление архива
-    $installData['archive']->close();
+    $installData['utility']->close();
     $archiveFile = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($archiveAddress);
     if($archiveFile->isExists()){
       $archiveFile->delete();
     }
 
-    return 'The unit "' . $installData['name'] . '" is successfully installed. Installer: '.$installResult;
+    return 'The unit "' . $installData['name'] . '" is successfully installed. Installer: ' . $installResult;
   }
 
   /**
@@ -174,7 +188,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * @return boolean|string false - если модуль не удалось установить.
    */
   public function installModuleURL($urlModule){
-    $address = $_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/InstallerModules/temp/0';
+    $address = $_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/InstallerModules/0';
     $arch = fopen($address, 'w+');
     fwrite($arch, file_get_contents($urlModule));
     fclose($arch);
@@ -185,7 +199,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
       return $this->installModule($address);
     }
     catch(\Exception $exc){
-      $fileArchive = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/InstallerModules/temp/0');
+      $fileArchive = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($address);
       if($fileArchive->isExists()){
         $fileArchive->delete();
       }

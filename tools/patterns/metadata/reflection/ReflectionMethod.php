@@ -3,13 +3,19 @@ namespace PPHP\tools\patterns\metadata\reflection;
 
 /**
  * Отражение метода класса, расширенное возможностью добавления метаданных.
+ *
+ * Данный класс является отображением метода с устойчивым состоянием и возможностью аннотирования.
+ * Класс наследует все возможности своего родителя, что позволяет использовать его в контексте родительского класса.
+ * Класс так же дополнен возможностью получения отражений своих аргументов с устойчивым состоянием и возможностью аннотирования.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\metadata\reflection
  */
 class ReflectionMethod extends \ReflectionMethod implements \PPHP\tools\patterns\metadata\Described{
 use \PPHP\tools\patterns\metadata\TDescribed;
 
   /**
    * Множество отражений параметров метода.
-   * @var array
+   * @var ReflectionParameter[]
    */
   protected $reflectionParameters;
 
@@ -17,7 +23,7 @@ use \PPHP\tools\patterns\metadata\TDescribed;
    * Метод возвращает отражение параметра метода.
    * @param integer|string $param Порядковый индекс или имя параметра.
    * @return ReflectionParameter Отражение параметра.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если в качестве параметра передан неверный тип.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\LogicException Выбрасывается в случае, если указанного параметра не существует в методе.
    */
   public function getParameter($param){

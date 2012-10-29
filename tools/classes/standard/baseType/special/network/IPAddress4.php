@@ -4,9 +4,14 @@ namespace PPHP\tools\classes\standard\baseType\special\network;
 /**
  * Класс-обертка служит для представления и верификации IP-адреса 4 версии.
  * Допустимый тип: четыре цифры в диапазоне от 0 до 255 идущие подряд, разделеные точками.
- * ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\baseType\special\network
  */
 class IPAddress4 extends \PPHP\tools\classes\standard\baseType\wrapper{
+  /**
+   * Тип данной обертки.
+   * @var string
+   */
   protected static $type = 'IPAddress';
 
   /**
@@ -32,7 +37,7 @@ class IPAddress4 extends \PPHP\tools\classes\standard\baseType\wrapper{
   /**
    * Метод определяет, является ли указанное значение допустимым типом.
    * @static
-   * @param mixed $val
+   * @param mixed $val Проверяемое значение.
    * @return boolean true - если данные являются допустимым типом или могут быть приведены к нему без потери данных, иначе - false.
    */
   public static function is($val){

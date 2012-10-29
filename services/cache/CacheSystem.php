@@ -12,7 +12,7 @@ class CacheSystem implements \PPHP\tools\patterns\singleton\Singleton{
   protected static $adapter;
 
   /**
-   * Метод возвращает экземпляр данного класса
+   * Метод возвращает экземпляр класс драйвера.
    * @static
    * @throws \PPHP\services\InitializingDataNotFoundException Выбрасывается в случае, если не удалось инициализировать кэш-систему.
    * @return CacheAdapter

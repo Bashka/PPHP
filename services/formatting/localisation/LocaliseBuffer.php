@@ -27,6 +27,6 @@ class LocaliseBuffer extends \PPHP\tools\patterns\buffer\MapBuffer{
    * @return array Ассоциативный массив данных локализации
    */
   public function getLocaliseData($fileAddress){
-    return $this->getDate($fileAddress);
+    return $this->getData($fileAddress);
   }
 }

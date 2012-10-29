@@ -3,24 +3,26 @@ namespace PPHP\tools\patterns\database\query;
 
 /**
  * Класс-оболочка для добавления алиаса компоненту.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\database\query
  */
 abstract class Alias implements ComponentQuery{
   /**
-   * Алиас компонента.
+   * Псевдоним компонента.
    * @var string
    */
   protected $alias;
 
   /**
-   * Компонент.
+   * Компонент, к которому устанавливается псевдоним.
    * @var ComponentQuery
    */
   protected $component;
 
   /**
-   * @param $component
-   * @param string $alias
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если аргумент имеет недопустимый тип.
+   * @param $component Компонент, к которому устанавливается псевдоним.
+   * @param string $alias Псевдоним компонента.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($component, $alias){
     if(!is_string($alias)){

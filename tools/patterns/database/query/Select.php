@@ -3,10 +3,12 @@ namespace PPHP\tools\patterns\database\query;
 
 /**
  * Класс представляет SQL запрос для получение записей из таблицы.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\database\query
  */
 class Select implements ComponentQuery{
   /**
-   * Множество полей, запрашиваемых в запросе.
+   * Множество запрашиваемых полей.
    * @var \SplObjectStorage
    */
   private $fields;
@@ -52,7 +54,7 @@ class Select implements ComponentQuery{
   /**
    * Метод добавляет поле в запрос.
    * @param Field $field Добавляемое поле.
-   * @throws StandardException Выбрасывается в случае, если заданный компонент уже включен в запрос.
+   * @throws StandardException Выбрасывается в случае, если указанное поле уже присутствует в запросе.
    */
   public function addField(Field $field){
     if($this->fields->offsetExists($field)){
@@ -64,7 +66,7 @@ class Select implements ComponentQuery{
   /**
    * Метод добавляет поле с алиасом в запрос.
    * @param FieldAlias $field Добавляемое поле.
-   * @throws StandardException Выбрасывается в случае, если заданный компонент уже включен в запрос.
+   * @throws StandardException Выбрасывается в случае, если указанное поле уже присутствует в запросе.
    */
   public function addAliasField(FieldAlias $field){
     if($this->fields->offsetExists($field)){
@@ -76,7 +78,7 @@ class Select implements ComponentQuery{
   /**
    * Метод добавляет таблицу в запрос.
    * @param Table $table Добавляемая таблица.
-   * @throws StandardException Выбрасывается в случае, если заданный компонент уже включен в запрос.
+   * @throws StandardException Выбрасывается в случае, если указанная таблица уже присутствует в запросе.
    */
   public function addTable(Table $table){
     if($this->tables->offsetExists($table)){
@@ -88,8 +90,8 @@ class Select implements ComponentQuery{
   /**
    * Метод добавляет соединение в запрос.
    * @param \PPHP\tools\patterns\database\query\Join $join Добавляемое соединение.
-   * @throws StandardException Выбрасывается в случае, если данное соединение уже присутствует в запросе
-   */
+   * @throws StandardException Выбрасывается в случае, если указанное соединение уже присутствует в запросе.
+*/
   public function addJoin(Join $join){
     if($this->joins->offsetExists($join)){
       throw new StandardException('Ошибка дублирования компонента.');
@@ -107,14 +109,15 @@ class Select implements ComponentQuery{
 
   /**
    * Метод определяет порядок сортировки для запроса.
-   * @param OrderBy $orderBy
+   * @param OrderBy $orderBy Способ сортировки.
    */
   public function insertOrderBy(OrderBy $orderBy){
     $this->orderBy = $orderBy;
   }
 
   /**
-   * @param \PPHP\tools\patterns\database\query\Limit $limit
+   * Метод определяет ограничение выборки.
+   * @param \PPHP\tools\patterns\database\query\Limit $limit Ограничение выборки.
    */
   public function insertLimit(Limit $limit){
     $this->limit = $limit;
@@ -130,8 +133,8 @@ class Select implements ComponentQuery{
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
    * @param string|null $driver Используемая СУБД.
-   * @throws StandardException Выбрасывается в случае, если компонент запроса не имеет достаточно данных для формирования запроса.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если значение аргумента имеет неверный тип.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws StandardException Выбрасывается в случае, если отсутствуют обязательные компоненты запроса.
    * @return string Представление элемента в виде части SQL запроса.
    */
   public function interpretation($driver = null){

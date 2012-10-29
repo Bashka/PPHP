@@ -4,6 +4,8 @@ use PPHP\tools\patterns\buffer\MapBuffer as MapBuffer;
 
 /**
  * Класс является основой для буфера состояний объекта.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\state
  */
 abstract class StateBuffer extends MapBuffer{
   /**
@@ -14,6 +16,6 @@ abstract class StateBuffer extends MapBuffer{
    * @return mixed
    */
   public function getState($stateName, StatesContext $context, array $links){
-    return $this->getDate($stateName, ['context' => $context, 'links' => $links]);
+    return $this->getData($stateName, ['context' => $context, 'links' => $links]);
   }
 }

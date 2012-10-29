@@ -3,6 +3,8 @@ namespace PPHP\tools\patterns\metadata;
 
 /**
  * Данный класс добавляет некоторые дополнительные методы для управления метаданными.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\metadata
  */
 class MetadataManager{
   /**

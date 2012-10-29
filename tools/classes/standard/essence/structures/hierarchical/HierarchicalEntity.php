@@ -3,11 +3,13 @@ namespace PPHP\tools\classes\standard\essence\structures\hierarchical;
 
 /**
  * Класс представляет сущности, имеющие неограниченные по вертикали и горизонтали иерархические связи между другими сужностями.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\essence\structures\hierarchical
  */
 abstract class HierarchicalEntity extends \PPHP\tools\patterns\database\LongObject{
   /**
-   * Идентификатор родительской сущности. null если сущность является корнем иерархии.
-   * @var HierarchicalEntity|null
+   * Идентификатор родительской сущности. null если сущность является корнем иерархии и целочисленный тип если объект еще не был восстановлен.
+   * @var HierarchicalEntity|null|integer
    */
   protected $hierarchicalParent;
 

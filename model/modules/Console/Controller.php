@@ -5,6 +5,9 @@ namespace PPHP\model\modules\Console;
  * Модуль предоставляет текстовый интерфейс доступа к установленным модулям системы.
  */
 class Controller extends \PPHP\model\classes\ModuleController{
+  public function x(\PPHP\tools\classes\standard\baseType\Date $a){
+    return (string)$a;
+  }
   /**
    * Метод тестирует механизмы вызова модулей.
    * @return string
@@ -28,6 +31,7 @@ class Controller extends \PPHP\model\classes\ModuleController{
     chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/model/modules', 0777);
     chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/model/modules/InstallerModules/temp', 0777);
     chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/model/modules/Console/files', 0777);
+    chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/model/modules/utilities/ConfigInstaller/files', 0777);
     chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/services/configuration/conf.ini', 0777);
     chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/services/log/log.txt', 0777);
     chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/tools/classes/standard/fileSystem/loadingFiles/temp', 0777);
@@ -156,7 +160,9 @@ class Controller extends \PPHP\model\classes\ModuleController{
    * @return array Массив имен зарегистрированных в системе модулей.
    */
   public function getModulesNames(){
-    return \PPHP\services\modules\ModulesRouter::getInstance()->getModulesNames();
+    $modules = \PPHP\services\modules\ModulesRouter::getInstance()->getModulesNames();
+    sort($modules);
+    return $modules;
   }
 
   /**
@@ -170,6 +176,7 @@ class Controller extends \PPHP\model\classes\ModuleController{
     if(!$actions){
       return [];
     }
+    sort($actions);
     return $actions;
   }
 

@@ -3,8 +3,14 @@ namespace PPHP\tools\classes\standard\baseType;
 
 /**
  * Класс-обертка служит для предоставления дополнительной логики целым числам.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\baseType
  */
 class Integer extends wrapper{
+  /**
+   * Тип данной обертки.
+   * @var string
+   */
   protected static $type = 'integer';
 
   /**
@@ -20,7 +26,7 @@ class Integer extends wrapper{
   /**
    * Метод определяет, является ли указанное значение целым числом.
    * @static
-   * @param mixed $val
+   * @param mixed $val Проверяемые данные.
    * @return boolean true - если данные являются целым числом или могут быть приведены к типу integer без потери данных, иначе - false.
    */
   public static function is($val){

@@ -3,8 +3,14 @@ namespace PPHP\tools\classes\standard\baseType;
 
 /**
  * Класс-обертка служит для предоставления дополнительной логики строкам.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\baseType
  */
 class String extends wrapper implements \ArrayAccess{
+  /**
+   * Тип данной обертки.
+   * @var string
+   */
   protected static $type = 'string';
 
   /**

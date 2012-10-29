@@ -4,9 +4,14 @@ namespace PPHP\tools\classes\standard\baseType\special;
 /**
  * Класс-обертка служит для представления и верификации имен.
  * Допустимый тип: только латинские буквы любого регистра, знак подчеркивания и цифры, но не на месте первого символа
- * ^[A-Za-z_][A-Za-z_0-9]*$
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\baseType\special
  */
 class Name extends \PPHP\tools\classes\standard\baseType\wrapper{
+  /**
+   * Тип данной обертки.
+   * @var string
+   */
   protected static $type = 'name';
 
   /**
@@ -22,7 +27,7 @@ class Name extends \PPHP\tools\classes\standard\baseType\wrapper{
   /**
    * Метод определяет, является ли указанное значение допустимым типом.
    * @static
-   * @param mixed $val
+   * @param mixed $val Проверяемое значение.
    * @return boolean true - если данные являются допустимым типом или могут быть приведены к нему без потери данных, иначе - false.
    */
   public static function is($val){

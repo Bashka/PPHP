@@ -1,6 +1,11 @@
 <?php
 namespace PPHP\tools\classes\standard\essence\access\authenticated;
 
+/**
+ * Менеджер аутентификации содержит механизмы восстановления аутентифицируемых сущностей.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\essence\access\authenticated
+ */
 class AuthenticationManager implements \PPHP\tools\patterns\singleton\Singleton{
   use \PPHP\tools\patterns\singleton\TSingleton;
   /**
@@ -10,7 +15,8 @@ class AuthenticationManager implements \PPHP\tools\patterns\singleton\Singleton{
   protected $dataMapper;
 
   /**
-   * @param \PPHP\tools\classes\standard\storage\database\DataMapper $dataMapper
+   * Метод устанавливает Data Mapper данному классу для работы с СУБД.
+   * @param \PPHP\tools\classes\standard\storage\database\DataMapper $dataMapper Интерфейс ORM.
    */
   public function setDataMapper(\PPHP\tools\classes\standard\storage\database\DataMapper $dataMapper){
     $this->dataMapper = $dataMapper;
@@ -33,10 +39,9 @@ class AuthenticationManager implements \PPHP\tools\patterns\singleton\Singleton{
   }
 
   /**
-   * Метод пытается аутентифицировать сущность по заданной ключевой паре..
-   * Если сущность аутентифицирована, она восстанвливает свое последнее состояние.
+   * Метод пытается аутентифицировать сущность по заданной ключевой паре. Если сущность аутентифицирована, она восстанвливает свое последнее состояние.
    * @param \PPHP\tools\classes\standard\essence\access\authenticated\AuthenticatedEntity $entity Аутентифицируемая сущность.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @return boolean true - если аутентификация успешна и сущность восстановлена, иначе - false.
    */
   public function authenticate(AuthenticatedEntity &$entity){

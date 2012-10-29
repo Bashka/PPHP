@@ -3,6 +3,8 @@ namespace PPHP\tools\patterns\database\query;
 
 /**
  * Класс представляет SQL запрос для удаления записей из таблицы.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\database\query
  */
 class Delete implements ComponentQuery{
   /**
@@ -17,7 +19,7 @@ class Delete implements ComponentQuery{
   private $where;
 
   /**
-   * @param Table $table
+   * @param Table $table Целевая таблица.
    */
   function __construct(Table $table){
     $this->table = $table;

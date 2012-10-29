@@ -4,8 +4,14 @@ namespace PPHP\tools\classes\standard\baseType\special\fileSystem;
 /**
  * Класс-обертка служит для представления и верификации адресов файлов и папок в файловой системе.
  * Допустимый тип: любые символы кроме  : * ? " < > | \0 \ и без ведущего / символа, а так же без двух и более / символов, следующих один за другим.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\baseType\special\fileSystem
  */
 class FileSystemAddress extends \PPHP\tools\classes\standard\baseType\wrapper{
+  /**
+   * Тип данной обертки.
+   * @var string
+   */
   protected static $type = 'fileSystemAddress';
 
   /**
@@ -33,7 +39,7 @@ class FileSystemAddress extends \PPHP\tools\classes\standard\baseType\wrapper{
   /**
    * Метод определяет, является ли указанное значение допустимым типом.
    * @static
-   * @param mixed $val
+   * @param mixed $val Проверяемое значение.
    * @return boolean true - если данные являются допустимым типом или могут быть приведены к нему без потери данных, иначе - false.
    */
   public static function is($val){
@@ -48,6 +54,7 @@ class FileSystemAddress extends \PPHP\tools\classes\standard\baseType\wrapper{
   }
 
   /**
+   * Метод определяет, является адрес абсолютным или относительным.
    * @return boolean true - если адрес абсолютный, иначе - false.
    */
   public function getIsRoot(){

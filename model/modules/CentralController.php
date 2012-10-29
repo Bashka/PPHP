@@ -10,12 +10,6 @@ spl_autoload_register(function($className){
  */
 class CentralController{
   /**
-   * Роутер модулей.
-   * @var \PPHP\services\modules\ModulesRouter
-   */
-  protected static $moduleRouter;
-
-  /**
    * Данный ментод отвечает за передачу модулю сообщения и возврат ответа.
    * @static
    * @throws \PPHP\services\modules\ModuleNotFoundException Выбрасывается в случае, если требуемый модуль не зарегистрирован в системе.
@@ -23,14 +17,14 @@ class CentralController{
   public static function main(){
     $viewProvider = \PPHP\services\view\ViewProvider::getInstance();
     $viewMessage = $viewProvider->getMessage();
-    self::$moduleRouter = \PPHP\services\modules\ModulesRouter::getInstance();
-    if(!self::$moduleRouter->isModuleExists($viewMessage['module'])){
+    $moduleRouter = \PPHP\services\modules\ModulesRouter::getInstance();
+    if(!$moduleRouter->isModuleExists($viewMessage['module'])){
       $send = new \stdClass();
       $send->exception = new \PPHP\services\modules\ModuleNotFoundException('Требуемого модуля "' . $viewMessage['module'] . '" не существует.');
       $viewProvider->sendMessage($send);
       exit(1);
     }
-    $controller = self::$moduleRouter->getController($viewMessage['module']);
+    $controller = $moduleRouter->getController($viewMessage['module']);
     $controller = $controller::getInstance();
 
     $send = new \stdClass();
@@ -41,7 +35,7 @@ class CentralController{
     }
     else{
       // Проверка прав доступа к методу модуля
-      if(AccessManager::getInstance()->isResolved($viewMessage['module'], $viewMessage['active'], self::$moduleRouter)){
+      if(AccessManager::getInstance()->isResolved($viewMessage['module'], $viewMessage['active'], $moduleRouter)){
         try{
           // Верификация данных
           if(isset($viewMessage['message'])){
@@ -79,12 +73,28 @@ class CentralController{
     if(!$causingModule->isMetadataExists('ParentModule')){
       throw new \PPHP\tools\patterns\metadata\EmptyMetadataException('Информация о зависимости модуля отсутствует.');
     }
-    self::$moduleRouter = \PPHP\services\modules\ModulesRouter::getInstance();
-    $controllerParentModule = self::$moduleRouter->getController($causingModule->getMetadata('ParentModule'));
+    $moduleRouter = \PPHP\services\modules\ModulesRouter::getInstance();
+    $controllerParentModule = $moduleRouter->getController($causingModule->getMetadata('ParentModule'));
     $message = func_get_args();
     array_shift($message);
     array_shift($message);
     return call_user_func_array([$controllerParentModule::getInstance(), $action], $message);
+  }
+
+  /**
+   * Метод возвращает контроллер утилиты.
+   * @static
+   * @param string $utilityName Имя утилиты
+   * @return \PPHP\model\classes\UtilityController|boolean Возвращает контроллер утилиты или false - если указанная утилита не установлена.
+   */
+  public static function getUtility($utilityName){
+    $utilitiesRouter = \PPHP\services\utilities\UtilitiesRouter::getInstance();
+    if(!$utilitiesRouter->isUtilityExists($utilityName)){
+      return false;
+    }
+    $controller = $utilitiesRouter->getController($utilityName);
+    $controller = $controller::getInstance();
+    return $controller;
   }
 }
 

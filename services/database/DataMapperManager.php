@@ -2,23 +2,23 @@
 namespace PPHP\services\database;
 
 /**
- * Класс позволяет соединиться с БД через кольцо объектно-реляционного преобразования
+ * Класс позволяет соединиться с БД через кольцо объектно-реляционного преобразования.
  */
 class DataMapperManager implements \PPHP\tools\patterns\singleton\Singleton{
 use \PPHP\tools\patterns\singleton\TSingleton;
 
   /**
-   * Соединение с БД
+   * Соединение с БД.
    * @var \PPHP\tools\classes\standard\storage\database\PDO
    */
   protected $PDO;
   /**
-   * Преобразователь данных
+   * Преобразователь данных.
    * @var \PPHP\tools\classes\standard\storage\database\queryCreator\AssociationQueryCreator
    */
   protected $queryCreator;
   /**
-   * Текущее соединение с БД через кольцо объектно-реляционного преобразования
+   * Текущее соединение с БД через кольцо объектно-реляционного преобразования.
    * @var \PPHP\tools\classes\standard\storage\database\DataMapper
    */
   protected $dataMapper;
@@ -29,9 +29,9 @@ use \PPHP\tools\patterns\singleton\TSingleton;
   }
 
   /**
-   * Метод возвращает новое соединение с БД через кольцо объектно-реляционного преобразования
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\PDOException Выбрасывается в случае возникновения ошибки при подключении к БД
-   * @return \PPHP\tools\classes\standard\storage\database\DataMapper Соединение с БД
+   * Метод возвращает новое соединение с БД через кольцо объектно-реляционного преобразования.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\PDOException Выбрасывается в случае возникновения ошибки при подключении к БД.
+   * @return \PPHP\tools\classes\standard\storage\database\DataMapper Соединение с БД.
    */
   public function getNewDataMapper(){
     $dataMapper = new \PPHP\tools\classes\standard\storage\database\DataMapper();
@@ -41,9 +41,9 @@ use \PPHP\tools\patterns\singleton\TSingleton;
   }
 
   /**
-   * Метод возвращает существующее соединение с БД через кольцо объектно-реляционного преобразования
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\PDOException Выбрасывается в случае возникновения ошибки при подключении к БД
-   * @return \PPHP\tools\classes\standard\storage\database\DataMapper Соединение с БД
+   * Метод возвращает существующее соединение с БД через кольцо объектно-реляционного преобразования.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\PDOException Выбрасывается в случае возникновения ошибки при подключении к БД.
+   * @return \PPHP\tools\classes\standard\storage\database\DataMapper Соединение с БД.
    */
   public function getDataMapper(){
     if(empty($this->dataMapper)){

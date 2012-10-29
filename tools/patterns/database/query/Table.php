@@ -3,17 +3,19 @@ namespace PPHP\tools\patterns\database\query;
 
 /**
  * Класс представляет таблицу в запросе.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\database\query
  */
 class Table implements ComponentQuery{
   /**
-   * Имя таблицы
+   * Имя таблицы.
    * @var string
    */
   private $tableName;
 
   /**
-   * @param string $tableName
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если аргумент имеет неверный тип.
+   * @param string $tableName Имя таблицы.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($tableName){
     if(!is_string($tableName) || empty($tableName)){

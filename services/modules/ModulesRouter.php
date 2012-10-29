@@ -28,7 +28,6 @@ use \PPHP\tools\patterns\singleton\TSingleton;
 
   /**
    * Метод определяет, существует ли данный модуль в системе.
-   * @abstract
    * @param string $moduleName Имя модуля.
    * @return boolean true - если модуль установлен, иначе - false.
    */
@@ -38,7 +37,6 @@ use \PPHP\tools\patterns\singleton\TSingleton;
 
   /**
    * Метод добавляет новой путь в роутер.
-   * @abstract
    * @param string $moduleName Имя модуля.
    * @param \PPHP\tools\patterns\metadata\reflection\ReflectionClass $controller Отображение класса контроллера для данного модуля.
    */
@@ -48,7 +46,6 @@ use \PPHP\tools\patterns\singleton\TSingleton;
 
   /**
    * Метод удаляет данные модуля из роутера.
-   * @abstract
    * @param string $moduleName Имя модуля.
    * @return boolean true - если модуль был успешно удален из роутера, иначе - false.
    */

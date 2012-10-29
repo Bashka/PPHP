@@ -33,7 +33,7 @@ class DataMapper{
   }
 
   /**
-   * Метод позволяет установить констуктор запросов для преобразователя данных.
+   * Метод позволяет установить конструктор запросов для преобразователя данных.
    * @param \PPHP\tools\classes\standard\storage\database\queryCreator\QueryCreator $queryCreator
    */
   public function setQueryCreator(\PPHP\tools\classes\standard\storage\database\queryCreator\QueryCreator $queryCreator){
@@ -135,7 +135,7 @@ class DataMapper{
   }
 
   /**
-   * Метод удаляет данные из базы данных
+   * Метод удаляет данные из базы данных.
    * @param \PPHP\tools\patterns\database\LongObject $object Удаляемый объект.
    * @throws QueryException Выбрасывается в случае, если запрос к БД выполнен с ошибкой.
    * @return void
@@ -145,7 +145,7 @@ class DataMapper{
   }
 
   /**
-   * Метод восcтанавливает состояние объекта из базы данных.
+   * Метод восстанавливает состояние объекта из базы данных.
    * @param \PPHP\tools\patterns\database\LongObject $object Востанавливаемый объект.
    * @throws UncertaintyException Выбрасывается в случае, если результатом запроса является множество записей или ни одной записи.
    * @throws QueryException Выбрасывается в случае, если запрос к БД выполнен с ошибкой.

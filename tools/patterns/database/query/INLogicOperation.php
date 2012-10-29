@@ -3,6 +3,8 @@ namespace PPHP\tools\patterns\database\query;
 
 /**
  * Логический оператор вхождения значения в указанное множество значений.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\database\query
  */
 class INLogicOperation implements Condition{
   /**
@@ -24,19 +26,24 @@ class INLogicOperation implements Condition{
   private $selectQuery;
 
   /**
-   * @param Field $field
+   * @param Field $field Проверяемое поле.
    */
   function __construct(Field $field){
     $this->field = $field;
     $this->values = [];
   }
 
+  /**
+   * Метод добавляет значение в список допустимых.
+   * @param string $value Добавляемое значение.
+   */
   public function addValue($value){
     $this->values[] = $value;
   }
 
   /**
-   * @param \PPHP\tools\patterns\database\query\Select $selectQuery
+   * Метод определяет SQL инструкцию, возвращающую список допустимых значений.
+   * @param \PPHP\tools\patterns\database\query\Select $selectQuery SQL инструкция, возвращающая список допустимых значений.
    */
   public function setSelectQuery($selectQuery){
     $this->selectQuery = $selectQuery;

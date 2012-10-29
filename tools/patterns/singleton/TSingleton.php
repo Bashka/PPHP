@@ -1,6 +1,11 @@
 <?php
 namespace PPHP\tools\patterns\singleton;
 
+/**
+ * Классическая реализация интерфейса PPHP\tools\patterns\singleton\Singleton.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\singleton
+ */
 trait TSingleton{
   protected static $instance = [];
 

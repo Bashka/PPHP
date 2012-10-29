@@ -17,6 +17,6 @@ class TestBuffer extends \PPHP\tools\patterns\buffer\MapBuffer{
   }
 
   public function get($key, array $arguments = null){
-    return $this->getDate($key, $arguments);
+    return $this->getData($key, $arguments);
   }
 }

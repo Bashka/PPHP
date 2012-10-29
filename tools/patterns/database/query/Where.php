@@ -3,6 +3,8 @@ namespace PPHP\tools\patterns\database\query;
 
 /**
  * Класс представляет условие в SQL запросе.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\database\query
  */
 class Where implements ComponentQuery{
   /**
@@ -12,7 +14,7 @@ class Where implements ComponentQuery{
   private $condition;
 
   /**
-   * @param Condition $condition
+   * @param Condition $condition Логическая операция.
    */
   function __construct(Condition $condition){
     $this->condition = $condition;

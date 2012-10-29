@@ -1,6 +1,11 @@
 <?php
 namespace PPHP\tools\patterns\metadata;
 
+/**
+ * Классическая реализация интерфейса PPHP\tools\patterns\metadata\Described.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\metadata
+ */
 trait TDescribed{
   /**
    * Метаданные элемента.
@@ -9,8 +14,8 @@ trait TDescribed{
   protected $metadata = [];
 
   /**
-   * Метод возвращает все метаданные данного элемента.
-   * @return array
+   * Метод возвращает все метаданные данного объекта.
+   * @return \ArrayAccess
    */
   public function getAllMetadata(){
     return $this->metadata;
@@ -32,7 +37,7 @@ trait TDescribed{
    * Метод устанавливает значение метаданных.
    * @param string $metadataName Имя метаданных.
    * @param string $metadataValue Значение метаданных.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если аргумент имеет неверный тип.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @return void
    */
   public function setMetadata($metadataName, $metadataValue){
@@ -53,9 +58,8 @@ trait TDescribed{
 
   /**
    * Метод удаляет метаданные из класса.
-   * @abstract
    * @param string $metadataName Удаляемые метаданные.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если аргумент имеет неверный тип.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   public function removeMetadata($metadataName){
     if(!is_string($metadataName) || empty($metadataName)){

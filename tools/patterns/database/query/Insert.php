@@ -3,6 +3,8 @@ namespace PPHP\tools\patterns\database\query;
 
 /**
  * Класс представляет SQL запрос для вставки записи в таблицу.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\database\query
  */
 class Insert implements ComponentQuery{
   /**
@@ -22,7 +24,7 @@ class Insert implements ComponentQuery{
   private $values;
 
   /**
-   * Оператор, возвращающий добавляемое множество.
+   * SQL инструкция, возвращающая добавляемое множество значений записи(ей).
    * @var Select
    */
   private $select;
@@ -40,8 +42,8 @@ class Insert implements ComponentQuery{
    * Метод добавляет данные в запрос.
    * @param Field $field Целевое поле.
    * @param string|number|boolean $value Значение поля.
-   * @throws StandardException Выбрасывается в случае, если заданный компонент уже включен в запрос.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если один из аргументов имеет недопустимое значение.
+   * @throws StandardException Выбрасывается в случае, если указанное поле уже присутствует в запросе.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   public function addData(Field $field, $value){
     if($this->fields->offsetExists($field)){
@@ -65,7 +67,7 @@ class Insert implements ComponentQuery{
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
    * @param string|null $driver Используемая СУБД.
-   * @throws StandardException Выбрасывается в случае, если компонент запроса не имеет достаточно данных для формирования запроса.
+   * @throws StandardException Выбрасывается в случае, если отсутствуют обязательные компоненты запроса.
    * @return string Представление элемента в виде части SQL запроса.
    */
   public function interpretation($driver=null){

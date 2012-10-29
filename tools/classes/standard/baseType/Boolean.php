@@ -3,8 +3,14 @@ namespace PPHP\tools\classes\standard\baseType;
 
 /**
  * Класс-обертка служит для верификации и представления логических данных в системе.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\baseType
  */
 class Boolean extends wrapper{
+  /**
+   * Тип данной обертки.
+   * @var string
+   */
   protected static $type = 'boolean';
 
   /**
@@ -23,7 +29,7 @@ class Boolean extends wrapper{
   /**
    * Метод определяет, является ли указанное значение допустимым типом.
    * @static
-   * @param mixed $val
+   * @param mixed $val Проверяемые данные.
    * @return boolean true - если данные являются допустимым типом или могут быть приведены к нему без потери данных, иначе - false.
    */
   public static function is($val){

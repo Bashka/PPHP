@@ -4,9 +4,14 @@ namespace PPHP\tools\classes\standard\baseType\special\network;
 /**
  * Класс-обертка служит для представления и верификации доменных имен.
  * Допустимый тип: должно начинаться латинской буквой или цифрой, а заканчиваться буквой, цифрой или знаком тире. Может содержать точки, но не идущие подряд и обязательно обрамленые знаком тире, латинской буквой или цифрой.
- * /^[a-z0-9][a-z0-9-]*((\.[a-z0-9-]+)*|\.)[a-z0-9]$/i
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\baseType\special\network
  */
 class DomainName extends \PPHP\tools\classes\standard\baseType\wrapper{
+  /**
+   * Тип данной обертки.
+   * @var string
+   */
   protected static $type = 'domainName';
 
   /**
@@ -29,7 +34,7 @@ class DomainName extends \PPHP\tools\classes\standard\baseType\wrapper{
   /**
    * Метод определяет, является ли указанное значение допустимым типом.
    * @static
-   * @param mixed $val
+   * @param mixed $val Проверяемое значение.
    * @return boolean true - если данные являются допустимым типом или могут быть приведены к нему без потери данных, иначе - false.
    */
   public static function is($val){

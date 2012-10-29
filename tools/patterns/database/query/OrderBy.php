@@ -3,6 +3,8 @@ namespace PPHP\tools\patterns\database\query;
 
 /**
  * Класс представляет условие сортировки результата запроса.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\patterns\database\query
  */
 class OrderBy implements ComponentQuery{
   /**
@@ -17,8 +19,8 @@ class OrderBy implements ComponentQuery{
   private $sortedType;
 
   /**
-   * @param string $sortedType [ASC] Способ сортировки
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если один из аргументов имеет недопустимое значение.
+   * @param string $sortedType [ASC] Способ сортировки.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($sortedType = 'ASC'){
     if(array_search($sortedType, ['ASC', 'DESC']) == -1){
@@ -40,7 +42,7 @@ class OrderBy implements ComponentQuery{
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
    * @param string|null $driver Используемая СУБД.
-   * @throws StandardException Выбрасывается в случае, если компонент запроса не имеет достаточно данных для формирования запроса.
+   * @throws StandardException Выбрасывается в случае, если отсутствуют обязательные компоненты запроса.
    * @return string Представление элемента в виде части SQL запроса.
    */
   public function interpretation($driver=null){
