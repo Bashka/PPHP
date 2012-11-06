@@ -29,7 +29,7 @@ PJS.localisation = function(){
       if(!localiseFiles[module][screen]){
         localiseFiles[module][screen] = [];
         $.ajax({
-          url     :'../../screens/' + module + '/' + screen + '_' + localise + '.localise',
+          url     :'/PPHP/view/screens/' + module + '/' + screen + '/' + screen + '_' + localise + '.localise',
           type    :'GET',
           dataType:'text',
           async   :false,

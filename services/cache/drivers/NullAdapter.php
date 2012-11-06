@@ -5,7 +5,7 @@ namespace PPHP\services\cache\drivers;
 /**
  * Объект-пустышка, применяемый в случае отсутствия кэш-системы.
  */
-class NullAdapter implements \PPHP\services\cache\CacheAdapter{
+class NullAdapter extends \PPHP\services\cache\CacheAdapter{
   /**
    * Метод записывает значение в кэш.
    * @param string $key Ключ значения.
@@ -33,6 +33,15 @@ class NullAdapter implements \PPHP\services\cache\CacheAdapter{
    * @return boolean true - если соединение успешно, иначе - false.
    */
   public function connect($host, $port = null){
+    return true;
+  }
+
+  /**
+   * Метод удаляет данные из кэша.
+   * @param string $key Ключ удаляемого значения.
+   * @return boolean true - если удаление выполнено, иначе - false.
+   */
+  public function remove($key){
     return true;
   }
 

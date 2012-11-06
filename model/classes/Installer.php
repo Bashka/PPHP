@@ -1,5 +1,5 @@
 <?php
-namespace PPHP\model\classes;
+  namespace PPHP\model\classes;
 
 /**
  * Родительский класс, для всех внутренних инсталяторов.

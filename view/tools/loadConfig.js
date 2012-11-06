@@ -1,7 +1,7 @@
 var YUI_config = {
   groups: {
     JQuery: {
-      base: '../../tools/JQuery/',
+      base: '../../../tools/JQuery/',
       async: false,
       modules: {
         'JQuery-base': {
@@ -21,7 +21,7 @@ var YUI_config = {
       }
     },
     PJS: {
-      base: '../../tools/PJS/',
+      base: '../../../tools/PJS/',
       async: false,
       modules: {
         'PJS-core': {

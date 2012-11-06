@@ -42,22 +42,45 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * @var \PPHP\services\configuration\Configurator
    */
   protected $conf;
+  /**
+   * @var \PPHP\services\cache\CacheAdapter
+   */
+  protected $cache;
 
   /**
-   * Конструктор по умолчанию использует файл инициализации под названием DB.ini, который должен храниться в тот же каталоге, что и данный класс.
+   * Конструктор использует конфигурацию системы для инициализации интерфейса доступа к СУБД.
+   *
+   * Метод использует систему кэширования, что позволяет реже обращаться к файловой системе для хранения данных инициализации.
+   * В случае, если кэширование отключено, метод работает с файловой системой при каждом обращении к нему.
    * @throws \PPHP\services\InitializingDataNotFoundException Выбрасывается в случае, если не удалось инициализировать соединение.
    */
   private function __construct(){
-    $this->conf = \PPHP\services\configuration\Configurator::getInstance();
+    $this->cache = \PPHP\services\cache\CacheSystem::getInstance();
 
-    if(!$this->conf->isExists('Database', 'Driver') || !$this->conf->isExists('Database', 'Host') || !$this->conf->isExists('Database', 'DBName') || !$this->conf->isExists('Database', 'Article')){
-      throw new \PPHP\services\InitializingDataNotFoundException('Недостаточно данных для инициализации, необходимыми полями являются: Driver, Host, DBName, Article');
+    if(!isset($this->cache->ConnectionManager_Driver)){
+      $this->conf = \PPHP\services\configuration\Configurator::getInstance();
+      if(!isset($this->conf->Database_Driver) || !isset($this->conf->Database_Host) || !isset($this->conf->Database_DBName) || !isset($this->conf->Database_User)){
+        throw new \PPHP\services\InitializingDataNotFoundException('Недостаточно данных для инициализации, необходимыми полями являются: Driver, Host, DBName, User');
+      }
+      $this->driver = $this->conf->Database_Driver;
+      $this->host = $this->conf->Database_Host;
+      $this->dbName = $this->conf->Database_DBName;
+      $this->user = $this->conf->Database_User;
+      $this->password = (isset($this->conf->Database_Password))? $this->conf->Database_Password : '';
+
+      $this->cache->ConnectionManager_Driver = $this->driver;
+      $this->cache->ConnectionManager_Host = $this->host;
+      $this->cache->ConnectionManager_DBName = $this->dbName;
+      $this->cache->ConnectionManager_User = $this->user;
+      $this->cache->ConnectionManager_Password = $this->password;
     }
-    $this->driver = $this->conf->get('Database', 'Driver');
-    $this->host = $this->conf->get('Database', 'Host');
-    $this->dbName = $this->conf->get('Database', 'DBName');
-    $this->user = $this->conf->get('Database', 'Article');
-    $this->password = ($this->conf->isExists('Database', 'Password'))? $this->conf->get('Database', 'Password') : '';
+    else{
+      $this->driver = $this->cache->ConnectionManager_Driver;
+      $this->host = $this->cache->ConnectionManager_Host;
+      $this->dbName = $this->cache->ConnectionManager_DBName;
+      $this->user = $this->cache->ConnectionManager_User;
+      $this->password = $this->cache->ConnectionManager_Password;
+    }
   }
 
   protected function createDSN(){
@@ -108,18 +131,23 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     switch($attributeName){
       case 'Driver':
         $this->driver = $value;
+        $this->cache->Database_Driver = $value;
         break;
       case 'Host':
         $this->host = $value;
+        $this->cache->Database_Host = $value;
         break;
       case 'DBName':
         $this->dbName = $value;
+        $this->cache->Database_DBName = $value;
         break;
-      case 'Article':
+      case 'User':
         $this->user = $value;
+        $this->cache->Database_User = $value;
         break;
       case 'Password':
         $this->password = $value;
+        $this->cache->Database_Password = $value;
         break;
     }
   }
@@ -145,7 +173,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
       case 'DBName':
         return $this->dbName;
         break;
-      case 'Article':
+      case 'User':
         return $this->user;
         break;
       case 'Password':

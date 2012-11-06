@@ -1,10 +1,13 @@
 <?php
-namespace PPHP\model\modules\utilities\ConfigInstaller;
+namespace PPHP\model\modules\SystemPackages;
 
 /**
- * Утилита предоставляет информацию об устанавливаемом компоненте.
+ * Класс, обеспечивающий доступ к архивам компонентов слоя домена для установки.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\model\modules\SystemPackages
  */
-class Controller extends \PPHP\model\classes\UtilityController{
+class ArchiveManager implements \PPHP\tools\patterns\singleton\Singleton{
+use \PPHP\tools\patterns\singleton\TSingleton;
   /**
    * Каталог для временных файлов компоненты.
    * @var \PPHP\tools\classes\standard\fileSystem\Directory
@@ -27,7 +30,7 @@ class Controller extends \PPHP\model\classes\UtilityController{
   protected $zip;
 
   protected function __construct(){
-    $this->tmpDir = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'].'/PPHP/model/modules/utilities/ConfigInstaller/tmp');
+    $this->tmpDir = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/SystemPackages/tmp');
   }
 
   /**
@@ -69,7 +72,7 @@ class Controller extends \PPHP\model\classes\UtilityController{
    */
   public function getFile($fileName, $callback){
     if(!$this->isFilesExists([$fileName])){
-      throw new \PPHP\tools\classes\standard\fileSystem\NotExistsException('Требуемого файла '.$fileName.' не существует в архиве компоненты.');
+      throw new \PPHP\tools\classes\standard\fileSystem\NotExistsException('Требуемого файла ' . $fileName . ' не существует в архиве компоненты.');
     }
     $this->zip->extractTo($this->tmpDir->getAddress(), [$fileName]);
     $file = $this->tmpDir->getFile($fileName);

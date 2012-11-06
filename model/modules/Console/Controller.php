@@ -3,11 +3,10 @@ namespace PPHP\model\modules\Console;
 
 /**
  * Модуль предоставляет текстовый интерфейс доступа к установленным модулям системы.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\model\modules\Console
  */
 class Controller extends \PPHP\model\classes\ModuleController{
-  public function x(\PPHP\tools\classes\standard\baseType\Date $a){
-    return (string)$a;
-  }
   /**
    * Метод тестирует механизмы вызова модулей.
    * @return string
@@ -27,11 +26,25 @@ class Controller extends \PPHP\model\classes\ModuleController{
     return $result;
   }
 
+  /**
+   * Метод выполняет синхронизацию постоянного хранилища и используемой системы кэширования.
+   * @return boolean true - если синхронизация успешно завершена.
+   */
+  public function synchCahce(){
+    \PPHP\services\database\identification\Autoincrement::getInstance()->synch();
+    return true;
+  }
+
+  /**
+   * Метод выполняет первоначальную внутреннюю настройку системы.
+   */
   public function preInstall(){
     chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/model/modules', 0777);
-    chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/model/modules/InstallerModules/temp', 0777);
+    chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/model/modules/Console/state.ini', 0777);
     chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/model/modules/Console/files', 0777);
-    chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/model/modules/utilities/ConfigInstaller/files', 0777);
+    chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/model/modules/SystemPackages/state.ini', 0777);
+    chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/model/modules/SystemPackages/tmp', 0777);
+    chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/model/modules/SystemPackages/InstallerModules/state.ini', 0777);
     chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/services/configuration/conf.ini', 0777);
     chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/services/log/log.txt', 0777);
     chmod($_SERVER['DOCUMENT_ROOT'].'/PPHP/tools/classes/standard/fileSystem/loadingFiles/temp', 0777);
@@ -146,7 +159,7 @@ class Controller extends \PPHP\model\classes\ModuleController{
    */
   public function moveFile(\PPHP\tools\classes\standard\baseType\Integer $fileID, \PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress $newAddress){
     $fileID = $fileID->getVal();
-    $newAddress = ($newAddress->getIsRoot())? $newAddress->getVal(): '/'.$newAddress->getVal();
+    $newAddress = ($newAddress->isRoot())? $newAddress->getVal(): '/'.$newAddress->getVal();
     $file = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files/'.$fileID);
     if(!$file->isExists()){
       return 'The file is not found';
@@ -156,11 +169,17 @@ class Controller extends \PPHP\model\classes\ModuleController{
   }
 
   /**
-   * Метод возвращает имена всех зарегистрированных в системе модулей.
-   * @return array Массив имен зарегистрированных в системе модулей.
+   * Метод возвращает имена всех зарегистрированных в системе конкретных модулей, упорядоченных в порядке возрастания.
+   * @return array Массив имен зарегистрированных в системе конкретных модулей.
    */
   public function getModulesNames(){
-    $modules = \PPHP\services\modules\ModulesRouter::getInstance()->getModulesNames();
+    $modulesRouter = \PPHP\services\modules\ModulesRouter::getInstance();
+    $modules = $modulesRouter->getModulesNames();
+    foreach($modules as $k => $moduleName){
+      if($modulesRouter->getReflectionModule($moduleName)->getType() != \PPHP\tools\patterns\metadata\reflection\ReflectionModule::SPECIFIC){
+        unset($modules[$k]);
+      }
+    }
     sort($modules);
     return $modules;
   }

@@ -178,6 +178,45 @@ class Directory extends ComponentFileSystem{
   }
 
   /**
+   * Метод пытается создать новый каталог в вызывающем каталоге и возвращает его представление в случае успеха.
+   * @param string $dirName Имя создаваемого каталога.
+   * @param int $mode Маска доступа.
+   * @throws NotExistsException Выбрасывается в случае, если вызываемого каталога не существует.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\DuplicationException Выбрасывает в случае, если указанный каталог уже существует.
+   * @return \PPHP\tools\classes\standard\fileSystem\Directory Созданный каталог.
+   */
+  public function createDir($dirName, $mode = 0777){
+    if(!is_integer($mode)){
+      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('integer', $mode);
+    }
+    if(!$this->isExists()){
+      throw new NotExistsException('Невозможно выполнить действие. В файловой системе компонент не найден.');
+    }
+    if($this->isDirExists($dirName)){
+      throw new \PPHP\tools\classes\standard\baseType\exceptions\DuplicationException('Указанный компонент уже существует в файловой системе.');
+    }
+    $dir = new Directory($dirName, $this);
+    $dir->create($mode);
+    return $dir;
+  }
+
+  public function createFile($fileName, $mode = 0777){
+    if(!is_integer($mode)){
+      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('integer', $mode);
+    }
+    if(!$this->isExists()){
+      throw new NotExistsException('Невозможно выполнить действие. В файловой системе компонент не найден.');
+    }
+    if($this->isFileExists($fileName)){
+      throw new \PPHP\tools\classes\standard\baseType\exceptions\DuplicationException('Указанный компонент уже существует в файловой системе.');
+    }
+    $file = new File($fileName, $this);
+    $file->create($mode);
+    return $file;
+  }
+
+  /**
    * Возвращает итератор для данного каталога.
    * @return \DirectoryIterator Итератор вызывающего каталога.
    */

@@ -41,18 +41,11 @@ class AuthenticationManager implements \PPHP\tools\patterns\singleton\Singleton{
   /**
    * Метод пытается аутентифицировать сущность по заданной ключевой паре. Если сущность аутентифицирована, она восстанвливает свое последнее состояние.
    * @param \PPHP\tools\classes\standard\essence\access\authenticated\AuthenticatedEntity $entity Аутентифицируемая сущность.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @return boolean true - если аутентификация успешна и сущность восстановлена, иначе - false.
    */
   public function authenticate(AuthenticatedEntity &$entity){
     $OID = $entity->getOID();
     $password = $entity->getPassword();
-    if(empty($OID)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('integer', $OID);
-    }
-    if(empty($password)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $password);
-    }
 
     try{
       $this->dataMapper->recoverFinding($entity, ['OID' => $OID, 'password' => $password]);

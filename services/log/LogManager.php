@@ -33,13 +33,20 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * @var \PPHP\services\configuration\Configurator
    */
   protected $conf;
+  /**
+   * @var \PPHP\services\cache\CacheAdapter
+   */
+  protected $cache;
 
   private function __construct(){
-    if(empty($this->conf)){
+    $this->cache = \PPHP\services\cache\CacheSystem::getInstance();
+    if(!isset($this->cache->LogManager_Type)){
       $this->conf = \PPHP\services\configuration\Configurator::getInstance();
+      $this->type = $this->conf->Log_Type;
+      $this->cache->LogManager_Type = $this->type;
     }
-    if(empty($this->type)){
-      $this->type = $this->conf->get('Log', 'Type');
+    else{
+      $this->type = $this->cache->LogManager_Type;
     }
   }
 
@@ -61,7 +68,8 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     }
 
     $this->type = $type;
-    $this->conf->set('Log', 'Type', $type);
+    $this->conf->Log_Type = $type;
+    $this->cache->LogManager_Type = $type;
     return true;
   }
 

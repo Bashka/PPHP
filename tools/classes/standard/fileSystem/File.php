@@ -112,7 +112,7 @@ class File extends ComponentFileSystem implements \SplObserver{
       return $this->getLocation()->isFileExists($this->getName());
     }
     catch(NotExistsException $exception){
-      throw new NotExistsException('Невозможно выполнить действие. В файловой системе родительский каталог не найден ('.$this->getAddress().').', 0, $exception);
+      throw new NotExistsException('Невозможно выполнить действие. В файловой системе родительский каталог ('.$this->getLocation()->getName().') не найден ('.$this->getAddress().').', 0, $exception);
     }
   }
 

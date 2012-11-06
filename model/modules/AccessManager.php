@@ -12,13 +12,13 @@ class AccessManager implements \PPHP\tools\patterns\singleton\Singleton{
    * В случае отсутствия модуля для разграничения прав доступа, метод делает доступными все методы всех модулей.
    * @param string $module Проверяемый модуль.
    * @param string $active Запрашиваемый метод модуля.
-   * @param \PPHP\services\modules\ModulesRouter $modulesRouter Роутер модулей.
    * @return boolean true - если доступ разрешен, иначе - false.
    */
-  public function isResolved($module, $active, \PPHP\services\modules\ModulesRouter $modulesRouter){
-    if($modulesRouter->isModuleExists('Access')){
+  public function isResolved($module, $active){
+    $modulesRouter = \PPHP\services\modules\ModulesRouter::getInstance();
+    if($modulesRouter->hasModule('Access')){
       $accessController = $modulesRouter->getController('Access');
-      return $accessController::getInstance()->isResolved(new \PPHP\tools\classes\standard\baseType\special\Name($module), new \PPHP\tools\classes\standard\baseType\special\Name($active));
+      return $accessController->isResolved(new \PPHP\tools\classes\standard\baseType\special\Name($module), new \PPHP\tools\classes\standard\baseType\special\Name($active));
     }
     else{
       return true;

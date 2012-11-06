@@ -41,11 +41,11 @@ class FileSystemAddressTest extends \PHPUnit_Framework_TestCase{
   }
 
   /**
-   * @covers PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress::getIsRoot
+   * @covers PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress::isRoot
    */
   public function testGetIsRoot(){
-    $this->assertFalse($this->object->getIsRoot());
+    $this->assertFalse($this->object->isRoot());
     $address = new \PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress('/testDir/test');
-    $this->assertTrue($address->getIsRoot());
+    $this->assertTrue($address->isRoot());
   }
 }

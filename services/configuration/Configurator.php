@@ -114,4 +114,39 @@ use \PPHP\tools\patterns\singleton\TSingleton;
   public function getSection($section){
     return $this->ini->getSection($section);
   }
+
+  /**
+   * Метод преобразует ссылку на ключ конфигурации в команду.
+   * @param string $varName Ссылка на ключ конфигурации.
+   * @return \stdClass Команда имеющая следующие свойства:
+   * - section - секция конфигурации;
+   * - key - ключ конфигурации.
+   */
+  protected function parseVarName($varName){
+    $positionDelimiter = strpos($varName, '_');
+    $result = new \stdClass();
+    $result->section = substr($varName, 0, $positionDelimiter);
+    $result->key = substr($varName, $positionDelimiter+1);
+    return $result;
+  }
+
+  function __get($name){
+    $name = $this->parseVarName($name);
+    return $this->get($name->section, $name->key);
+  }
+
+  function __set($name, $value){
+    $name = $this->parseVarName($name);
+    $this->set($name->section, $name->key, $value);
+  }
+
+  function __isset($name){
+    $name = $this->parseVarName($name);
+    return $this->isExists($name->section, $name->key);
+  }
+
+  function __unset($name){
+    $name = $this->parseVarName($name);
+    $this->delete($name->section, $name->key);
+  }
 }

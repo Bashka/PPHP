@@ -4,7 +4,7 @@ namespace PPHP\services\cache;
 /**
  * Объекты-адаптеры, предоставляющие интерфейс для работы с кэш-системами.
  */
-interface CacheAdapter{
+abstract class CacheAdapter{
   /**
    * Метод записывает значение в кэш.
    * @abstract
@@ -13,7 +13,7 @@ interface CacheAdapter{
    * @param null|integer $time Время кэширования в секундах.
    * @return boolean true - если запись успешна, иначе - false.
    */
-  public function set($key, $value, $time=null);
+  public abstract function set($key, $value, $time=null);
 
   /**
    * Метод возвращает данные из кэша.
@@ -21,7 +21,15 @@ interface CacheAdapter{
    * @param string $key Ключ запрашиваемого значения.
    * @return string|boolean Ассоциированное с ключем значение или false, если значение не установленно.
    */
-  public function get($key);
+  public abstract function get($key);
+
+  /**
+   * Метод удаляет данные из кэша.
+   * @abstract
+   * @param string $key Ключ удаляемого значения.
+   * @return boolean true - если удаление выполнено, иначе - false.
+   */
+  public abstract function remove($key);
 
   /**
    * Метод устанавливает соединение с кэш-системой.
@@ -30,5 +38,21 @@ interface CacheAdapter{
    * @param null|integer $port Порт для соединения.
    * @return boolean true - если соединение успешно, иначе - false.
    */
-  public function connect($host, $port=null);
+  public abstract function connect($host, $port=null);
+
+  function __set($name, $value){
+    $this->set($name, $value);
+  }
+
+  function __get($name){
+    return $this->get($name);
+  }
+
+  function __isset($name){
+    return $this->get($name) !== false;
+  }
+
+  function __unset($name){
+    $this->remove($name);
+  }
 }

@@ -5,7 +5,7 @@ namespace PPHP\services\cache\drivers;
 /**
  * Адаптер, для взаимодействия с memcache.
  */
-class MemcacheAdapter implements \PPHP\services\cache\CacheAdapter{
+class MemcacheAdapter extends \PPHP\services\cache\CacheAdapter{
   /**
    * Не адаптированный объект взаимодействия с кэш-системой.
    * @var \Memcache
@@ -44,6 +44,15 @@ class MemcacheAdapter implements \PPHP\services\cache\CacheAdapter{
    */
   public function connect($host, $port = null){
     return $this->cache->connect($host, $port);
+  }
+
+  /**
+   * Метод удаляет данные из кэша.
+   * @param string $key Ключ удаляемого значения.
+   * @return boolean true - если удаление выполнено, иначе - false.
+   */
+  public function remove($key){
+    return $this->cache->delete($key);
   }
 
 }

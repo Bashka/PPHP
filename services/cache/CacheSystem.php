@@ -17,20 +17,30 @@ class CacheSystem implements \PPHP\tools\patterns\singleton\Singleton{
    * @throws \PPHP\services\InitializingDataNotFoundException Выбрасывается в случае, если не удалось инициализировать кэш-систему.
    * @return CacheAdapter
    */
-  static public function getInstance(){
+  public static function getInstance(){
     if(empty(self::$adapter)){
       $conf = \PPHP\services\configuration\Configurator::getInstance();
-      if(!$conf->isExists('Cache', 'Driver') || !$conf->isExists('Cache', 'Server')){
+      if(!isset($conf->Cache_Driver) || !isset($conf->Cache_Server)){
         throw new \PPHP\services\InitializingDataNotFoundException('Недостаточно данных для инициализации, необходимыми полями являются: Driver, Server');
       }
-      $adapterName = '\PPHP\services\cache\drivers\\' . $conf->get('Cache', 'Driver');
+      $adapterName = '\PPHP\services\cache\drivers\\' . $conf->Cache_Driver;
       $adapter = new $adapterName;
-      $serverOption = $conf->get('Cache', 'Server');
+      $serverOption = $conf->Cache_Server;
       $serverOption = explode(':', $serverOption);
       $adapter->connect($serverOption[0], $serverOption[1]);
       self::$adapter = $adapter;
     }
     return self::$adapter;
+  }
+
+  /**
+   * Метод определяет, используется ли утилита кэширования в системе.
+   * @static
+   * @return boolean true - если кэширование используется, иначе - false.
+   */
+  public static function hasCache(){
+    $conf = \PPHP\services\configuration\Configurator::getInstance();
+    return $conf->Cache_Driver != 'NullAdapter';
   }
 
   /**

@@ -16,13 +16,15 @@ class VerifierData{
     foreach($args as &$argVal){
       try{
         $verifyClass = $method->getParameter($i++)->getClass();
-        if($verifyClass){
-          $verifyClass = $verifyClass->getName();
-          $argVal = new $verifyClass($argVal);
-        }
       }
-      // Обработка динамических аргументов
-      catch(\PPHP\tools\classes\standard\baseType\exceptions\LogicException $exc){}
+        // Обработка динамических аргументов
+      catch(\PPHP\tools\classes\standard\baseType\exceptions\LogicException $exc){
+        $verifyClass = false;
+      }
+      if($verifyClass){
+        $verifyClass = $verifyClass->getName();
+        $argVal = new $verifyClass($argVal);
+      }
     }
   }
 }

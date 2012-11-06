@@ -20,12 +20,11 @@ class LocalisationManager implements \PPHP\tools\patterns\singleton\Singleton{
     if(empty(self::$instance)){
       self::$instance = \PPHP\services\formatting\localisation\LocalisationManager::getInstance();
       $modulesRouter = \PPHP\services\modules\ModulesRouter::getInstance();
-      if($modulesRouter->isModuleExists('Localisation')){
+      if($modulesRouter->hasModule('Localisation')){
         $localisationController = $modulesRouter->getController('Localisation');
-        self::$instance->setLocalise($localisationController::getInstance()->getLanguage());
+        self::$instance->setLocalise($localisationController->getLanguage());
       }
       else{
-
         self::$instance->setLocalise(\PPHP\services\formatting\localisation\LocalisationManager::getDefaultLanguage());
       }
     }

@@ -57,7 +57,7 @@ class FileSystemAddress extends \PPHP\tools\classes\standard\baseType\wrapper{
    * Метод определяет, является адрес абсолютным или относительным.
    * @return boolean true - если адрес абсолютный, иначе - false.
    */
-  public function getIsRoot(){
+  public function isRoot(){
     return $this->isRoot;
   }
 }

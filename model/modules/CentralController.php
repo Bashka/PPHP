@@ -10,32 +10,43 @@ spl_autoload_register(function($className){
  */
 class CentralController{
   /**
-   * Данный ментод отвечает за передачу модулю сообщения и возврат ответа.
+   * Метод возвращает контроллер указанного конкретного модуля.
+   * @static
+   * @param string $moduleName Имя зарпашиваемого модуля.
+   * @throws \PPHP\services\modules\ModuleNotFoundException Выбрасывается в случае, если требуемого модуля не существует в системе.
+   * @return \PPHP\model\classes\ModuleController Контроллер целевого модуля.
+   */
+  public static function getControllerModule($moduleName){
+    return \PPHP\services\modules\ModulesRouter::getInstance()->getController($moduleName);
+  }
+
+  /**
+   * Данный метод отвечает за передачу модулю сообщения от слоя представления и возврат ответа.
    * @static
    * @throws \PPHP\services\modules\ModuleNotFoundException Выбрасывается в случае, если требуемый модуль не зарегистрирован в системе.
    */
   public static function main(){
     $viewProvider = \PPHP\services\view\ViewProvider::getInstance();
     $viewMessage = $viewProvider->getMessage();
-    $moduleRouter = \PPHP\services\modules\ModulesRouter::getInstance();
-    if(!$moduleRouter->isModuleExists($viewMessage['module'])){
+    $module = $viewMessage['module'];
+    $method = $viewMessage['active'];
+    try{
+      $controller = self::getControllerModule($module);
+    }
+    catch(\PPHP\services\modules\ModuleNotFoundException $exc){
       $send = new \stdClass();
-      $send->exception = new \PPHP\services\modules\ModuleNotFoundException('Требуемого модуля "' . $viewMessage['module'] . '" не существует.');
+      $send->exception = $exc;
       $viewProvider->sendMessage($send);
       exit(1);
     }
-    $controller = $moduleRouter->getController($viewMessage['module']);
-    $controller = $controller::getInstance();
 
     $send = new \stdClass();
-
-    $method = $viewMessage['active'];
     if(!method_exists($controller, $method)){
-      $send->exception = new \PPHP\services\modules\ModuleNotFoundException('Запрашиваемый интерфейс '.$method.' модуля '.$viewMessage['module'].' отсутствует.');
+      $send->exception = new \PPHP\services\modules\ModuleNotFoundException('Запрашиваемый интерфейс '.$method.' модуля '.$module.' отсутствует.');
     }
     else{
       // Проверка прав доступа к методу модуля
-      if(AccessManager::getInstance()->isResolved($viewMessage['module'], $viewMessage['active'], $moduleRouter)){
+      if(AccessManager::getInstance()->isResolved($module, $method)){
         try{
           // Верификация данных
           if(isset($viewMessage['message'])){
@@ -57,44 +68,6 @@ class CentralController{
       }
     }
     $viewProvider->sendMessage($send);
-  }
-
-  /**
-   * Метод позволяет зависимым модулям обращаться к контроллеру родительского модуля.
-   * Чтобы организовать зависимость между модулями, необходимо добавить аннотацию ParentModule с именем родительского модуля в контроллер дочернего модуля.
-   * @static
-   * @param \PPHP\tools\patterns\metadata\reflection\ReflectionClass $causingModule Отражение контроллера вызывающего модуля.
-   * @param string $action Вызываемый метод контроллера родительского модуля.
-   * @param mixed ... Параметры, передаваемые вызываемому методу.
-   * @throws \PPHP\tools\patterns\metadata\EmptyMetadataException Выбрасывается в случае, если дочерним модулем не определена зависимость.
-   * @return mixed Ответ вызываемого метода.
-   */
-  public static function sendParent(\PPHP\tools\patterns\metadata\reflection\ReflectionClass $causingModule, $action){
-    if(!$causingModule->isMetadataExists('ParentModule')){
-      throw new \PPHP\tools\patterns\metadata\EmptyMetadataException('Информация о зависимости модуля отсутствует.');
-    }
-    $moduleRouter = \PPHP\services\modules\ModulesRouter::getInstance();
-    $controllerParentModule = $moduleRouter->getController($causingModule->getMetadata('ParentModule'));
-    $message = func_get_args();
-    array_shift($message);
-    array_shift($message);
-    return call_user_func_array([$controllerParentModule::getInstance(), $action], $message);
-  }
-
-  /**
-   * Метод возвращает контроллер утилиты.
-   * @static
-   * @param string $utilityName Имя утилиты
-   * @return \PPHP\model\classes\UtilityController|boolean Возвращает контроллер утилиты или false - если указанная утилита не установлена.
-   */
-  public static function getUtility($utilityName){
-    $utilitiesRouter = \PPHP\services\utilities\UtilitiesRouter::getInstance();
-    if(!$utilitiesRouter->isUtilityExists($utilityName)){
-      return false;
-    }
-    $controller = $utilitiesRouter->getController($utilityName);
-    $controller = $controller::getInstance();
-    return $controller;
   }
 }
 
