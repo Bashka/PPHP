@@ -1,6 +1,6 @@
 <?php
 namespace PPHP\model\modules;
-$_SERVER['DOCUMENT_ROOT'] = 'C:/WebServers/home/Delphinum/www/PPHP';
+
 spl_autoload_register(function($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
