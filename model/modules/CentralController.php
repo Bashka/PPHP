@@ -30,7 +30,7 @@ class CentralController{
   /**
    * Данный метод отвечает за передачу модулю сообщения от слоя представления и возврат ответа.
    * @static
-   * @throws \PPHP\services\modules\ModuleNotFoundException Выбрасывается в случае, если требуемый модуль не зарегистрирован в системе.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\LogicException Выбрасывается в случае, если требуемый модуль не зарегистрирован в системе.
    */
   public static function main(){
     $viewProvider = \PPHP\services\view\ViewProvider::getInstance();
@@ -49,7 +49,7 @@ class CentralController{
 
     $send = new \stdClass();
     if(!method_exists($controller, $method)){
-      $send->exception = new \PPHP\services\modules\ModuleNotFoundException('Запрашиваемый интерфейс '.$method.' модуля '.$module.' отсутствует.');
+      $send->exception = new \PPHP\tools\classes\standard\baseType\exceptions\LogicException('Запрашиваемый интерфейс '.$method.' модуля '.$module.' отсутствует.');
     }
     else{
       // Проверка прав доступа к методу модуля

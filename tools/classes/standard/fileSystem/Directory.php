@@ -225,7 +225,7 @@ class Directory extends ComponentFileSystem{
   }
 
   /**
-   * Возвращает компонент каталога, имя которого заданно в аргементе.
+   * Возвращает компонент каталога, имя которого заданно в аргументе.
    * @param $fileName Имя компонента.
    * @return \PPHP\tools\classes\standard\fileSystem\File Получаемый компонент.
    * @throws NotExistsException Выбрасывается в случае, если вызываемого или получаемого каталога на момент вызова метода не существует.

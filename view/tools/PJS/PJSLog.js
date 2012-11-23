@@ -20,8 +20,8 @@ PJS.log = function(){
     },
 
   /*
-     * Метод позволяет вернуть уведомителя в свернутый формат.
-     */
+   * Метод позволяет вернуть уведомителя в свернутый формат.
+   */
     close = function(){
       informant.html('!');
       informant.css('text-align', 'center');
@@ -34,17 +34,15 @@ PJS.log = function(){
   });
 
   informant.on('click', function(event){
-   clearTimeout(timer);
+    clearTimeout(timer);
     if(informant.html() == '!'){
-      // Открытие последнего исключения
-      if(!event.ctrlKey){
-        var lastError = PJS.log.getLastException();
-        informant.html(toStringException(lastError));
+      var lastError = PJS.log.getLastException(),
+        strError = toStringException(lastError),
+        trace = lastError.trace;
+      for(var i in trace){
+        strError += toStringException(trace[i]);
       }
-      // Открытие всего журнала
-      else{
-        informant.html(PJS.log.toStringJournal());
-      }
+      informant.html(strError);
       open();
     }
     // Закрытие уведомления
@@ -74,12 +72,24 @@ PJS.log = function(){
    * @return string
    */
   var toStringException = function(e){
-    return '-----' + e.time + '-----' + "<br />" +
-      ' Exception: <span style="color: red">' + e.type + "</span><br />" +
-      ' Message: <b>' + e.message + "</b><br />" +
-      ' Code: ' + e.code + "<br />" +
-      ' File: ' + e.file + "<br />" +
-      ' Line: ' + e.line + "<br /><br />";
+    var result = '';
+    if(e.time !== undefined){
+      result += '-----' + e.time + '-----' + "<br />";
+    }
+    else{
+      result += '-----'+"<br />";
+    }
+    if(e.type !== undefined){
+      result += ' Exception: <span style="color: red">' + e.type + "</span><br />";
+    }
+    if(e.message !== undefined){
+      result += ' Message: ' + e.message + "<br />";
+    }
+    if(e.code !== undefined){
+      result += ' Code: ' + e.code + "<br />";
+    }
+    result += ' File: ' + e.file + "<br />" + ' Line: ' + e.line + "<br /><br />";
+    return result;
   };
 
   return {
