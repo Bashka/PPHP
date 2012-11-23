@@ -46,8 +46,6 @@ class FileINI{
     }
     $this->file = $file;
     $this->isSection = $isSection;
-    $this->activeKey=0;
-    $this->activeSection=0;
   }
 
   /**
@@ -205,5 +203,47 @@ class FileINI{
     else{
       return isset($this->content[$section][$key]);
     }
+  }
+
+  /**
+   * Метод преобразует ссылку на ключ конфигурации в команду.
+   * Разделителем секции и ключа (если файл разделен на секции) является первый символ подчеркивания (_).
+   * @param string $varName Ссылка на ключ конфигурации.
+   * @return \stdClass Команда имеющая следующие свойства:
+   * - section - секция конфигурации или null - если файл не разделен на секции;
+   * - key - ключ конфигурации.
+   */
+  protected function parseVarName($varName){
+    $result = new \stdClass();
+    if(!$this->isSection){
+      $result->section = null;
+      $result->key = $varName;
+    }
+    else{
+      $positionDelimiter = strpos($varName, '_');
+      $result->section = substr($varName, 0, $positionDelimiter);
+      $result->key = substr($varName, $positionDelimiter+1);
+    }
+    return $result;
+  }
+
+  function __get($name){
+    $name = $this->parseVarName($name);
+    return $this->get($name->key, $name->section);
+  }
+
+  function __set($name, $value){
+    $name = $this->parseVarName($name);
+    $this->set($name->key, $value, $name->section);
+  }
+
+  function __isset($name){
+    $name = $this->parseVarName($name);
+    return $this->isDataExists($name->key, $name->section);
+  }
+
+  function __unset($name){
+    $name = $this->parseVarName($name);
+    $this->remove($name->key, $name->section);
   }
 }

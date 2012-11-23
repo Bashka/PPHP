@@ -6,13 +6,13 @@ namespace PPHP\model\modules\SystemPackages;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\model\modules\SystemPackages
  */
-class ArchiveManager implements \PPHP\tools\patterns\singleton\Singleton{
-use \PPHP\tools\patterns\singleton\TSingleton;
+class ArchiveManager{
   /**
    * Каталог для временных файлов компоненты.
+   * @static
    * @var \PPHP\tools\classes\standard\fileSystem\Directory
    */
-  protected $tmpDir;
+  protected static $tmpDir;
   /**
    * Файл конфигурации компоненты.
    * @var \PPHP\tools\classes\standard\fileSystem\File
@@ -29,8 +29,10 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    */
   protected $zip;
 
-  protected function __construct(){
-    $this->tmpDir = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/SystemPackages/tmp');
+  public function __construct(){
+    if(!self::$tmpDir){
+      self::$tmpDir = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/SystemPackages/tmp');
+    }
   }
 
   /**
@@ -44,8 +46,8 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     if(!$this->zip->statName('conf.ini')){
       throw new \PPHP\tools\classes\standard\fileSystem\NotExistsException('Нарушена структура модуля.');
     }
-    $this->zip->extractTo($this->tmpDir->getAddress(), ['conf.ini']);
-    $this->confFile = $this->tmpDir->getFile('conf.ini');
+    $this->zip->extractTo(self::$tmpDir->getAddress(), ['conf.ini']);
+    $this->confFile = self::$tmpDir->getFile('conf.ini');
     $this->conf = new \PPHP\tools\classes\standard\fileSystem\FileINI($this->confFile, true);
   }
 
@@ -74,8 +76,8 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     if(!$this->isFilesExists([$fileName])){
       throw new \PPHP\tools\classes\standard\fileSystem\NotExistsException('Требуемого файла ' . $fileName . ' не существует в архиве компоненты.');
     }
-    $this->zip->extractTo($this->tmpDir->getAddress(), [$fileName]);
-    $file = $this->tmpDir->getFile($fileName);
+    $this->zip->extractTo(self::$tmpDir->getAddress(), [$fileName]);
+    $file = self::$tmpDir->getFile($fileName);
     return $callback($file);
   }
 
@@ -86,7 +88,9 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    */
   public function moveFiles(\PPHP\tools\classes\standard\fileSystem\Directory $location, array $filesNames = null){
     $this->zip->extractTo($location->getAddress(), $filesNames);
-    $location->getFile('conf.ini')->delete();
+    if($location->isFileExists('conf.ini')){
+      $location->getFile('conf.ini')->delete();
+    }
   }
 
   /**
@@ -108,10 +112,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    */
   public function close(){
     $this->zip->close();
-    $this->tmpDir->clear();
-    unset($this->confFile);
-    unset($this->conf);
-    unset($this->zip);
+    self::$tmpDir->clear();
   }
 
   /**

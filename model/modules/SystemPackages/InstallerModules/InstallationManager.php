@@ -146,7 +146,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    */
   protected function getDataModule($archiveAddress){
     $data = [];
-    $archiveManager = \PPHP\model\modules\SystemPackages\ArchiveManager::getInstance();
+    $archiveManager = new \PPHP\model\modules\SystemPackages\ArchiveManager();
     $archiveManager->open($archiveAddress);
 
     if(!$archiveManager->isDataExists([['Module', 'name'], ['Module', 'type'], ['Module', 'version']])){

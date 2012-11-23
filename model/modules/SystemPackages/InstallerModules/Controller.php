@@ -20,6 +20,7 @@ class Controller extends \PPHP\model\classes\ModuleController{
     }
     return InstallationManager::getInstance()->installModule($archiveAddress);
   }
+
   /**
    * Метод устанавливает указанный удаленный модуль.
    * @param \PPHP\tools\classes\standard\baseType\special\network\URL $urlModule URL адрес устанавливаемого архива модуля.

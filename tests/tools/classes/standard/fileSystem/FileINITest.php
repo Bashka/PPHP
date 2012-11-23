@@ -144,5 +144,49 @@ class FileINITest extends \PHPUnit_Framework_TestCase{
     $this->assertFalse($this->object->isDataExists('k3'));
     $this->assertTrue($this->object->isDataExists('k1'));
   }
+
+  /**
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::__set
+   */
+  public function test__set(){
+    $this->object->k1 = 'newV1';
+    $this->object->k3 = 'v3';
+    $this->assertEquals('newV1', $this->object->get('k1'));
+    $this->assertEquals('v3', $this->object->get('k3'));
+
+    $this->objectSection->section_k1 = 'newV1';
+    $this->objectSection->section_k3 = 'v3';
+    $this->assertEquals('newV1', $this->objectSection->get('k1', 'section'));
+    $this->assertEquals('v3', $this->objectSection->get('k3', 'section'));
+  }
+
+  /**
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::__get
+   */
+  public function test__get(){
+    $this->assertEquals('v1', $this->object->k1);
+    $this->assertEquals('v1', $this->objectSection->section_k1);
+  }
+
+  /**
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::__isset
+   */
+  public function test__isset(){
+    $this->assertFalse(isset($this->objectSection->section_k3));
+    $this->assertTrue(isset($this->objectSection->section_k1));
+    $this->assertFalse(isset($this->object->k3));
+    $this->assertTrue(isset($this->object->k1));
+  }
+
+  /**
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::remove
+   */
+  public function test__unset(){
+    unset($this->object->k1);
+    $this->assertEquals(null, $this->object->get('k1'));
+
+    unset($this->objectSection->section_k1);
+    $this->assertEquals(null, $this->objectSection->get('k1', 'section'));
+  }
 }
 
