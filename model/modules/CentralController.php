@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\model\modules;
+$_SERVER['DOCUMENT_ROOT'] = 'C:/WebServers/home/Delphinum/www';
 spl_autoload_register(function($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
@@ -36,19 +37,19 @@ register_shutdown_function(function (){
       $viewProvider = \PPHP\services\view\ViewProvider::getInstance();
       $viewProvider->sendMessage($send);
     }
-    // Предупреждения
-    elseif($error['type'] == E_CORE_WARNING || $error['type'] == E_WARNING || $error['type'] == E_USER_WARNING || $error['type'] == E_DEPRECATED || $error['type'] == E_USER_DEPRECATED){
-      $log->setMessage(\PPHP\services\log\Message::createWarning($error['message'] . ' - ' . $error['file'] . ':' . $error['line']));
-    }
-    // Уведомления
-    elseif($error['type'] == E_NOTICE || $error['type'] == E_USER_NOTICE || $error['type'] == E_STRICT){
-      $log->setMessage(\PPHP\services\log\Message::createNotice($error['message'] . ' - ' . $error['file'] . ':' . $error['line']));
-    }
   }
   else{
     ob_end_flush();
   }
 });
+set_error_handler(function($code, $message, $file, $line){
+  $log = \PPHP\services\log\LogManager::getInstance();
+  $log->setMessage(\PPHP\services\log\Message::createWarning($message . ' - ' . $file . ':' . $line));
+}, E_COMPILE_WARNING|E_WARNING|E_USER_WARNING|E_DEPRECATED|E_USER_DEPRECATED|E_CORE_WARNING);
+set_error_handler(function($code, $message, $file, $line){
+  $log = \PPHP\services\log\LogManager::getInstance();
+  $log->setMessage(\PPHP\services\log\Message::createNotice($message . ' - ' . $file . ':' . $line));
+}, E_NOTICE|E_USER_NOTICE|E_STRICT);
 
 
 /**
