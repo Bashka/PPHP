@@ -14,6 +14,7 @@ interface Writer{
    * Метод записывает строку в поток.
    * @abstract
    * @param string $data Записываемая строка.
+   * @throws \PPHP\tools\patterns\io\IOException Выбрасывается в случае возникновения ошибки при записи в поток.
    * @return integer Число реально записанных байт.
    */
   public function write($data);

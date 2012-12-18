@@ -85,6 +85,9 @@ PJS.log = function(){
     if(e.message !== undefined){
       result += ' Message: ' + e.message + "<br />";
     }
+    if(e.class !== undefined){
+      result += ' Class exception: ' + e.class + "<br />";
+    }
     if(e.code !== undefined){
       result += ' Code: ' + e.code + "<br />";
     }

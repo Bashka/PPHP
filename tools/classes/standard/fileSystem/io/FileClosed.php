@@ -19,7 +19,7 @@ trait FileClosed{
     if($this->isClose()){
       return true;
     }
-    $this->closed = fclose($this->descriptor);
+    $this->closed = fclose($this->resource);
     return $this->closed;
   }
 

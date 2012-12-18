@@ -154,9 +154,22 @@ class String extends wrapper implements \ArrayAccess{
    * @param integer|null $length Число отбираемых символов или null - если необходимо выбрать все символы до конца строки.
    * @return \PPHP\tools\classes\standard\baseType\String Результирующая подстрока.
    */
-  public function sub($start, $length = null){
-    $val = (is_null($length))? iconv_substr($this->val, $start, $this->count(), 'UTF-8') : iconv_substr($this->val, $start, $length, 'UTF-8');
-    return new static($val);
+  public function sub($start = null, $length = null){
+    $start = ($start === null)? $this->point : $start;
+    $length = ($length === null)? $this->count() : $length;
+    return new static(iconv_substr($this->val, $start, $length, 'UTF-8'));
+  }
+
+  /**
+   * Метод возвращает подстроку строки в байтах.
+   * @param integer $start Позиция начального байта.
+   * @param integer|null $length Число отбираемых байт или null - если необходимо выбрать все байты до конца строки.
+   * @return \PPHP\tools\classes\standard\baseType\String Результирующая подстрока.
+   */
+  public function subByte($start = null, $length = null){
+    $start = ($start === null)? $this->point : $start;
+    $length = ($length === null)? $this->count() : $length;
+    return new static(substr($this->val, $start, $length));
   }
 
   /**
@@ -363,12 +376,11 @@ class String extends wrapper implements \ArrayAccess{
    */
   public function nextComponent($delimiter){
     $positionDelimiter = strpos($this->val, $delimiter, $this->point);
-    if($positionDelimiter < 0){
+    if($positionDelimiter < 0 || $positionDelimiter === false){
       return false;
     }
     $component = substr($this->val, $this->point, $positionDelimiter-$this->point);
     $this->point += strlen($component)+strlen($delimiter);
     return new static($component);
   }
-
 }

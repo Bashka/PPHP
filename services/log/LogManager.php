@@ -13,7 +13,11 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    */
   const WARNING = 'Warning';
   /**
-   * Журнализация ошибок, предупреждений и информационных сообщений.
+   * Журнализация ошибок, предупреждений и уведомлений.
+   */
+  const NOTICE = 'Notice';
+  /**
+   * Журнализация ошибок, предупреждений, уведомлений и информационных сообщений.
    */
   const INFO = 'Info';
 
@@ -63,7 +67,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     if(!is_string($type)){
       throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $type);
     }
-    if($type != self::ERROR && $type != self::WARNING && $type != self::INFO){
+    if($type != self::ERROR && $type != self::WARNING && $type != self::NOTICE && $type != self::INFO){
       throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('Недопустимое значение аргумента.');
     }
 
@@ -87,7 +91,9 @@ use \PPHP\tools\patterns\singleton\TSingleton;
   protected function getLog(){
     if(empty($this->writer)){
       $this->writer = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/services/log/log.txt');
+      $lengthWriter = $this->writer->getSize();
       $this->writer = $this->writer->getWriter();
+      $this->writer->setPosition($lengthWriter);
     }
     return $this->writer;
   }
@@ -98,13 +104,17 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * @return boolean true - если сообщение успешно записано, иначе - false.
    */
   public function setMessage(Message $message){
-    if($this->type == self::WARNING && $message->getType() == self::INFO){
+    $messType = $message->getType();
+    if($this->type == self::ERROR && $messType != self::ERROR){
       return false;
     }
-    if($this->type == self::ERROR && $message->getType() != self::ERROR){
+    elseif($this->type == self::WARNING && ($messType != self::ERROR || $messType != self::WARNING)){
       return false;
     }
-    $this->getLog()->write($message->serialize());
+    elseif($this->type == self::NOTICE && $messType == self::INFO){
+      return false;
+    }
+    $this->getLog()->write($message->interpretation());
     return true;
   }
 }

@@ -17,6 +17,9 @@ class InvalidArgumentException extends LogicException{
     if(is_null($expectedType) && is_null($actualData)){
       parent::__construct('Недопустимое значение аргумента.', $code, $previous);
     }
+    elseif($expectedType !== null && $actualData === null){
+      parent::__construct($expectedType, $code, $previous);
+    }
     else{
       parent::__construct('Неверный тип аргумента, ожидается '.$expectedType.' вместо '.gettype($actualData).'.', $code, $previous);
     }

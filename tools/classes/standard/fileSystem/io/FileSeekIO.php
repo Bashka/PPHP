@@ -11,7 +11,7 @@ trait FileSeekIO{
    * @return boolean true - если позиция установлена, иначе - false.
    */
   public function setPosition($position){
-    return (boolean) (fseek($this->descriptor, $position) + 1);
+    return (boolean) (fseek($this->resource, $position) + 1);
   }
 
   /**
@@ -20,6 +20,6 @@ trait FileSeekIO{
    * @return integer
    */
   public function getPosition(){
-    return ftell($this->descriptor);
+    return ftell($this->resource);
   }
 }

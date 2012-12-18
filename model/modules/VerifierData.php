@@ -13,7 +13,10 @@ class VerifierData{
    */
   public static function verifyArgs(\PPHP\tools\patterns\metadata\reflection\ReflectionMethod $method, array &$args){
     $i = 0;
-    foreach($args as &$argVal){
+    foreach($args as $k => &$argVal){
+      if($argVal === ''){
+        unset($args[$k]);
+      }
       try{
         $verifyClass = $method->getParameter($i++)->getClass();
       }

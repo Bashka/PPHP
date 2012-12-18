@@ -4,7 +4,7 @@ namespace PPHP\services\log;
 /**
  * Представление сообщения журнала в системе.
  */
-class Message{
+class Message implements \PPHP\tools\patterns\interpreter\Interpreter{
   /**
    * Содержание сообщения.
    * @var string
@@ -37,6 +37,17 @@ class Message{
   }
 
   /**
+   * Метод формирует сообщений журнала типа Notice.
+   * @static
+   * @param string $content Содержание сообщения.
+   * @param \Exception|null $exception Исклюлчение - основание.
+   * @return Message
+   */
+  public static function createNotice($content, \Exception $exception=null){
+    return new static($content, LogManager::NOTICE);
+  }
+
+  /**
    * Метод формирует сообщений журнала типа Warning.
    * @static
    * @param string $content Содержание сообщения.
@@ -54,7 +65,7 @@ class Message{
    * @param \Exception $exception Исклюлчение - основание.
    * @return Message
    */
-  public static function createError($content, \Exception $exception){
+  public static function createError($content, \Exception $exception=null){
     return new static($content, LogManager::ERROR, $exception);
   }
 
@@ -99,14 +110,16 @@ class Message{
   }
 
   /**
-   * Метод формирует строку сообщения для журнализации.
-   * @return string
+   * Метод возвращает строку, полученную при интерпретации объекта.
+   * @param null|mixed $driver[optional] Данные, позволяющие изменить логику интерпретации объекта.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @return string Результат интерпретации.
    */
-  public function serialize(){
-    $result = $this->type.'['.$this->date.']: '.$this->content;
+  public function interpretation($driver = null){
+    $result = strtoupper($this->type).'['.$this->date.']: '.$this->content;
     if(!empty($this->exception)){
       $result .= get_class($this->exception).'['.$this->exception->getFile().' - '.$this->exception->getLine().']: '.$this->exception->getMessage()."\n";
     }
-    return $result;
+    return $result.';'.PHP_EOL;
   }
 }

@@ -27,7 +27,7 @@ class FileReaderTest extends \PHPUnit_Framework_TestCase{
   public static function setUpBeforeClass(){
     fclose(fopen(self::testFileName, 'a+'));
     self::$descriptor = fopen(self::testFileName, 'r+');
-    fwrite(self::$descriptor, "First test line\nSecond test line\n");
+    fwrite(self::$descriptor, 'First test line'.PHP_EOL.'Second test line'.PHP_EOL);
   }
 
   public static function tearDownAfterClass(){
@@ -55,7 +55,8 @@ class FileReaderTest extends \PHPUnit_Framework_TestCase{
    * @covers PPHP\tools\classes\standard\fileSystem\io\FileReader::read
    */
   public function testReadForEndFile(){
-    for($i = 33; $i--;){
+    $length = 31 + 2 * strlen(PHP_EOL);
+    for($i = $length; $i--;){
       $this->object->read();
     }
     $this->assertFalse($this->object->read());
@@ -73,7 +74,8 @@ class FileReaderTest extends \PHPUnit_Framework_TestCase{
    * @covers PPHP\tools\classes\standard\fileSystem\io\FileReader::readLine
    */
   public function testReadLineForEndFile(){
-    for($i = 33; $i--;){
+    $length = 31 + 2 * strlen(PHP_EOL);
+    for($i = $length; $i--;){
       $this->object->read();
     }
     $this->assertFalse($this->object->readLine());
@@ -92,14 +94,15 @@ class FileReaderTest extends \PHPUnit_Framework_TestCase{
    */
   public function testReadAll(){
     $this->object->read();
-    $this->assertEquals("First test line\nSecond test line\n", $this->object->readAll());
+    $this->assertEquals('irst test line'.PHP_EOL.'Second test line'.PHP_EOL, $this->object->readAll());
   }
 
   /**
    * @covers PPHP\tools\classes\standard\fileSystem\io\FileReader::readSet
    */
   public function testReadSetForEndFile(){
-    for($i = 33; $i--;){
+    $length = 31 + 2 * strlen(PHP_EOL);
+    for($i = $length; $i--;){
       $this->object->read();
     }
     $this->assertEquals('', $this->object->readSet(5));
