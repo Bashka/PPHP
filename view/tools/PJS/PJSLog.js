@@ -91,7 +91,8 @@ PJS.log = function(){
     if(e.code !== undefined){
       result += ' Code: ' + e.code + "<br />";
     }
-    result += ' File: ' + e.file + "<br />" + ' Line: ' + e.line + "<br /><br />";
+    result += ' File: ' + e.file + "<br />" + ' Line: ' + e.line + "<br />";
+    result += ' Buffer: ' + e.buffer + "<br /><br />";
     return result;
   };
 

@@ -30,7 +30,7 @@ class Request extends Message{
   /**
    * Метод восстанавливает объект из строки.
    * @param string $string Исходная строка.
-   * @param null|mixed $driver[optional] Данные для восстановления.
+   * @param null|mixed $driver[optional] Данные для восстановления. Данный метод принимает символ конца строки для парсинга запроса.
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты строки.
    * @return mixed Результирующий объект.
    */
@@ -40,7 +40,7 @@ class Request extends Message{
     }
     $string = new \PPHP\tools\classes\standard\baseType\String($string);
 
-    $generalHeader = $string->nextComponent(PHP_EOL);
+    $generalHeader = $string->nextComponent($driver);
     if($generalHeader === false){
       throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует стартовая строка запроса.');
     }
@@ -53,11 +53,11 @@ class Request extends Message{
       throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует данные о URI запроса.');
     }
 
-    $header = $string->nextComponent(PHP_EOL.PHP_EOL);
+    $header = $string->nextComponent($driver.$driver);
     if($header === false){
       throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует заголовок запроса.');
     }
-    $header = Header::reestablish($header->getVal());
+    $header = Header::reestablish($header->getVal(), $driver);
     if(!$header->hasParameter('Host')){
       throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует адрес узла запроса.');
     }
@@ -104,12 +104,12 @@ class Request extends Message{
 
   /**
    * Метод возвращает строку, полученную при интерпретации объекта.
-   * @param null|mixed $driver[optional] Данные, позволяющие изменить логику интерпретации объекта.
+   * @param null|mixed $driver[optional] Данные, позволяющие изменить логику интерпретации объекта. Данный метод принимает символ конца строки для сериализации запроса.
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){
     $generalHeader = $this->method . ' ' . $this->URI . ' HTTP/1.1';
-    return $generalHeader . PHP_EOL . $this->header->interpretation() . PHP_EOL . $this->body;
+    return $generalHeader . $driver . $this->header->interpretation($driver) . $driver . $this->body;
 
   }
 

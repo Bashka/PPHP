@@ -1,6 +1,5 @@
 <?php
 namespace PPHP\model\modules;
-
 spl_autoload_register(function($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
@@ -9,7 +8,9 @@ register_shutdown_function(function (){
   $error = error_get_last();
   // Обработка ошибки
   if($error){
+    $buffer = ob_get_contents();
     ob_end_clean();
+    header('HTTP/1.1 200 OK');
     $log = \PPHP\services\log\LogManager::getInstance();
     // Фатальные ошибки
     if($error['type'] == E_CORE_ERROR || $error['type'] == E_ERROR || $error['type'] == E_PARSE || $error['type'] == E_USER_ERROR){
@@ -30,6 +31,7 @@ register_shutdown_function(function (){
       $send->exception->message = $error['message'];
       $send->exception->file = $error['file'];
       $send->exception->line = $error['line'];
+      $send->exception->buffer = $buffer;
 
       $viewProvider = \PPHP\services\view\ViewProvider::getInstance();
       $viewProvider->sendMessage($send);

@@ -60,7 +60,7 @@ class InStream extends \PPHP\tools\patterns\io\InStream implements \PPHP\tools\p
    * @return string|boolean Возвращает текущий байт из потока или false, если поток закончет.
    */
   public function read(){
-    socket_set_option($this->resource, SOL_SOCKET, SO_RCVTIMEO, ['sec' => $this->readTimeout, 'usec' => -1]);
+    socket_set_option($this->resource, SOL_SOCKET, SO_RCVTIMEO, ['sec' => $this->readTimeout, 'usec' => 1]);
 
     $char = socket_read($this->resource, 1);
     socket_set_block($this->resource);

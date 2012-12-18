@@ -21,7 +21,7 @@ class Header implements \PPHP\tools\patterns\interpreter\Interpreter, \PPHP\tool
    * @return mixed Результирующий объект.
    */
   public static function reestablish($string, $driver = null){
-    $string = explode(PHP_EOL, $string);
+    $string = explode($driver, $string);
     $resultObj = new static;
     foreach($string as $parameter){
       if($parameter !== ''){
@@ -65,11 +65,11 @@ class Header implements \PPHP\tools\patterns\interpreter\Interpreter, \PPHP\tool
    */
   public function interpretation($driver = null){
     if(count($this->parameters) == 0){
-      return PHP_EOL;
+      return $driver;
     }
     $result = '';
     foreach($this->parameters as $parameter){
-      $result .= $parameter->interpretation().PHP_EOL;
+      $result .= $parameter->interpretation().$driver;
     }
     return $result;
   }

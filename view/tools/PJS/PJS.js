@@ -77,7 +77,7 @@ var PJS = function(){
         success :wrapForQuery(callback, error, context),
         error   :function(a){
           PJS.log.addException({
-            type   :'QueryError',
+            type   :'QueryError ['+ a.status+':'+ a.statusText+']',
             message:'Ошибка парсинга ответа. <br />' + a.responseText,
             code   :1,
             file   :'undefined',

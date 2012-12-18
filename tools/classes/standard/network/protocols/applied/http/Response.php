@@ -21,7 +21,7 @@ class Response extends Message{
   /**
    * Метод восстанавливает объект из строки.
    * @param string $string Исходная строка.
-   * @param null|mixed $driver[optional] Данные для восстановления.
+   * @param null|mixed $driver[optional] Данные для восстановления. Данный метод принимает символ конца строки для парсинга ответа.
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты строки.
    * @return mixed Результирующий объект.
    */
@@ -31,7 +31,7 @@ class Response extends Message{
     }
     $string = new \PPHP\tools\classes\standard\baseType\String($string);
 
-    $generalHeader = $string->nextComponent(PHP_EOL);
+    $generalHeader = $string->nextComponent($driver);
     if($generalHeader === false){
       throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует стартовая строка ответа.');
     }
@@ -45,16 +45,16 @@ class Response extends Message{
       throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует данные о сообщении ответа.');
     }
 
-    $header = $string->nextComponent(PHP_EOL.PHP_EOL);
+    $header = $string->nextComponent($driver.$driver);
     if($header === false){
-      if($string->sub()->getVal() == PHP_EOL){
+      if($string->sub()->getVal() == $driver){
         $header = new \PPHP\tools\classes\standard\baseType\String('');
       }
       else{
         throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует заголовок запроса.');
       }
     }
-    $header = Header::reestablish($header->getVal());
+    $header = Header::reestablish($header->getVal(), $driver);
 
     if($header->hasParameter('Content-Length')){
       $body = $string->subByte(null, (int)$header->getParameter('Content-Length')->getValue())->getVal();
@@ -77,13 +77,13 @@ class Response extends Message{
 
   /**
    * Метод возвращает строку, полученную при интерпретации объекта.
-   * @param null|mixed $driver[optional] Данные, позволяющие изменить логику интерпретации объекта.
+   * @param null|mixed $driver[optional] Данные, позволяющие изменить логику интерпретации объекта. Данный метод принимает символ конца строки для сериализации ответа.
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){
     $generalHeader = 'HTTP/1.1 '.$this->code.' '.$this->message;
-    return $generalHeader . PHP_EOL . $this->header->interpretation() . PHP_EOL . $this->body;
+    return $generalHeader . $driver . $this->header->interpretation($driver) . $driver . $this->body;
   }
 
   public function getCode(){
