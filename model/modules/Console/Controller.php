@@ -9,6 +9,7 @@ namespace PPHP\model\modules\Console;
 class Controller extends \PPHP\model\classes\ModuleController{
   /**
    * Метод тестирует механизмы вызова модулей.
+   * @param mixed ... Аргументы для тестирования ввода/вывода.
    * @return string
    */
   public function test(){

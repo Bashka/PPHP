@@ -4,13 +4,50 @@ namespace PPHP\model\modules;
 spl_autoload_register(function($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
-set_exception_handler(function($exc){
-  $viewProvider = \PPHP\services\view\ViewProvider::getInstance();
-  $send = new \stdClass();
-  $send->exception = $exc;
-  $viewProvider->sendMessage($send);
-  exit(1);
+ob_start();
+register_shutdown_function(function (){
+  $error = error_get_last();
+  // Обработка ошибки
+  if($error){
+    ob_end_clean();
+    $log = \PPHP\services\log\LogManager::getInstance();
+    // Фатальные ошибки
+    if($error['type'] == E_CORE_ERROR || $error['type'] == E_ERROR || $error['type'] == E_PARSE || $error['type'] == E_USER_ERROR){
+      $log->setMessage(\PPHP\services\log\Message::createError($error['message'] . ' - ' . $error['file'] . ':' . $error['line']));
+
+      // Обработка исключений
+      $send = new \stdClass();
+      $send->exception = new \stdClass();
+      $send->exception->type = 1;
+      if(strpos($error['message'], 'Uncaught exception') === 0){
+        $className = strpos($error['message'], "'");
+        $className = substr($error['message'], $className + 1, strpos($error['message'], "'", $className + 1) - $className - 1);
+        $send->exception->class = $className;
+      }
+      else{
+        $send->exception->class = '';
+      }
+      $send->exception->message = $error['message'];
+      $send->exception->file = $error['file'];
+      $send->exception->line = $error['line'];
+
+      $viewProvider = \PPHP\services\view\ViewProvider::getInstance();
+      $viewProvider->sendMessage($send);
+    }
+    // Предупреждения
+    elseif($error['type'] == E_CORE_WARNING || $error['type'] == E_WARNING || $error['type'] == E_USER_WARNING || $error['type'] == E_DEPRECATED || $error['type'] == E_USER_DEPRECATED){
+      $log->setMessage(\PPHP\services\log\Message::createWarning($error['message'] . ' - ' . $error['file'] . ':' . $error['line']));
+    }
+    // Уведомления
+    elseif($error['type'] == E_NOTICE || $error['type'] == E_USER_NOTICE || $error['type'] == E_STRICT){
+      $log->setMessage(\PPHP\services\log\Message::createNotice($error['message'] . ' - ' . $error['file'] . ':' . $error['line']));
+    }
+  }
+  else{
+    ob_end_flush();
+  }
 });
+
 
 /**
  * Класс является центральным контроллером системы и отвечает за вызов и передачу модулю сообщений вида, а так же за возврат ему ответа модуля.
@@ -30,48 +67,34 @@ class CentralController{
   /**
    * Данный метод отвечает за передачу модулю сообщения от слоя представления и возврат ответа.
    * @static
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\LogicException Выбрасывается в случае, если требуемый модуль не зарегистрирован в системе.
+   * @throws AccessException Выбрасывается в случае, если доступ к данному методу модуля запрещен.
    */
   public static function main(){
     $viewProvider = \PPHP\services\view\ViewProvider::getInstance();
     $viewMessage = $viewProvider->getMessage();
     $module = $viewMessage['module'];
     $method = $viewMessage['active'];
-    try{
-      $controller = self::getControllerModule($module);
-    }
-    catch(\PPHP\services\modules\ModuleNotFoundException $exc){
-      $send = new \stdClass();
-      $send->exception = $exc;
-      $viewProvider->sendMessage($send);
-      exit(1);
-    }
+    $controller = self::getControllerModule($module);
 
     $send = new \stdClass();
     if(!method_exists($controller, $method)){
-      $send->exception = new \PPHP\tools\classes\standard\baseType\exceptions\LogicException('Запрашиваемый интерфейс '.$method.' модуля '.$module.' отсутствует.');
+      $send->exception = new \PPHP\tools\classes\standard\baseType\exceptions\LogicException('Запрашиваемый интерфейс ' . $method . ' модуля ' . $module . ' отсутствует.');
     }
     else{
       // Проверка прав доступа к методу модуля
       if(AccessManager::getInstance()->isResolved($module, $method)){
-        try{
-          // Верификация данных
-          if(isset($viewMessage['message'])){
-            VerifierData::verifyArgs($controller->getReflectionMethod($method), $viewMessage['message']);
-          }
-          else{
-            $viewMessage['message'] = [];
-          }
+        // Верификация данных
+        if(isset($viewMessage['message'])){
+          VerifierData::verifyArgs($controller->getReflectionMethod($method), $viewMessage['message']);
+        }
+        else{
+          $viewMessage['message'] = [];
+        }
 
-          $send->answer = call_user_func_array([$controller, $method], $viewMessage['message']);
-        }
-        catch(\Exception $e){
-          \PPHP\services\log\LogManager::getInstance()->setMessage(\PPHP\services\log\Message::createError($e->getMessage(), $e));
-          $send->exception = $e;
-        }
+        $send->answer = call_user_func_array([$controller, $method], $viewMessage['message']);
       }
       else{
-        $send->exception = new AccessException('Доступ запрещен.');
+        throw new AccessException('Доступ запрещен.');
       }
     }
     $viewProvider->sendMessage($send);

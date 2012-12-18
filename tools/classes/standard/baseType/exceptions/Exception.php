@@ -17,6 +17,6 @@ class Exception extends \Exception implements \JsonSerializable{
       $trace[$k]->file = $exc['file'];
       $trace[$k]->line = $exc['line'];
     }
-    return ['type' => get_called_class(), 'message' => $this->message, 'code' => $this->code, 'file' => $this->file, 'line' => $this->line, 'trace' => $trace];
+    return ['type' => 1, 'class' => get_called_class(), 'message' => $this->message, 'code' => $this->code, 'file' => $this->file, 'line' => $this->line, 'trace' => $trace];
   }
 }
