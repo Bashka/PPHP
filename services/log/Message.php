@@ -75,7 +75,7 @@ class Message implements \PPHP\tools\patterns\interpreter\Interpreter{
    * @param \Exception $exception Исклюлчение - основание.
    */
   private function __construct($content, $type=LogManager::ERROR, \Exception $exception=null){
-    $this->date = date('d.m.Y', time());
+    $this->date = date('d.m.Y H:i:s', time());
     $this->content = $content;
     $this->type = $type;
     $this->exception = $exception;
