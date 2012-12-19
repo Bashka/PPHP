@@ -1,7 +1,7 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\baseType;
 use stdClass;
-
+$_SERVER['DOCUMENT_ROOT'] = 'C:/WebServers/home/Delphinum/www';
 spl_autoload_register(function($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
@@ -93,6 +93,9 @@ class StringTest extends \PHPUnit_Framework_TestCase{
     $this->assertEquals('est', $this->object->sub(1,3)->getVal());
     $this->assertEquals('string тестовая строка +/\\#`', $this->object->sub(5)->getVal());
     $this->assertEquals('string те', $this->object->sub(5,9)->getVal());
+    $this->object->setPoint(2);
+    $this->assertEquals('st', $this->object->sub(null,2)->getVal());
+    $this->assertEquals('Te', $this->object->sub(null,-3)->getVal());
   }
 
   /**
@@ -217,5 +220,23 @@ class StringTest extends \PHPUnit_Framework_TestCase{
     $this->assertEquals('string', $this->object->nextComponent(' ')->getVal());
     $this->assertEquals('тест', $this->object->nextComponent('о')->getVal());
     $this->assertEquals('вая строка ', $this->object->nextComponent('+')->getVal());
+  }
+
+  /**
+   * @covers PPHP\tools\classes\standard\baseType\String::current
+   * @covers PPHP\tools\classes\standard\baseType\String::next
+   * @covers PPHP\tools\classes\standard\baseType\String::key
+   * @covers PPHP\tools\classes\standard\baseType\String::valid
+   * @covers PPHP\tools\classes\standard\baseType\String::rewind
+   */
+  public function testIterator(){
+    $key = '';
+    $val = '';
+    foreach($this->object as $k => $v){
+      $key .= $k;
+      $val .= $v;
+    }
+    $this->assertEquals('0123456789101112131415161718192021222324252627282930313233', $key);
+    $this->assertEquals('Test string тестовая строка +/\\#`', $val);
   }
 }

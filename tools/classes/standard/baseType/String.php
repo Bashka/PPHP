@@ -6,7 +6,7 @@ namespace PPHP\tools\classes\standard\baseType;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType
  */
-class String extends wrapper implements \ArrayAccess{
+class String extends wrapper implements \ArrayAccess, \Iterator{
   /**
    * Тип данной обертки.
    * @var string
@@ -15,6 +15,8 @@ class String extends wrapper implements \ArrayAccess{
 
   /**
    * Внутренний указатель компонента.
+   * Указатель может быть задан программно или изменяться автоматически при вызове некоторых методов.
+   * Указатель определяет текущий байт строки.
    * @var integer
    */
   protected $point = 0;
@@ -100,6 +102,74 @@ class String extends wrapper implements \ArrayAccess{
   }
 
   /**
+   * (PHP 5 &gt;= 5.0.0)<br/>
+   * Return the current element
+   * @link http://php.net/manual/en/iterator.current.php
+   * @return mixed Can return any type.
+   */
+  public function current(){
+    return iconv_substr($this->val, $this->point, 1, 'UTF-8');
+  }
+
+  /**
+   * (PHP 5 &gt;= 5.0.0)<br/>
+   * Move forward to next element
+   * @link http://php.net/manual/en/iterator.next.php
+   * @return void Any returned value is ignored.
+   */
+  public function next(){
+    $this->point++;
+  }
+
+  /**
+   * Сдвигает внутренний указатель на одну позицию назад.
+   * @return bool
+   */
+  public function prev(){
+    if($this->point > 0){
+      $this->point--;
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+
+  /**
+   * (PHP 5 &gt;= 5.0.0)<br/>
+   * Return the key of the current element
+   * @link http://php.net/manual/en/iterator.key.php
+   * @return scalar scalar on success, or null on failure.
+   */
+  public function key(){
+    return $this->point;
+  }
+
+  /**
+   * (PHP 5 &gt;= 5.0.0)<br/>
+   * Checks if current position is valid
+   * @link http://php.net/manual/en/iterator.valid.php
+   * @return boolean The return value will be casted to boolean and then evaluated.
+   * Returns true on success or false on failure.
+   */
+  public function valid(){
+    if($this->point < 0 || $this->point > $this->count()){
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * (PHP 5 &gt;= 5.0.0)<br/>
+   * Rewind the Iterator to the first element
+   * @link http://php.net/manual/en/iterator.rewind.php
+   * @return void Any returned value is ignored.
+   */
+  public function rewind(){
+    $this->point = 0;
+  }
+
+  /**
    * Множество символов, используемых для формирования строк.
    * @var string[]
    */
@@ -150,13 +220,21 @@ class String extends wrapper implements \ArrayAccess{
 
   /**
    * Метод возвращает подстроку строки.
-   * @param integer $start Позиция начального символа.
-   * @param integer|null $length Число отбираемых символов или null - если необходимо выбрать все символы до конца строки.
+   * @param integer $start[optional] Позиция начального символа. Если параметр не задан, используется позиция, на которую ссылается внутренний указатель.
+   * @param integer $length[optional] Число отбираемых символов справа от начального символа если значение положительное, и слева если отрицательное. Если параметр не задан, выбирается все символы до конца строки.
    * @return \PPHP\tools\classes\standard\baseType\String Результирующая подстрока.
    */
   public function sub($start = null, $length = null){
     $start = ($start === null)? $this->point : $start;
     $length = ($length === null)? $this->count() : $length;
+    if($length < 0){
+      $start = $start+$length;
+      if($start < 0){
+        $length = $length+(-$start);
+        $start = 0;
+      }
+      $length = -$length;
+    }
     return new static(iconv_substr($this->val, $start, $length, 'UTF-8'));
   }
 
@@ -169,6 +247,14 @@ class String extends wrapper implements \ArrayAccess{
   public function subByte($start = null, $length = null){
     $start = ($start === null)? $this->point : $start;
     $length = ($length === null)? $this->count() : $length;
+    if($length < 0){
+      $start = $start+$length;
+      if($start < 0){
+        $length = $length+(-$start);
+        $start = 0;
+      }
+      $length = -$length;
+    }
     return new static(substr($this->val, $start, $length));
   }
 
@@ -352,7 +438,8 @@ class String extends wrapper implements \ArrayAccess{
   }
 
   /**
-   * @param integer $point
+   * Метод изменяет позицию внутреннего указателя строки на заданную.
+   * @param integer $point Новая позиция внутреннего указателя строки.
    * @throws exceptions\LogicException Выбрасывается в случае, если указанного символа не существует.
    */
   public function setPoint($point){
@@ -363,7 +450,8 @@ class String extends wrapper implements \ArrayAccess{
   }
 
   /**
-   * @return integer
+   * Метод возвращает текущую позицию внутреннего указателя строки.
+   * @return integer Текущая позиция внутреннего указателя строки.
    */
   public function getPoint(){
     return $this->point;

@@ -2,14 +2,39 @@
  * Ядро системы управления пользовательским интерфейсом.
  */
 var PJS = function(){
+  var loading = (function(){
+    var countQuery = 0,
+      loadingImg = $('<img src="/PPHP/view/tools/PJS/loading.gif" alt="Loading" style="position: absolute; top: 10px; left: 10px">');
+
+    loadingImg.hide();
+
+    return {
+      load: function(){
+        if(countQuery == 0){
+          loadingImg.show();
+          $('body').append(loadingImg);
+        }
+        countQuery++;
+      },
+
+      complete: function(){
+        countQuery--;
+        if(countQuery == 0){
+          loadingImg.hide();
+        }
+      }
+    }
+  })();
+
   /*
    * Метод оборачивает заданную функцию обратного вызова, используемую при выполнении метода query, в анонимную функцию, служащую для распаковки ответа модуля.
    * @param function callback Упаковываемая функция.
    */
   var wrapForQuery = function(callback, error, context){
     var wrap = function(data, code){
+      loading.complete();
       if(data.answer !== undefined){
-        var context = arguments.callee.context || this
+        var context = arguments.callee.context || this;
         arguments.callee.callback.apply(context, [data.answer]);
       }
       else if(data.exception !== undefined){
@@ -65,6 +90,8 @@ var PJS = function(){
         }
       }
 
+      loading.load();
+
       jQuery.ajax({
         url     :'/PPHP/model/modules/CentralController.php',
         type    :((data === undefined)? 'GET' : 'POST'),
@@ -76,6 +103,7 @@ var PJS = function(){
         dataType:'json',
         success :wrapForQuery(callback, error, context),
         error   :function(a){
+          loading.complete();
           PJS.log.addException({
             type   :'QueryError ['+ a.status+':'+ a.statusText+']',
             message:'Ошибка парсинга ответа. <br />' + a.responseText,
