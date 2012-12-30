@@ -3,50 +3,53 @@
  */
 YUI().use('node', 'io-base', 'json-parse', 'json-stringify', function(Y){
   window.PJS = window.PJS || {};
-window.PJS.core = function(){
-  var loading = (function(){
-    var countQuery = 0,
-      loadingImg = Y.Node.create('<img src="/PPHP/view/tools/PJS/loading.gif" alt="Loading" style="position: absolute; top: 10px; left: 10px">');
-    loadingImg.hide();
+  window.PJS.core = function(){
+    var loading = (function(){
+      var countQuery = 0,
+        loadingImg = Y.Node.create('<img src="/PPHP/view/tools/PJS/loading.gif" alt="Loading" style="position: absolute; top: 10px; left: 10px">');
+      loadingImg.hide();
 
-    return {
-      load:function(){
-        if(countQuery == 0){
-          loadingImg.show();
-          Y.one('body').append(loadingImg);
-        }
-        countQuery++;
-      },
+      return {
+        load:function(){
+          if(countQuery == 0){
+            loadingImg.show();
+            Y.one('body').append(loadingImg);
+          }
+          countQuery++;
+        },
 
-      complete:function(){
-        countQuery--;
-        if(countQuery == 0){
-          loadingImg.hide();
+        complete:function(){
+          countQuery--;
+          if(countQuery == 0){
+            loadingImg.hide();
+          }
         }
       }
-    }
-  })();
+    })();
 
-  return {
-    /*
-     * Контейнер, содержащий контроллеры используемых в системе экранов.
-     * @var Object
-     */
-    controllers:{},
+    return {
+      /*
+       * Контейнер, содержащий контроллеры используемых в системе экранов.
+       * @var Object
+       */
+      controllers:{},
 
-    /*
-     * Метод выполняет запрос к заданному модулю и передает ему данные.
-     * @param {String} moduleName Имя запрашиваемого модуля.
-     * @param {String} active Имя запрашиваемого метода модуля.
-     * @param {Object} [options] Конфигурация запроса.
-     */
-    query:function(moduleName, active, options){
+      /*
+       * Метод выполняет запрос к заданному модулю и передает ему данные.
+       * @param {String} moduleName Имя запрашиваемого модуля.
+       * @param {String} active Имя запрашиваемого метода модуля.
+       * @param {Object} [options] Конфигурация запроса.
+       */
+      query:function(moduleName, active, options){
         var context = options.context || this,
-        callback = options.callback || function(){},
-        error = options.error || function(){},
-        data = options.data;
+          callback = options.callback || function(){
+          },
+          error = options.error || function(){
+          },
+          data = options.data,
+          timeout = options.timeout || 2000;
 
-      loading.load();
+        loading.load();
 
         var body = {
           module:moduleName,
@@ -58,7 +61,7 @@ window.PJS.core = function(){
         Y.io('/PPHP/model/modules/CentralController.php', {
           method:((data === undefined)? 'GET' : 'POST'),
           data:body,
-          timeout:2000,
+          timeout:timeout,
           on:{
             success:function(code, xhr){
               loading.complete();
@@ -86,22 +89,22 @@ window.PJS.core = function(){
             }
           }
         });
-    },
+      },
 
-    /*
-     * Метод предоставляет более удобный и короткий доступ к локализатору сообщений.
-     * @param object controller Контроллер экрана, сообщение которого локализуется.
-     * @param string message Локализуемое сообщение.
-     * @return string Локализованное сообщение или начальное сообщение, если локализация невозможна.
-     */
-    locMess:function(controller, message){
-      if(this.localisation){
-        return this.localisation.localiseMessage(controller.module, controller.screen, message)
-      }
-      else{
-        return message;
+      /*
+       * Метод предоставляет более удобный и короткий доступ к локализатору сообщений.
+       * @param object controller Контроллер экрана, сообщение которого локализуется.
+       * @param string message Локализуемое сообщение.
+       * @return string Локализованное сообщение или начальное сообщение, если локализация невозможна.
+       */
+      locMess:function(controller, message){
+        if(this.localisation){
+          return this.localisation.localiseMessage(controller.module, controller.screen, message)
+        }
+        else{
+          return message;
+        }
       }
     }
-  }
-}();
+  }();
 });
