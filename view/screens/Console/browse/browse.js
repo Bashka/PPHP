@@ -354,7 +354,7 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
           PJS.core.query(command.module, command.action,
             {
               data:command.args,
-              timeout:10000,
+              timeout:arg.DOM.received.timeoutQueryInput.getDOMNode().value*1000, // Приведение микросекунд к секундам
               callback:function(answer){
                 if(typeof answer == 'object'){
                   var objInfo = '{';

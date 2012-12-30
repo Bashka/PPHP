@@ -1,60 +1,75 @@
-window.PJS = window.PJS || {};
-/*
- * Локализатор сообщений.
- */
-window.PJS.localisation = function(){
+YUI().use('node', 'io-base', 'json-parse', 'json-stringify', function(Y){
+  window.PJS = window.PJS || {};
   /*
-   * Буфер файлов локализации.
-   * @var array
+   * Объектное представление локализатора сообщений уровня представления.
+   * @public
+   * @type {Object}
    */
-  var localiseFiles = [],
-  /*
-   * Текущая локализация.
-   * @var string
-   */
-  localise;
-
-  return {
+  window.PJS.localisation = (function(){
     /*
-     * Метод позволяет локализовать переданное сообщение.
-     * @param string module Модуль, к которому относится сообщение.
-     * @param string screen Экран, к которому относится сообщение.
-     * @param string message Локализуемое сообщение.
-     * @return string Локализованное сообщение или начальное сообщение, если локализация невозможна.
+     * Буфер файлов локализации.
+     * @private
+     * @type {String[]}
      */
-    localiseMessage:function(module, screen, message){
-      if(!localiseFiles[module]){
-        localiseFiles[module] = [];
-      }
-      if(!localiseFiles[module][screen]){
-        localiseFiles[module][screen] = [];
-        $.ajax({
-          url     :'/PPHP/view/screens/' + module + '/' + screen + '/' + screen + '_' + localise + '.localise',
-          type    :'GET',
-          dataType:'text',
-          async   :false,
-          success :function(data){
-            var rows = data.split("\n");
-            for(var i in rows){
-              var element = rows[i].split('=');
-              localiseFiles[module][screen][element[0]] = element[1];
+    var localiseFiles = [],
+    /*
+     * Текущая локализация.
+     * @private
+     * @type {String}
+     */
+      localise;
+
+    return {
+      /*
+       * Метод позволяет локализовать переданное сообщение.
+       * @public
+       * @function
+       * @param {String} module Модуль, к которому относится сообщение.
+       * @param {String} screen Экран, к которому относится сообщение.
+       * @param {String} message Локализуемое сообщение.
+       * @return {String} Локализованное сообщение или начальное сообщение, если локализация невозможна.
+       */
+      localiseMessage:function(module, screen, message){
+        if(!localiseFiles[module]){
+          localiseFiles[module] = [];
+        }
+        if(!localiseFiles[module][screen]){
+          localiseFiles[module][screen] = [];
+          Y.io('/PPHP/view/screens/' + module + '/' + screen + '/' + screen + '_' + localise + '.localise', {
+            method:'GET',
+            timeout:2000,
+            sync:true,
+            headers:{
+              'Content-Type': 'text/html;charset=utf-8'
+            },
+            on:{
+              success:function(code, xhr){
+                var rows = xhr.responseText.split("\n");
+                for(var i in rows){
+                  var element = rows[i].split('=');
+                  localiseFiles[module][screen][element[0]] = element[1];
+                }
+              }
             }
-          }
-        });
-      }
-      if(localiseFiles[module][screen][message]){
-        return localiseFiles[module][screen][message];
-      }
-      else{
-        return message;
-      }
-    },
+          });
+        }
+        if(localiseFiles[module][screen][message]){
+          return localiseFiles[module][screen][message];
+        }
+        else{
+          return message;
+        }
+      },
 
-    /*
-     * Метод позволяет определить текущую локализацию.
-     */
-    setLanguage:function(lang){
-      localise = lang;
+      /*
+       * Метод позволяет определить текущую локализацию.
+       * @public
+       * @function
+       * @param {String} lang Устанавливая локализация.
+       */
+      setLanguage:function(lang){
+        localise = lang;
+      }
     }
-  }
-}();
+  })();
+});

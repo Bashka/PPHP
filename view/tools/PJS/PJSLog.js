@@ -1,26 +1,37 @@
 YUI().use('node', 'event', function(Y){
   window.PJS = window.PJS || {};
-  window.PJS.log = function(){
-    /*
+  /**
+   * Объектное представление журнала ошибок.
+   * @public
+   * @type {Object}
+   */
+  window.PJS.log = (function(){
+    /**
      * Представление уведомителя.
-     * @var {Node} Node набор из одного элемента.
+     * @private
+     * @type {Node} Узел уведомителя.
      */
     var informant = Y.Node.create('<div style="overflow: auto; color: red; text-align: center; min-width: 20px; min-height: 20px; max-height: 300px; position: fixed; top: 5px; left: 5px; border: 1px solid #000000; border-radius: 5px; background: black">!</div>');
-    /*
+    /**
      * Таймер, отвечающий за скрытие уведомителя.
-     * @var object
+     * @private
+     * @type {Object}
      */
     var timer;
 
-    /*
+    /**
      * Метод позволяет подготовить увидомителя к показу иключения.
+     * @private
+     * @function
      */
     var open = function(){
         informant.setStyle('color', 'white');
       },
 
-    /*
+    /**
      * Метод позволяет вернуть уведомителя в свернутый формат.
+     * @private
+     * @function
      */
       close = function(){
         informant.setHTML('!');
@@ -51,8 +62,10 @@ YUI().use('node', 'event', function(Y){
       }
     });
 
-    /*
+    /**
      * Метод служит для вызова уведомителя на экран с последующим его уходом в случае бездействия.
+     * @private
+     * @function
      */
     var showInformant = function(){
       informant.show();
@@ -64,10 +77,12 @@ YUI().use('node', 'event', function(Y){
       }, 5000)
     };
 
-    /*
+    /**
      * Метод преобразует объект исключения в строку.
-     * @param object e Преобразуемое исключение.
-     * @return string
+     * @private
+     * @function
+     * @param {Object} e Преобразуемое исключение.
+     * @return {String} Строковое представление сообщения журнала.
      */
     var toStringException = function(e){
       var result = '';
@@ -95,15 +110,19 @@ YUI().use('node', 'event', function(Y){
     };
 
     return {
-      /*
+      /**
        * Журнал исключений.
+       * @public
+       * @type {Object[]}
        */
       journal:[],
 
-      /*
+      /**
        * Метод служит для добавления исключения в журнал.
        * Вызов метода всегда сопровождается показом уведомителя.
-       * @param object exc Добавляемое исключение.
+       * @public
+       * @function
+       * @param {Object} exc Добавляемое исключение.
        */
       addException:function(exc){
         exc.time = new Date().toLocaleTimeString();
@@ -111,8 +130,10 @@ YUI().use('node', 'event', function(Y){
         showInformant();
       },
 
-      /*
+      /**
        * Метод преобразует весь журнал в строку.
+       * @public
+       * @function
        */
       toStringJournal:function(){
         var journal = '';
@@ -122,12 +143,15 @@ YUI().use('node', 'event', function(Y){
         return journal;
       },
 
-      /*
+      /**
        * Метод возвращает самое позднее исключение в журнале.
+       * @public
+       * @function
+       * @return {Object} Последнее записаное в журнал исключение.
        */
       getLastException:function(){
         return this.journal[this.journal.length - 1];
       }
     }
-  }();
+  })();
 });

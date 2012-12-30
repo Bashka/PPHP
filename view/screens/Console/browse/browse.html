@@ -28,11 +28,10 @@
         <ul>
             <li><a href="#commands">Commands</a></li>
             <li><a href="#upload">Upload</a></li>
+            <li><a href="#setting">Setting</a></li>
         </ul>
         <div>
-            <div dGet="commandsContainer">
-
-            </div>
+            <div dGet="commandsContainer"></div>
             <div dLoader="uploaderLoader">
                 <div id="selectFiles"></div>
                 <div id="uploadFilesContainer">
@@ -40,6 +39,11 @@
                             class="yui3-button">Upload Files
                     </button>
                 </div>
+            </div>
+            <div>
+                <label>
+                    Timeout query: <input dGet="timeoutQueryInput" type="text" value="10"/>
+                </label>
             </div>
         </div>
     </div>
