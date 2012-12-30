@@ -5,75 +5,35 @@ html {
 
 body {
     padding: 10px;
-}
-
-#consoleBox {
-    font-family: "Courier New";
     color: white;
 }
 
-#consoleScreen {
-    min-height: 20px;
-    height: 320px;
-    width: 100%;
-}
-
-.Console_messageScreen{
-    height: 16px;
-    overflow: auto;
-}
-
-#console input[type=text]{
-    background: #222;
-    color: white;
-    font-family: "Courier New";
-    font-size: 15px;
-
-    margin-top: 10px;
-
+/* inPanel */
+#Console_browse_inPanel input[type=text]{
     border: none;
     border-bottom: 1px solid white;
+    background: none;
+    color: white;
 }
 
-#module{
-    width: 80px
+#Console_browse_inPanel .Console_browse_argInput{
+    width: 100px;
+    margin-right: 5px;
 }
 
-.yui3-aclist-content{
-    background: white;
-    color: #000000;
-    width: 200px;
-    padding: 5px;
+/* outPanel */
+#Console_browse_outPanel{
+    height: 300px;
+    overflow: auto;
+    font-family: "Courier New",monospace;
 }
 
-.yui3-aclist-item-active{
-    border: 1px dotted black;
+#Console_browse_outPanel .Console_browse_command{
+  cursor: pointer;
 }
 
-#action{
-    width: 131px
-}
-
-#argsCommand input[type=text]{
-    width: 9px
-}
-
-#argsCommand input[type=button]{
-    width: 20px;
-    height: 20px;
-    cursor: pointer
-}
-
-#argsCommand{
-    display: inline;
-}
-
-.yui3-tabview-content {
-    width: 100%;
-    float: left;
-    margin-top: 20px;
-}
-
+/* menu */
+/* tab view */
 .yui3-tab {
     border: 1px solid white;
     border-radius: 5px 5px 0 0;
@@ -85,15 +45,6 @@ body {
     height: 2em;
 }
 
-.yui3-tab-selected {
-    background: #858585;
-    height: 2em;
-}
-
-.yui3-tab-label {
-    color: white;
-}
-
 .yui3-tabview-panel {
     border-top: 1px solid white;
     border-radius: 0 10px 0 0;
@@ -102,13 +53,26 @@ body {
     overflow: auto;
 }
 
-#uploadFilesButton {
-    width: 300px;
-    height: 30px;
+.yui3-tabview-content {
+    margin-top: 20px;
 }
 
-#clearConsoleButton {
-    width: 300px;
-    height: 30px;
-    cursor: pointer;
+.yui3-tab-selected {
+    background: #858585;
+    height: 2em;
+}
+
+.yui3-tab-label {
+    color: white;
+}
+/* auto complete */
+.yui3-aclist-content{
+    background: white;
+    color: #000000;
+    width: 200px;
+    padding: 5px;
+}
+
+.yui3-aclist-item-active{
+    border: 1px dotted black;
 }

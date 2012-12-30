@@ -1,23 +1,24 @@
 /*
  * Ядро системы управления пользовательским интерфейсом.
  */
-var PJS = function(){
+YUI().use('node', 'io-base', 'json-parse', 'json-stringify', function(Y){
+  window.PJS = window.PJS || {};
+window.PJS.core = function(){
   var loading = (function(){
     var countQuery = 0,
-      loadingImg = $('<img src="/PPHP/view/tools/PJS/loading.gif" alt="Loading" style="position: absolute; top: 10px; left: 10px">');
-
+      loadingImg = Y.Node.create('<img src="/PPHP/view/tools/PJS/loading.gif" alt="Loading" style="position: absolute; top: 10px; left: 10px">');
     loadingImg.hide();
 
     return {
-      load: function(){
+      load:function(){
         if(countQuery == 0){
           loadingImg.show();
-          $('body').append(loadingImg);
+          Y.one('body').append(loadingImg);
         }
         countQuery++;
       },
 
-      complete: function(){
+      complete:function(){
         countQuery--;
         if(countQuery == 0){
           loadingImg.hide();
@@ -25,28 +26,6 @@ var PJS = function(){
       }
     }
   })();
-
-  /*
-   * Метод оборачивает заданную функцию обратного вызова, используемую при выполнении метода query, в анонимную функцию, служащую для распаковки ответа модуля.
-   * @param function callback Упаковываемая функция.
-   */
-  var wrapForQuery = function(callback, error, context){
-    var wrap = function(data, code){
-      loading.complete();
-      if(data.answer !== undefined){
-        var context = arguments.callee.context || this;
-        arguments.callee.callback.apply(context, [data.answer]);
-      }
-      else if(data.exception !== undefined){
-        PJS.log.addException(data.exception);
-        arguments.callee.error(data.exception);
-      }
-    }
-    wrap.callback = callback;
-    wrap.error = error;
-    wrap.context = context;
-    return wrap;
-  }
 
   return {
     /*
@@ -57,64 +36,56 @@ var PJS = function(){
 
     /*
      * Метод выполняет запрос к заданному модулю и передает ему данные.
-     * @param string moduleName Имя запрашиваемого модуля.
-     * @param string active Имя запрашиваемого метода модуля.
-     * @param Object [optional] data Данные, передаваемые модулю. Если данные не передаются, то в качестве данного аргумента можно передать функцию обратного вызова.
-     * @param function [optional] callback Функция обратного вызова, вызываемая при получении ответа от модуля. Данной функции передается один параметр - ответ модуля.
-     * @param function [optional] error Функция обратного вызова, вызываемая при ошибочном запросе. Данной функции передается три параметра: код ошибки, текстовое представление ошибки и сообщение об ошибке.
-     * @param function [optional] complete Функция обратного вызова, вызываемая при получении ответа от модуля.
-     * @param object [optional] context Контекста вызова функции callback.
+     * @param {String} moduleName Имя запрашиваемого модуля.
+     * @param {String} active Имя запрашиваемого метода модуля.
+     * @param {Object} [options] Конфигурация запроса.
      */
-    query      :function(moduleName, active, data, callback, error, complete, context){
-      if(typeof data == 'function'){
-        if(typeof complete == 'object'){
-          context = complete;
-        }
-        if(typeof error == 'object'){
-          context = error;
-        }
-        if(typeof callback == 'object'){
-          context = callback;
-        }
-        complete = error || function(){};
-        error = callback || function(){};
-        callback = data;
-        data = undefined;
-      }
-      else{
-        callback = callback || function(){
-        }
-        error = error || function(){
-        }
-        complete = complete || function(){
-        }
-      }
+    query:function(moduleName, active, options){
+        var context = options.context || this,
+        callback = options.callback || function(){},
+        error = options.error || function(){},
+        data = options.data;
 
       loading.load();
 
-      jQuery.ajax({
-        url     :'/PPHP/model/modules/CentralController.php',
-        type    :((data === undefined)? 'GET' : 'POST'),
-        data    :{
-          module :moduleName,
-          active :active,
-          message:data
-        },
-        dataType:'json',
-        success :wrapForQuery(callback, error, context),
-        error   :function(a){
-          loading.complete();
-          PJS.log.addException({
-            type   :'QueryError ['+ a.status+':'+ a.statusText+']',
-            message:'Ошибка парсинга ответа. <br />' + a.responseText,
-            code   :1,
-            file   :'undefined',
-            line   :'undefined',
-            trace  :[]
-          });
-        },
-        complete: complete
-      });
+        var body = {
+          module:moduleName,
+          active:active
+        };
+        if(data !== undefined){
+          body.message = Y.JSON.stringify(data);
+        }
+        Y.io('/PPHP/model/modules/CentralController.php', {
+          method:((data === undefined)? 'GET' : 'POST'),
+          data:body,
+          timeout:2000,
+          on:{
+            success:function(code, xhr){
+              loading.complete();
+              if(xhr.responseText != ''){
+                var data = Y.JSON.parse(xhr.responseText);
+                if(data.answer !== undefined){
+                  callback.apply(context, [data.answer]);
+                }
+                else if(data.exception !== undefined){
+                  PJS.log.addException(data.exception);
+                  error.apply(context, [data.exception]);
+                }
+              }
+            },
+            failure:function(code, xhr){
+              loading.complete();
+              PJS.log.addException({
+                type:'QueryError [' + xhr.status + ':' + xhr.statusText + ']',
+                message:'Ошибка парсинга ответа. <br />' + xhr.responseText,
+                code:1,
+                file:'undefined',
+                line:'undefined',
+                trace:[]
+              });
+            }
+          }
+        });
     },
 
     /*
@@ -123,7 +94,7 @@ var PJS = function(){
      * @param string message Локализуемое сообщение.
      * @return string Локализованное сообщение или начальное сообщение, если локализация невозможна.
      */
-    locMess    :function(controller, message){
+    locMess:function(controller, message){
       if(this.localisation){
         return this.localisation.localiseMessage(controller.module, controller.screen, message)
       }
@@ -133,3 +104,4 @@ var PJS = function(){
     }
   }
 }();
+});

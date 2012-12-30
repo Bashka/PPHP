@@ -1,8 +1,8 @@
-var PJS = PJS || {};
+window.PJS = window.PJS || {};
 /*
  * Локализатор сообщений.
  */
-PJS.localisation = function(){
+window.PJS.localisation = function(){
   /*
    * Буфер файлов локализации.
    * @var array

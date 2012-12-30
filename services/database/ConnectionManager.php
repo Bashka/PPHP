@@ -93,8 +93,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * @return \PPHP\tools\classes\standard\storage\database\PDO Соединение с БД.
    */
   public function getNewPDO(){
-    // @TODO: отключить запрет ошибок.
-    return @new \PPHP\tools\classes\standard\storage\database\PDO($this->createDSN(), $this->user, $this->password);
+    return new \PPHP\tools\classes\standard\storage\database\PDO($this->createDSN(), $this->user, $this->password);
   }
 
   /**
@@ -104,8 +103,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    */
   public function getPDO(){
     if(empty($this->PDO)){
-      // @TODO: отключить запрет ошибок. Выскакивает warning с отключением постоянного соединения с СУБД.
-      $this->PDO = @new \PPHP\tools\classes\standard\storage\database\PDO($this->createDSN(), $this->user, $this->password, [\PDO::ATTR_PERSISTENT => true]);
+      $this->PDO = new \PPHP\tools\classes\standard\storage\database\PDO($this->createDSN(), $this->user, $this->password, [\PDO::ATTR_PERSISTENT => true]);
     }
     return $this->PDO;
   }

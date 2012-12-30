@@ -4,19 +4,8 @@ var YUI_config = {
       base: '../../../tools/JQuery/',
       async: false,
       modules: {
-        'JQuery-base': {
+        'JQuery': {
           path: 'jquery.js'
-        },
-        'JQuery-form': {
-          path: 'jquery.form.js',
-          requests: ['JQuery-base']
-        },
-        'JQuery-jframe': {
-          path: 'jquery.jframe.js',
-          requests: ['JQuery-base', 'JQuery-form']
-        },
-        'JQuery-core': {
-          use: ['JQuery-base', 'JQuery-form', 'JQuery-jframe']
         }
       }
     },
