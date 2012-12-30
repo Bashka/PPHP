@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\model\modules;
+
 spl_autoload_register(function($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
@@ -50,7 +51,6 @@ set_error_handler(function($code, $message, $file, $line){
   $log->setMessage(\PPHP\services\log\Message::createNotice($message . ' - ' . $file . ':' . $line));
 }, E_NOTICE|E_USER_NOTICE|E_STRICT);
 
-
 /**
  * Класс является центральным контроллером системы и отвечает за вызов и передачу модулю сообщений вида, а так же за возврат ему ответа модуля.
  */
@@ -87,6 +87,7 @@ class CentralController{
       if(AccessManager::getInstance()->isResolved($module, $method)){
         // Верификация данных
         if(isset($viewMessage['message'])){
+          $viewMessage['message'] = json_decode($viewMessage['message']);
           VerifierData::verifyArgs($controller->getReflectionMethod($method), $viewMessage['message']);
         }
         else{
