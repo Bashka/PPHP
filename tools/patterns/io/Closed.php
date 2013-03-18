@@ -15,7 +15,7 @@ interface Closed{
    * Метод закрывает поток.
    * @abstract
    * @return boolean true - если поток удачно закрыт, иначе - false.
-   * @throws \PPHP\tools\patterns\io\IOException Выбрасывается в случае невозможности закрытия сокета вызванного ошибкой.
+   * @throws \PPHP\tools\patterns\io\IOException Выбрасывается в случае невозможности закрытия потока.
    */
   public function close();
 

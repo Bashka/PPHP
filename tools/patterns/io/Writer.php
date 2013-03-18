@@ -5,16 +5,19 @@ namespace PPHP\tools\patterns\io;
  * Интерфейс определяет выходной поток.
  *
  * Поток, реализующий данный интерфейс представляет собой соединение с ресурсом, установленное для записи данных.
- * Данные в выходной поток записываются как посимвольно, так и построчно.
- * @author Artur Sh. Mamedbekov
+ * Данные в выходной поток записываются побайтово с возможностью обработки строк (массива байт).
+ * @author  Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\io
  */
 interface Writer{
   /**
-   * Метод записывает строку в поток.
+   * Метод записывает байт или строку в поток.
    * @abstract
+   *
    * @param string $data Записываемая строка.
-   * @throws \PPHP\tools\patterns\io\IOException Выбрасывается в случае возникновения ошибки при записи в поток.
+   *
+   * @throws IOException Выбрасывается в случае возникновения ошибки при записи в поток.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return integer Число реально записанных байт.
    */
   public function write($data);
