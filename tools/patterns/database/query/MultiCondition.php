@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Множественное логическое выражение.
@@ -27,11 +28,12 @@ class MultiCondition implements Condition{
    * @param Condition $leftOperand Левый логический операнд.
    * @param string $logicOperator Логический оператор. Одно из следующих значений: AND, OR.
    * @param Condition $rightOperand Правый логический операнд.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   *
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct(Condition $leftOperand, $logicOperator, Condition $rightOperand){
     if(array_search($logicOperator, ['AND', 'OR']) == -1){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException();
+      throw new exceptions\InvalidArgumentException('Недопустимое значение аргумента. Ожидается AND или OR.');
     }
     $this->leftOperand = $leftOperand;
     $this->logicOperator = $logicOperator;
@@ -40,10 +42,22 @@ class MultiCondition implements Condition{
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param string|null $driver Используемая СУБД.
-   * @return string Представление элемента в виде части SQL запроса.
+   *
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return string Результат интерпретации.
    */
   public function interpretation($driver=null){
-    return '(' . $this->leftOperand->interpretation() . ' ' . $this->logicOperator . ' ' . $this->rightOperand->interpretation() . ')';
+    try{
+      return '(' . $this->leftOperand->interpretation($driver) . ' ' . $this->logicOperator . ' ' . $this->rightOperand->interpretation($driver) . ')';
+    }
+    catch(exceptions\NotFoundDataException $exc){
+      throw $exc;
+    }
+    catch(exceptions\InvalidArgumentException $exc){
+      throw $exc;
+    }
   }
 }

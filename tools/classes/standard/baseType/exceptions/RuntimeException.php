@@ -6,4 +6,5 @@ namespace PPHP\tools\classes\standard\baseType\exceptions;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType\exceptions
  */
-class RuntimeException extends Exception{}
+class RuntimeException extends Exception{
+}

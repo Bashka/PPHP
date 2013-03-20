@@ -2,7 +2,7 @@
 namespace PPHP\tools\patterns\singleton;
 
 /**
- * Классическая реализация интерфейса PPHP\tools\patterns\singleton\Singleton.
+ * Классическая реализация интерфейса Singleton.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\singleton
  */
@@ -12,7 +12,8 @@ trait TSingleton{
   /**
    * Метод возвращает экземпляр данного класса.
    * @static
-   * @return static
+   * @abstract
+   * @return static Единственный экземпляр данного класса.
    */
   public final static function getInstance(){
     $calledClass = get_called_class();

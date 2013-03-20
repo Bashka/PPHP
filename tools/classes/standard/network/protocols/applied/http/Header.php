@@ -1,12 +1,14 @@
 <?php
 namespace PPHP\tools\classes\standard\network\protocols\applied\http;
+use \PPHP\tools\patterns\interpreter as interpreter;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет заголовок HTTP запроса.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\network\protocols\applied\http
  */
-class Header implements \PPHP\tools\patterns\interpreter\Interpreter, \PPHP\tools\patterns\interpreter\Restorable{
+class Header implements interpreter\Interpreter, interpreter\Restorable{
   /**
    * Используемые в заголовке параметры.
    * @var Parameter[]
@@ -15,12 +17,21 @@ class Header implements \PPHP\tools\patterns\interpreter\Interpreter, \PPHP\tool
 
   /**
    * Метод восстанавливает объект из строки.
+   * @abstract
+   *
    * @param string $string Исходная строка.
-   * @param null|mixed $driver[optional] Данные для восстановления.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты строки.
+   * @param mixed $driver [optional] Разделитель компонентов заголовка.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты строки.
+   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return mixed Результирующий объект.
    */
   public static function reestablish($string, $driver = null){
+    if(!is_string($string)){
+      throw new exceptions\InvalidArgumentException('string', $string);
+    }
+
     $string = explode($driver, $string);
     $resultObj = new static;
     foreach($string as $parameter){
@@ -60,7 +71,12 @@ class Header implements \PPHP\tools\patterns\interpreter\Interpreter, \PPHP\tool
 
   /**
    * Метод возвращает строку, полученную при интерпретации объекта.
-   * @param null|mixed $driver[optional] Данные, позволяющие изменить логику интерпретации объекта.
+   * @abstract
+   *
+   * @param mixed $driver [optional] Разделитель компонентов заголовка.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){
@@ -69,7 +85,15 @@ class Header implements \PPHP\tools\patterns\interpreter\Interpreter, \PPHP\tool
     }
     $result = '';
     foreach($this->parameters as $parameter){
-      $result .= $parameter->interpretation().$driver;
+      try{
+        $result .= $parameter->interpretation($driver) . $driver;
+      }
+      catch(exceptions\NotFoundDataException $e){
+        throw $e;
+      }
+      catch(exceptions\InvalidArgumentException $e){
+        throw $e;
+      }
     }
     return $result;
   }

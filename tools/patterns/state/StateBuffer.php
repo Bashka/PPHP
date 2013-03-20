@@ -10,9 +10,11 @@ use PPHP\tools\patterns\buffer\MapBuffer as MapBuffer;
 abstract class StateBuffer extends MapBuffer{
   /**
    * Метод возвращает объект состояния по его имени.
+   *
    * @param string $stateName Имя состояния.
    * @param StatesContext $context Контекст.
    * @param array $links Открытые для состояния свойства контекста.
+   *
    * @return mixed
    */
   public function getState($stateName, StatesContext $context, array $links){

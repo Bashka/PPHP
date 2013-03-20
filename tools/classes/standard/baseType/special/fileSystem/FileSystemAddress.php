@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\fileSystem;
+use \PPHP\tools\classes\standard\baseType as baseType;
 
 /**
  * Класс-обертка служит для представления и верификации адресов файлов и папок в файловой системе.
@@ -7,7 +8,7 @@ namespace PPHP\tools\classes\standard\baseType\special\fileSystem;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType\special\fileSystem
  */
-class FileSystemAddress extends \PPHP\tools\classes\standard\baseType\wrapper{
+class FileSystemAddress extends baseType\wrapper{
   /**
    * Тип данной обертки.
    * @var string

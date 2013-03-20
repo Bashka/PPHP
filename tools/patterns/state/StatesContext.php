@@ -14,10 +14,11 @@ interface StatesContext{
   /**
    * Метод изменяет состояние объекта на заданное. Изменить состояние объекта может только его подсостояние, передаваемое во втором аргументе. На практике это означает, что нет возможности изменить состояние объекта программно.
    * @abstract
+   *
    * @param string $stateName Устанавливаемое состояние.
-   * @param \PPHP\tools\patterns\state\State|\PPHP\tools\patterns\state\StatesContext $substate Подсостояние, запрашивающее изменение.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\RuntimeException Исключение выбрасывается при попытке программного изменения состояния.
-   * @return void
+   * @param State|StatesContext $substate Подсостояние, запрашивающее изменение.
+   *
+    @throws \PPHP\tools\classes\standard\baseType\exceptions\RuntimeException Исключение выбрасывается при попытке программного изменения состояния.
    */
   public function passageState($stateName, $substate);
 

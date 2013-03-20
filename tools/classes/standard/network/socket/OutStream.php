@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\network\socket;
+use \PPHP\tools\patterns\io as io;
 
 /**
  * Объекты данного класса представляют сокетное соединение в виде выходного потока.
@@ -9,7 +10,7 @@ namespace PPHP\tools\classes\standard\network\socket;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\network\socket
  */
-class OutStream extends \PPHP\tools\patterns\io\OutStream implements \PPHP\tools\patterns\io\Closed{
+class OutStream extends io\OutStream implements io\Closed{
   /**
    * Флаг готовности потока.
    * @var boolean true - если поток открыт, false - если закрыт.
@@ -18,7 +19,9 @@ class OutStream extends \PPHP\tools\patterns\io\OutStream implements \PPHP\tools
 
   /**
    * Метод закрывает поток.
-   * @throws \PPHP\tools\patterns\io\IOException Выбрасывается в случае невозможности закрытия сокета вызванного ошибкой.
+   *
+   * @throws io\IOException Выбрасывается в случае невозможности закрытия сокетного потока вызванного ошибкой.
+   *
    * @return boolean true - если поток удачно закрыт, иначе - false.
    */
   public function close(){
@@ -28,11 +31,11 @@ class OutStream extends \PPHP\tools\patterns\io\OutStream implements \PPHP\tools
     else{
       if(socket_shutdown($this->resource) === false){
         $code = socket_last_error($this->resource);
-        throw new \PPHP\tools\patterns\io\IOException('Ошибка закрытия сокета.'.socket_strerror($code), $code);
+        throw new io\IOException('Ошибка закрытия сокета.'.socket_strerror($code), $code);
       }
       if(socket_close($this->resource) === false){
         $code = socket_last_error($this->resource);
-        throw new \PPHP\tools\patterns\io\IOException('Ошибка закрытия сокета.'.socket_strerror($code), $code);
+        throw new io\IOException('Ошибка закрытия сокета.'.socket_strerror($code), $code);
       }
       $this->isClose = true;
       return true;
@@ -49,15 +52,17 @@ class OutStream extends \PPHP\tools\patterns\io\OutStream implements \PPHP\tools
 
   /**
    * Метод записывает строку в поток.
+   *
    * @param string $data Записываемая строка.
-   * @throws \PPHP\tools\patterns\io\IOException Выбрасывается в случае возникновения ошибки при записи в поток.
+   *
+   * @throws io\IOException Выбрасывается в случае возникновения ошибки при записи в поток.
    * @return integer Число реально записанных байт.
    */
   public function write($data){
     $result = socket_write($this->resource, $data);
     if($result === false){
       $code = socket_last_error($this->resource);
-      throw new \PPHP\tools\patterns\io\IOException(socket_strerror($code), $code);
+      throw new io\IOException(socket_strerror($code), $code);
     }
     else{
       return $result;

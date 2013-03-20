@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Ограничитель выборки. Платформо-зависимый компонент.
@@ -16,24 +17,27 @@ class Limit implements ComponentQuery{
 
   /**
    * @param $countRow Число отбираемых записей.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($countRow){
     if(!is_int($countRow)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('integer', $countRow);
+      throw new exceptions\InvalidArgumentException('integer', $countRow);
     }
     $this->countRow = $countRow;
   }
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param string|null $driver Используемая СУБД.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
-   * @return string Представление элемента в виде части SQL запроса.
+   *
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return string Результат интерпретации.
    */
   public function interpretation($driver=null){
     if(!is_string($driver) || empty($driver)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $driver);
+      throw new exceptions\InvalidArgumentException('string', $driver);
     }
     switch($driver){
       case 'sqlsrv': // MS SQL Server
@@ -48,7 +52,7 @@ class Limit implements ComponentQuery{
       case 'ibm': // DB2
         return 'FETCH FIRST '.$this->countRow.' ROWS ONLY';
       default:
-        throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
+        throw new exceptions\InvalidArgumentException('Недопустимое значение параметра. Ожидается sqlsrv, firebird, oci, mysql, pgsql или ibm.');
     }
   }
 }

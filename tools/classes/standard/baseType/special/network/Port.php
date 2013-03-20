@@ -1,5 +1,7 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\network;
+use \PPHP\tools\classes\standard\baseType as baseType;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс-обертка служит для представления и верификации номеров портов (TCP/IP).
@@ -7,7 +9,7 @@ namespace PPHP\tools\classes\standard\baseType\special\network;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType\special\network
  */
-class Port extends \PPHP\tools\classes\standard\baseType\wrapper{
+class Port extends baseType\wrapper{
   /**
    * Тип данной обертки.
    * @var string
@@ -31,9 +33,9 @@ class Port extends \PPHP\tools\classes\standard\baseType\wrapper{
    */
   public static function is($val){
     try{
-      $intVal = new \PPHP\tools\classes\standard\baseType\Integer($val);
+      $intVal = new baseType\Integer($val);
     }
-    catch(\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException $exc){
+    catch(exceptions\InvalidArgumentException $exc){
       return false;
     }
 

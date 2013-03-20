@@ -13,16 +13,17 @@ interface Originator{
   /**
    * Метод создает хранителя с текущим состоянием объекта и возвращает его.
    * @abstract
-   * @return \PPHP\tools\patterns\memento\Memento
+   * @return Memento Хранитель текущего состояния вызываемого объекта.
    */
   public function createMemento();
 
   /**
    * Метод восстанавливает состояние вызываемого объекта из переданного хранителя.
    * @abstract
-   * @param \PPHP\tools\patterns\memento\Memento $memento Хранитель, являющейся основой для восстановления.
-   * @throws \PPHP\tools\patterns\memento\AccessException Выбрасывается в случае, если вызываемый объект пытается получить доступ к чужому хранителю.
-   * @return boolean true - если востановление выполнено, иначе - false.
+   *
+   * @param Memento $memento Хранитель, являющийся основой для восстановления.
+   *
+   * @throws AccessException Выбрасывается в случае, если вызываемый объект пытается получить доступ к чужому хранителю.
    */
   public function restoreFromMemento(Memento $memento);
 }

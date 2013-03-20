@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\network;
+use \PPHP\tools\classes\standard\baseType as baseType;
 
 /**
  * Класс-обертка служит для представления и верификации имен протоколов обмена данными.
@@ -35,7 +36,7 @@ class Report extends \PPHP\tools\classes\standard\baseType\wrapper{
    */
   protected function transform($val){
     $val = (string)$val;
-    $strVal = new \PPHP\tools\classes\standard\baseType\String($val);
+    $strVal = new baseType\String($val);
     $this->name = strtolower($strVal->subLeft($strVal->search(':'))->getVal());
     return $val;
   }

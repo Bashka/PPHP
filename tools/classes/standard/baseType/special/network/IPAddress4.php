@@ -1,5 +1,7 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\network;
+use \PPHP\tools\classes\standard\baseType as baseType;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс-обертка служит для представления и верификации IP-адреса 4 версии.
@@ -7,7 +9,7 @@ namespace PPHP\tools\classes\standard\baseType\special\network;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType\special\network
  */
-class IPAddress4 extends \PPHP\tools\classes\standard\baseType\wrapper{
+class IPAddress4 extends baseType\wrapper{
   /**
    * Тип данной обертки.
    * @var string
@@ -59,12 +61,13 @@ class IPAddress4 extends \PPHP\tools\classes\standard\baseType\wrapper{
   /**
    * Метод возвращает указанное значение компонента адреса.
    * @param integer $index Индекс компонента в диапазоне от 0 до 3.
+   *
+   * @throws exceptions\LogicException Выбрасывается в случае, если индек выходит за границы допустимого диапазона.
    * @return integer Значение компонента адреса.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\LogicException Выбрасывается в случае, если индек выходит за границы допустимого диапазона.
    */
   public function getTrio($index){
     if($index < 0 || $index > 3){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\LogicException('Недопустимый индекс массива.');
+      throw new exceptions\LogicException('Недопустимый индекс массива.');
     }
     return $this->trio[$index];
   }
@@ -72,8 +75,9 @@ class IPAddress4 extends \PPHP\tools\classes\standard\baseType\wrapper{
   /**
    * Метод возвращает значение компонента адреса в двоичной форме.
    * @param integer $index Индекс компонента в диапазоне от 0 до 3.
+   *
+   * @throws exceptions\LogicException Выбрасывается в случае, если индек выходит за границы допустимого диапазона.
    * @return string Значение компонента адреса в двоичной форме.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\LogicException Выбрасывается в случае, если индек выходит за границы допустимого диапазона.
    */
   public function getTrioBin($index){
     return decbin($this->getTrio($index));

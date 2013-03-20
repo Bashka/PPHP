@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\fileSystem;
+use \PPHP\tools\classes\standard\baseType as baseType;
 
 /**
  * Класс-обертка служит для представления и верификации имен файлов и папок.
@@ -33,7 +34,7 @@ class FileSystemName extends \PPHP\tools\classes\standard\baseType\wrapper{
    */
   protected function transform($val){
     $val = (string)$val;
-    $strVal = new \PPHP\tools\classes\standard\baseType\String($val);
+    $strVal = new baseType\String($val);
     $positionPoint = $strVal->search('.', false, false);
     if($positionPoint > -1){
       $this->name = $strVal->subLeft($positionPoint)->getVal();

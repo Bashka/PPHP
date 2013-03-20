@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс-обертка служит для предоставления дополнительной логики строкам.
@@ -23,7 +24,9 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод приводит переданные данные к типу обертки.
+   *
    * @param mixed $val Приводимые данные.
+   *
    * @return mixed Приведенные данные.
    */
   protected function transform($val){
@@ -33,7 +36,9 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
   /**
    * Метод определяет, является ли указанное значение строкой.
    * @static
+   *
    * @param mixed $string Проверяемые данные.
+   *
    * @return boolean true - если данные являются строкой или могут быть приведены к строковому типу без потери данных, иначе - false.
    */
   public static function is($string){
@@ -84,8 +89,10 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Присваивание значение элементу запщено.
+   *
    * @param $offset
    * @param $value
+   *
    * @throws exceptions\LogicException Выбрасывается в случае вызова метода.
    */
   public function offsetSet($offset, $value){
@@ -98,7 +105,7 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
    * @throws exceptions\LogicException Выбрасывается в случае вызова метода.
    */
   public function offsetUnset($offset){
-    throw new \PPHP\tools\classes\standard\baseType\exceptions\LogicException('Невозможно модифицировать объект.');
+    throw new exceptions\LogicException('Невозможно модифицировать объект.');
   }
 
   /**
@@ -178,19 +185,21 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
   /**
    * Метод формирует случайную строку зананной длины.
    * @static
+   *
    * @param integer $length Длина строки.
    * @param integer $srand Число для инициализации генератора случайных чисел.
+   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае, если аргумент имеет неверный форма.
-   * @return \PPHP\tools\classes\standard\baseType\String
+   * @return String
    */
   public static function generate($length, $srand = null){
     $string = '';
     if(!is_int($length)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('integer', $length);
+      throw new exceptions\InvalidArgumentException('integer', $length);
     }
     $srand = !is_null($srand)? $srand : time();
     if(!is_int($srand)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('integer', $srand);
+      throw new exceptions\InvalidArgumentException('integer', $srand);
     }
 
     srand($srand);
@@ -220,9 +229,11 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод возвращает подстроку строки.
-   * @param integer $start[optional] Позиция начального символа. Если параметр не задан, используется позиция, на которую ссылается внутренний указатель.
-   * @param integer $length[optional] Число отбираемых символов справа от начального символа если значение положительное, и слева если отрицательное. Если параметр не задан, выбирается все символы до конца строки.
-   * @return \PPHP\tools\classes\standard\baseType\String Результирующая подстрока.
+   *
+   * @param integer $start [optional] Позиция начального символа. Если параметр не задан, используется позиция, на которую ссылается внутренний указатель.
+   * @param integer $length [optional] Число отбираемых символов справа от начального символа если значение положительное, и слева если отрицательное. Если параметр не задан, выбирается все символы до конца строки.
+   *
+   * @return String Результирующая подстрока.
    */
   public function sub($start = null, $length = null){
     $start = ($start === null)? $this->point : $start;
@@ -240,9 +251,11 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод возвращает подстроку строки в байтах.
-   * @param integer $start Позиция начального байта.
-   * @param integer|null $length Число отбираемых байт или null - если необходимо выбрать все байты до конца строки.
-   * @return \PPHP\tools\classes\standard\baseType\String Результирующая подстрока.
+   *
+   * @param integer $start [optional] Позиция начального байта.
+   * @param integer $length [optional] Число отбираемых байт или null - если необходимо выбрать все байты до конца строки.
+   *
+   * @return String Результирующая подстрока.
    */
   public function subByte($start = null, $length = null){
     $start = ($start === null)? $this->point : $start;
@@ -260,8 +273,10 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод возвращает подстроку из указанно числа символов начиная с первого.
+   *
    * @param integer $length Отбираемое число символов.
-   * @return \PPHP\tools\classes\standard\baseType\String Результирующая подстрока.
+   *
+   * @return String Результирующая подстрока.
    */
   public function subLeft($length){
     return $this->sub(0, $length);
@@ -269,8 +284,10 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод возвращает подстроку из указанного числа символов начиная с последнего.
+   *
    * @param integer $length Отбираемое число символов.
-   * @return \PPHP\tools\classes\standard\baseType\String Результирующая подстрока.
+   *
+   * @return String Результирующая подстрока.
    */
   public function subRight($length){
     return $this->sub($this->count() - $length - 1);
@@ -278,10 +295,12 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод дополняет строку до указанной длины символов.
+   *
    * @param integer $length Требуемая длина строки. Если текущая длина больше или равна требуемой, то дополнения не происходит.
    * @param string $char Символ, заполняющий недостающую длину строки. По умолчанию пробел.
-   * @param int|string $type Тип дополнения. Одна из констрант данного класса тип PAD_*.
-   * @return \PPHP\tools\classes\standard\baseType\String Результирующая строка.
+   * @param integer|string $type Тип дополнения. Одна из констрант данного класса тип PAD_*.
+   *
+   * @return String Результирующая строка.
    */
   public function pad($length, $char = ' ', $type = self::PAD_LEFT){
     $count = $this->count();
@@ -313,9 +332,11 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод заменяет указанные подстроки в строке на данные.
+   *
    * @param string $search Искомая подстрока.
    * @param string $replace Заменяющая подстрока.
-   * @return \PPHP\tools\classes\standard\baseType\String Результирующая строка.
+   *
+   * @return String Результирующая строка.
    */
   public function replace($search, $replace){
     return new static(str_replace($search, $replace, $this->val));
@@ -323,9 +344,11 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод заменяет указанный шаблон на заданную строку.
+   *
    * @param string $pattern Регулярное выражение для поиска.
    * @param string $replacement Замещающая строка.
-   * @return \PPHP\tools\classes\standard\baseType\String Результирующая строка.
+   *
+   * @return String Результирующая строка.
    */
   public function change($pattern, $replacement){
     return new static(preg_replace($pattern, $replacement, $this->val));
@@ -333,9 +356,11 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод выполняет поиск указанной подстроки в строке и возвращает ее позицию.
+   *
    * @param string $search Искомая строка.
-   * @param boolean $registry Если true - то поиск выполняется без учета регистра, иначе - false.
-   * @param boolean $beginning Если true - то поиск выполняется с начала строки, иначе - false.
+   * @param boolean $registry [optional] Если true - то поиск выполняется без учета регистра, иначе - false.
+   * @param boolean $beginning [optional] Если true - то поиск выполняется с начала строки, иначе - false.
+   *
    * @return integer Позиция искомой подстроки в строке или -1 - если подстрока не найдена.
    */
   public function search($search, $registry = true, $beginning = true){
@@ -359,7 +384,9 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод выполняет поиск подстроки с помощью регулярного выражения.
+   *
    * @param string $pattern Регулярное выражение.
+   *
    * @return integer Число найденых совпадений с шаблоном. 1 - если подстрока найдена и 0 - если нет.
    */
   public function match($pattern){
@@ -368,7 +395,9 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод разбивает строку на массив по указанному разделителю.
+   *
    * @param string $delimiter Разделитель.
+   *
    * @return array Массив подстрок.
    */
   public function explode($delimiter){
@@ -393,9 +422,11 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод выполняет верификацию строки в соответствии с указанными параметрами.
+   *
    * @param integer $minLength Минимальное число символов в строке.
    * @param integer $maxLength Максимальное число символов в строке.
    * @param string $pattern Шаблон допустимых символов. Если указать префикс ^, то шаблон будет содержать недопустимые символы. Шаблон соответствует регулярному выражению для конструкции [].
+   *
    * @return boolean true - если верификация пройдена, иначе - false.
    */
   public function verify($minLength, $maxLength, $pattern){
@@ -413,10 +444,12 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод удаляет из строки запрещенные символы и приводит ее к указанной длине.
+   *
    * @param integer $minLength Минимальная длина строки в байтах. Если строка меньше, она дополняется слева пробелами.
    * @param integer $maxLength Максимальная длина строки в байтах. Если строка больше, она обрезается.
    * @param string $illegalChars Шаблон запрещенных символов, удаляемых из строки. Шаблон соответствует регулярному выражению для конструкции [].
-   * @return \PPHP\tools\classes\standard\baseType\String Результирующая строка.
+   *
+   * @return String Результирующая строка.
    */
   public function prevent($minLength, $maxLength, $illegalChars){
     $count = $this->count();
@@ -439,12 +472,18 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод изменяет позицию внутреннего указателя строки на заданную.
+   *
    * @param integer $point Новая позиция внутреннего указателя строки.
+   *
    * @throws exceptions\LogicException Выбрасывается в случае, если указанного символа не существует.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае передаче параметра недопустимого типа.
    */
   public function setPoint($point){
+    if(!is_integer($point)){
+      throw new exceptions\InvalidArgumentException('integer', $point);
+    }
     if($point < 0 || $point > $this->length()){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\LogicException('Недопустимый индекс массива.');
+      throw new exceptions\LogicException('Недопустимый индекс массива.');
     }
     $this->point = $point;
   }
@@ -459,8 +498,10 @@ class String extends wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод возвращает следующий компонент от текущей позиции указателя компонента до указанного ограничителя.
+   *
    * @param string $delimiter Ограничитель компонента.
-   * @return boolean|\PPHP\tools\classes\standard\baseType\String Компонента или false - если указанный ограничитель не найден.
+   *
+   * @return boolean|String Компонента или false - если указанный ограничитель не найден.
    */
   public function nextComponent($delimiter){
     $positionDelimiter = strpos($this->val, $delimiter, $this->point);

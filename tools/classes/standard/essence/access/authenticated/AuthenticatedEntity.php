@@ -1,5 +1,7 @@
 <?php
 namespace PPHP\tools\classes\standard\essence\access\authenticated;
+use \PPHP\tools\patterns\database as database;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет аутентифицируемую сущность.
@@ -11,7 +13,7 @@ namespace PPHP\tools\classes\standard\essence\access\authenticated;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\essence\access\authenticated
  */
-abstract class AuthenticatedEntity extends \PPHP\tools\patterns\database\LongObject{
+abstract class AuthenticatedEntity extends database\LongObject{
   /**
    * Пароль.
    * @var string
@@ -22,11 +24,11 @@ abstract class AuthenticatedEntity extends \PPHP\tools\patterns\database\LongObj
   /**
    * Метод устанавливает пароль сущности.
    * @param string $password Устанавливаемый пароль.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   public function setPassword($password){
     if(!is_string($password) || empty($password)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $password);
+      throw new exceptions\InvalidArgumentException('string', $password);
     }
     $this->password = $password;
   }

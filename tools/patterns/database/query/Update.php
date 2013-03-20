@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет SQL запрос для обновления данных в БД.
@@ -50,14 +51,14 @@ class Update implements ComponentQuery{
    * @param Field $field Целевое поле.
    * @param string|number|boolean $value Значение целевого поля.
    * @throws StandardException Выбрасывается в случае, если указанное поле уже присутствует в запросе.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   public function addData(Field $field, $value){
     if($this->fields->offsetExists($field)){
       throw new StandardException('Ошибка дублирования компонента.');
     }
     if(is_object($value) || is_array($value)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException();
+      throw new exceptions\InvalidArgumentException('Неверный тип аргумента. Ожидается string, number, boolean.');
     }
     $this->fields->attach($field);
     $this->values->enqueue($value);
@@ -66,27 +67,40 @@ class Update implements ComponentQuery{
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param string|null $driver Используемая СУБД.
-   * @throws StandardException Выбрасывается в случае, если отсутствуют обязательные компоненты запроса.
-   * @return string Представление элемента в виде части SQL запроса.
+   *
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return string Результат интерпретации.
    */
   public function interpretation($driver=null){
     if($this->values->count() == 0){
       throw new StandardException();
     }
-    $resultString = 'UPDATE `' . $this->table->interpretation() . '` SET ';
-    $this->fields->rewind();
-    $this->values->rewind();
-    do{
-      $resultString .= $this->fields->current()->interpretation() . ' = "' . $this->values->current() . '",';
-      $this->fields->next();
-      $this->values->next();
+
+    try{
+      $resultString = 'UPDATE `' . $this->table->interpretation($driver) . '` SET ';
+      $this->fields->rewind();
+      $this->values->rewind();
+      do{
+        $resultString .= $this->fields->current()->interpretation($driver) . ' = "' . $this->values->current() . '",';
+        $this->fields->next();
+        $this->values->next();
+      }
+      while($this->values->valid());
+      $resultString = substr($resultString, 0, strlen($resultString) - 1);
+      if(!empty($this->where)){
+        $resultString .= ' ' . $this->where->interpretation($driver);
+      }
     }
-    while($this->values->valid());
-    $resultString = substr($resultString, 0, strlen($resultString) - 1);
-    if(!empty($this->where)){
-      $resultString .= ' ' . $this->where->interpretation();
+    catch(exceptions\NotFoundDataException $exc){
+      throw $exc;
     }
+    catch(exceptions\InvalidArgumentException $exc){
+      throw $exc;
+    }
+
     return $resultString;
   }
 

@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\network;
+use \PPHP\tools\classes\standard\baseType as baseType;
 
 /**
  * Класс-обертка служит для представления и верификации URL адреса.
@@ -16,22 +17,22 @@ class URL extends \PPHP\tools\classes\standard\baseType\wrapper{
 
   /**
    * Протокол.
-   * @var \PPHP\tools\classes\standard\baseType\special\network\Report
+   * @var Report
    */
   protected $report;
   /**
    * Адрес ресурса.
-   * @var \PPHP\tools\classes\standard\baseType\special\network\IPAddress|\PPHP\tools\classes\standard\baseType\special\network\DomainName
+   * @var IPAddress|DomainName
    */
   protected $address;
   /**
    * Порт.
-   * @var \PPHP\tools\classes\standard\baseType\special\network\Port
+   * @var Port
    */
   protected $port;
   /**
    * Физический адрес ресурса.
-   * @var \PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress
+   * @var baseType\special\fileSystem\FileSystemAddress
    */
   protected $fileSystemAddress;
 
@@ -57,7 +58,7 @@ class URL extends \PPHP\tools\classes\standard\baseType\wrapper{
     }
 
     if(!empty($components[4]) && $components[4] != '/'){
-        $this->fileSystemAddress = new \PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress($components[4]);
+        $this->fileSystemAddress = new baseType\special\fileSystem\FileSystemAddress($components[4]);
     }
 
     return (string) $val;
@@ -89,7 +90,7 @@ class URL extends \PPHP\tools\classes\standard\baseType\wrapper{
     }
     // Адрес ресурса
     if(!empty($components[4]) && $components[4] != '/'){
-      if(!\PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress::is($components[4])){
+      if(!baseType\special\fileSystem\FileSystemAddress::is($components[4])){
         return false;
       }
     }
@@ -97,28 +98,28 @@ class URL extends \PPHP\tools\classes\standard\baseType\wrapper{
   }
 
   /**
-   * @return \PPHP\tools\classes\standard\baseType\special\network\DomainName|\PPHP\tools\classes\standard\baseType\special\network\IPAddress
+   * @return DomainName|IPAddress
    */
   public function getAddress(){
     return $this->address;
   }
 
   /**
-   * @return \PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress|null
+   * @return baseType\special\fileSystem\FileSystemAddress|null
    */
   public function getFileSystemAddress(){
     return $this->fileSystemAddress;
   }
 
   /**
-   * @return \PPHP\tools\classes\standard\baseType\special\network\Port|null
+   * @return Port|null
    */
   public function getPort(){
     return $this->port;
   }
 
   /**
-   * @return \PPHP\tools\classes\standard\baseType\special\network\Report
+   * @return Report
    */
   public function getReport(){
     return $this->report;

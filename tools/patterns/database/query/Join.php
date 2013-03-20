@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Операция объединения записей.
@@ -19,12 +20,12 @@ class Join implements ComponentQuery{
   protected $type;
   /**
    * Связываемая таблица.
-   * @var \PPHP\tools\patterns\database\query\Table
+   * @var Table
    */
   protected $table;
   /**
    * Условие связывания.
-   * @var \PPHP\tools\patterns\database\query\Condition
+   * @var Condition
    */
   protected $condition;
 
@@ -32,11 +33,12 @@ class Join implements ComponentQuery{
    * @param string $type Тип соединения. CROSS, INNER, LEFT, RIGHT или FULL.
    * @param Table $table Связываемая таблица.
    * @param Condition $condition Условие связывания.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   *
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
-  function __construct($type, \PPHP\tools\patterns\database\query\Table $table, \PPHP\tools\patterns\database\query\Condition $condition){
+  function __construct($type, Table $table, Condition $condition){
     if($type != 'CROSS' && $type != 'INNER' && $type != 'LEFT' && $type != 'RIGHT' && $type != 'FULL'){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException();
+      throw new exceptions\InvalidArgumentException('Недопустимое значение параметра. Ожидается CROSS, INNER, LEFT, RIGHT или FULL.');
     }
     $this->type = $type;
     $this->table = $table;
@@ -45,10 +47,22 @@ class Join implements ComponentQuery{
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param string|null $driver Используемая СУБД.
-   * @return string Представление элемента в виде части SQL запроса.
+   *
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return string Результат интерпретации.
    */
   public function interpretation($driver=null){
-    return $this->type . ' JOIN `' . $this->table->interpretation() . '` ON ' . $this->condition->interpretation();
+    try{
+      return $this->type . ' JOIN `' . $this->table->interpretation($driver) . '` ON ' . $this->condition->interpretation($driver);
+    }
+    catch(exceptions\NotFoundDataException $exc){
+      throw $exc;
+    }
+    catch(exceptions\InvalidArgumentException $exc){
+      throw $exc;
+    }
   }
 }

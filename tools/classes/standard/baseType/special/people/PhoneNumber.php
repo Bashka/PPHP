@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\people;
+use \PPHP\tools\classes\standard\baseType as baseType;
 
 /**
  * Класс-обертка служит для представления и верификации телефонных номеров.
@@ -7,7 +8,7 @@ namespace PPHP\tools\classes\standard\baseType\special\people;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType\special\people
  */
-class PhoneNumber extends \PPHP\tools\classes\standard\baseType\wrapper{
+class PhoneNumber extends baseType\wrapper{
   /**
    * Тип данной обертки.
    * @var string

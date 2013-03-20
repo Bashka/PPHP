@@ -1,9 +1,12 @@
 <?php
 namespace PPHP\tools\classes\standard\network\protocols\applied\http;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use \PPHP\tools\classes\standard\baseType as baseType;
 
 /**
  * Класс представляет HTTP ответ сервера.
- * @author Artur Sh. Mamedbekov
+ *
+ * @author  Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\network\protocols\applied\http
  */
 class Response extends Message{
@@ -20,38 +23,43 @@ class Response extends Message{
 
   /**
    * Метод восстанавливает объект из строки.
+   * @abstract
+   *
    * @param string $string Исходная строка.
-   * @param null|mixed $driver[optional] Данные для восстановления. Данный метод принимает символ конца строки для парсинга ответа.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты строки.
+   * @param mixed  $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты строки.
+   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return mixed Результирующий объект.
    */
   public static function reestablish($string, $driver = null){
     if($string == ''){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта.');
+      throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта.');
     }
-    $string = new \PPHP\tools\classes\standard\baseType\String($string);
+    $string = new baseType\String($string);
 
     $generalHeader = $string->nextComponent($driver);
     if($generalHeader === false){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует стартовая строка ответа.');
+      throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует стартовая строка ответа.');
     }
     $generalHeader->nextComponent(' ');
     $code = $generalHeader->nextComponent(' ')->getVal();
     if($code === false){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует данные о коде ответа.');
+      throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует данные о коде ответа.');
     }
     $message = $generalHeader->sub()->getVal();
     if($message === false){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует данные о сообщении ответа.');
+      throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует данные о сообщении ответа.');
     }
 
-    $header = $string->nextComponent($driver.$driver);
+    $header = $string->nextComponent($driver . $driver);
     if($header === false){
       if($string->sub()->getVal() == $driver){
-        $header = new \PPHP\tools\classes\standard\baseType\String('');
+        $header = new baseType\String('');
       }
       else{
-        throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует заголовок запроса.');
+        throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует заголовок запроса.');
       }
     }
     $header = Header::reestablish($header->getVal(), $driver);
@@ -59,7 +67,7 @@ class Response extends Message{
     if($header->hasParameter('Content-Length')){
       $body = $string->subByte(null, (int)$header->getParameter('Content-Length')->getValue())->getVal();
       if($body === ''){
-        throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует заявленное тело запроса.');
+        throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует заявленное тело запроса.');
       }
     }
     else{
@@ -77,13 +85,25 @@ class Response extends Message{
 
   /**
    * Метод возвращает строку, полученную при интерпретации объекта.
-   * @param null|mixed $driver[optional] Данные, позволяющие изменить логику интерпретации объекта. Данный метод принимает символ конца строки для сериализации ответа.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @abstract
+   *
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){
-    $generalHeader = 'HTTP/1.1 '.$this->code.' '.$this->message;
-    return $generalHeader . $driver . $this->header->interpretation($driver) . $driver . $this->body;
+    $generalHeader = 'HTTP/1.1 ' . $this->code . ' ' . $this->message;
+    try{
+      return $generalHeader . $driver . $this->header->interpretation($driver) . $driver . $this->body;
+    }
+    catch(exceptions\NotFoundDataException $e){
+      throw $e;
+    }
+    catch(exceptions\InvalidArgumentException $e){
+      throw $e;
+    }
   }
 
   public function getCode(){

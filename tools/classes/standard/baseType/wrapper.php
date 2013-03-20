@@ -22,7 +22,9 @@ abstract class wrapper{
   /**
    * Метод приводит переданные данные к типу обертки.
    * @abstract
+   *
    * @param mixed $val Приводимые данные.
+   *
    * @return mixed Приведенные данные.
    */
   protected abstract function transform($val);
@@ -30,7 +32,9 @@ abstract class wrapper{
   /**
    * Метод определяет, является ли указанное значение допустимым типом для данной обертки.
    * @static
+   *
    * @param mixed $val Проверяемые данные.
+   *
    * @return boolean true - если данные являются допустимым типом или могут быть приведены к этому типу без потери данных, иначе - false.
    */
   public static function is($val){
@@ -47,11 +51,12 @@ abstract class wrapper{
 
   /**
    * @param mixed $val Оборачиваемое значение.
+   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($val){
     if(!static::is($val)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException(static::$type, $val);
+      throw new exceptions\InvalidArgumentException(static::$type, $val);
     }
     $this->val = $this->transform($val);
   }

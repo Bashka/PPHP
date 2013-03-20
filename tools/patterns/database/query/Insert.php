@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет SQL запрос для вставки записи в таблицу.
@@ -40,17 +41,19 @@ class Insert implements ComponentQuery{
 
   /**
    * Метод добавляет данные в запрос.
+   *
    * @param Field $field Целевое поле.
    * @param string|number|boolean $value Значение поля.
+   *
    * @throws StandardException Выбрасывается в случае, если указанное поле уже присутствует в запросе.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   public function addData(Field $field, $value){
     if($this->fields->offsetExists($field)){
       throw new StandardException('Ошибка дублирования компонента.');
     }
     if(is_object($value) || is_array($value)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException();
+      throw new exceptions\InvalidArgumentException('Неверный тип аргумента, ожидается string, integer, float, boolean.');
     }
     $this->fields->attach($field);
     $this->values->enqueue($value);
@@ -66,25 +69,36 @@ class Insert implements ComponentQuery{
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param string|null $driver Используемая СУБД.
-   * @throws StandardException Выбрасывается в случае, если отсутствуют обязательные компоненты запроса.
-   * @return string Представление элемента в виде части SQL запроса.
+   *
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return string Результат интерпретации.
    */
   public function interpretation($driver=null){
     if($this->values->count() == 0){
-      throw new StandardException();
+      throw new exceptions\NotFoundDataException();
     }
 
-    $resultString = 'INSERT INTO `' . $this->table->interpretation() . '` (';
-    foreach($this->fields as $field){
-      $resultString .= $field->interpretation() . ',';
-    }
-    $resultString = substr($resultString, 0, strlen($resultString) - 1);
+    try{
+      $resultString = 'INSERT INTO `' . $this->table->interpretation($driver) . '` (';
+      foreach($this->fields as $field){
+        $resultString .= $field->interpretation($driver) . ',';
+      }
+      $resultString = substr($resultString, 0, strlen($resultString) - 1);
 
-    // Генерация запроса с данными вложенного запроса
-    if(is_object($this->select)){
-      $resultString = ') (' . $this->select->interpretation() . ')';
-      return $resultString;
+      // Генерация запроса с данными вложенного запроса
+      if(is_object($this->select)){
+        $resultString = ') (' . $this->select->interpretation($driver) . ')';
+        return $resultString;
+      }
+    }
+    catch(exceptions\NotFoundDataException $exc){
+      throw $exc;
+    }
+    catch(exceptions\InvalidArgumentException $exc){
+      throw $exc;
     }
 
     // Генерация запроса с константными данными

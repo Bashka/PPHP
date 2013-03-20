@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет таблицу в запросе.
@@ -15,11 +16,11 @@ class Table implements ComponentQuery{
 
   /**
    * @param string $tableName Имя таблицы.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($tableName){
     if(!is_string($tableName) || empty($tableName)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $tableName);
+      throw new exceptions\InvalidArgumentException('string', $tableName);
     }
     $this->tableName = $tableName;
   }
@@ -27,8 +28,12 @@ class Table implements ComponentQuery{
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param string|null $driver Используемая СУБД.
-   * @return string Представление элемента в виде части SQL запроса.
+   *
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return string Результат интерпретации.
    */
   public function interpretation($driver=null){
     return $this->tableName;

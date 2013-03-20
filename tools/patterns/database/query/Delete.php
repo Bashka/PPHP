@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет SQL запрос для удаления записей из таблицы.
@@ -35,12 +36,22 @@ class Delete implements ComponentQuery{
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param string|null $driver Используемая СУБД.
-   * @return string Представление элемента в виде части SQL запроса.
+   *
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return string Результат интерпретации.
    */
   public function interpretation($driver=null){
-    return 'DELETE FROM `' . $this->table->interpretation() . '` ' . (is_object($this->where)? $this->where->interpretation() : '');
+    try{
+      return 'DELETE FROM `' . $this->table->interpretation($driver) . '` ' . (is_object($this->where)? $this->where->interpretation($driver) : '');
+    }
+    catch(exceptions\NotFoundDataException $exc){
+      throw $exc;
+    }
+    catch(exceptions\InvalidArgumentException $exc){
+      throw $exc;
+    }
   }
-
-
 }

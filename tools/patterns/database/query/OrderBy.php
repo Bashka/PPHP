@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет условие сортировки результата запроса.
@@ -20,11 +21,11 @@ class OrderBy implements ComponentQuery{
 
   /**
    * @param string $sortedType [ASC] Способ сортировки.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($sortedType = 'ASC'){
     if(array_search($sortedType, ['ASC', 'DESC']) == -1){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException();
+      throw new exceptions\InvalidArgumentException('Недопустимое значение аргумента. Ожидается ASC или DESC.');
     }
     $this->fields = new \SplObjectStorage();
     $this->sortedType = $sortedType;
@@ -41,17 +42,28 @@ class OrderBy implements ComponentQuery{
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param string|null $driver Используемая СУБД.
-   * @throws StandardException Выбрасывается в случае, если отсутствуют обязательные компоненты запроса.
-   * @return string Представление элемента в виде части SQL запроса.
+   *
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return string Результат интерпретации.
    */
   public function interpretation($driver=null){
     if($this->fields->count() == 0){
-      throw new StandardException();
+      throw new exceptions\NotFoundDataException('Недостаточно данных для формирования строки.');
     }
     $result = 'ORDER BY ';
     foreach($this->fields as $field){
-      $result .= $field->interpretation() . ',';
+      try{
+        $result .= $field->interpretation($driver) . ',';
+      }
+      catch(exceptions\NotFoundDataException $exc){
+        throw $exc;
+      }
+      catch(exceptions\InvalidArgumentException $exc){
+        throw $exc;
+      }
     }
     return substr($result, 0, strlen($result) - 1) . ' ' . $this->sortedType;
   }

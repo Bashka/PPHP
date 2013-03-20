@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет логическое выражение.
@@ -27,17 +28,28 @@ abstract class QueryCondition implements Condition{
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param string|null $driver Используемая СУБД.
-   * @throws StandardException Выбрасывается в случае, если произведена попытка интерпретации пустого выражения.
-   * @return string Представление элемента в виде части SQL запроса.
+   *
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return string Результат интерпретации.
    */
   public function interpretation($driver=null){
     if($this->conditions->count() == 0){
-      throw new StandardException('Недостаточное число условий в выражении.');
+      throw new exceptions\NotFoundDataException('Недостаточное число условий в выражении.');
     }
     $resultMulticondition = '(';
     foreach($this->conditions as $condition){
-      $resultMulticondition .= $condition->interpretation() . $this->getOperator();
+      try{
+        $resultMulticondition .= $condition->interpretation($driver) . $this->getOperator();
+      }
+      catch(exceptions\NotFoundDataException $exc){
+        throw $exc;
+      }
+      catch(exceptions\InvalidArgumentException $exc){
+        throw $exc;
+      }
     }
     $resultMulticondition = substr($resultMulticondition, 0, strlen($resultMulticondition) - strlen($this->getOperator()));
     $resultMulticondition .= ')';
