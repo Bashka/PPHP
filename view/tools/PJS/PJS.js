@@ -68,7 +68,7 @@ YUI().use('node', 'io-base', 'json-parse', 'json-stringify', function(Y){
           error = options.error || function(){
           },
           data = options.data,
-          timeout = options.timeout || 2000;
+          timeout = options.timeout || 5000;
 
         loading.load();
 

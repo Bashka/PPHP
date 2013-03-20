@@ -1,5 +1,7 @@
 <?php
 namespace PPHP\tools\classes\standard\network\socket;
+use \PPHP\tools\patterns\io as io;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет двунаправленный поток, используемый при сокетном соединении.
@@ -10,7 +12,7 @@ namespace PPHP\tools\classes\standard\network\socket;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\network\socket
  */
-class Stream implements \PPHP\tools\patterns\io\Closed, \PPHP\tools\patterns\io\Reader, \PPHP\tools\patterns\io\Writer{
+class Stream implements io\Closed, io\Reader, io\Writer{
   /**
    * Входной поток от удаленного сокета.
    * @var InStream
@@ -29,10 +31,16 @@ class Stream implements \PPHP\tools\patterns\io\Closed, \PPHP\tools\patterns\io\
 
   /**
    * Метод закрывает поток.
+   * @throws io\IOException Выбрасывается в случае невозможности закрытия сокетного потока из за ошибки.
    * @return boolean true - если поток удачно закрыт, иначе - false.
    */
   public function close(){
-    return $this->in->close();
+    try{
+      return $this->in->close();
+    }
+    catch(io\IOException $e){
+      throw $e;
+    }
   }
 
   /**
@@ -45,49 +53,109 @@ class Stream implements \PPHP\tools\patterns\io\Closed, \PPHP\tools\patterns\io\
 
   /**
    * Метод считывает один байт из потока.
-   * @throws \PPHP\tools\patterns\io\IOException Выбрасывается в случае возникновения ошибки при чтении из потока.
+   * @throws io\IOException Выбрасывается в случае возникновения ошибки при чтении из потока.
    * @return string|boolean Возвращает текущий байт из потока или false, если поток закончет.
    */
   public function read(){
-    return $this->in->read();
+    if(!$this->isClose()){
+      throw new io\IOException('Невозможно выполнить чтение из закрытого потока.');
+    }
+
+    try{
+      return $this->in->read();
+    }
+    catch(io\IOException $e){
+      throw $e;
+    }
   }
 
   /**
    * Метод считывает указанное количество байт из потока.
+   *
    * @param integer $length Количество считываемых байт.
+   *
+   * @throws exceptions\InvalidArgumentException  Выбрасывается в случае возникновения ошибки при чтении из потока.
+   * @throws io\IOException  Выбрасывается в случае возникновения ошибки при чтении из потока.
    * @return boolean|string Прочитанная строка или false - если достигнут конец потока.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException  Выбрасывается в случае возникновения ошибки при чтении из потока.
    */
   public function readString($length){
-    return $this->in->readString($length);
+    if(!$this->isClose()){
+      throw new io\IOException('Невозможно выполнить чтение из закрытого потока.');
+    }
+
+    try{
+      return $this->in->readString($length);
+    }
+    catch(io\IOException $e){
+      throw $e;
+    }
+    catch(exceptions\InvalidArgumentException $e){
+      throw $e;
+    }
   }
 
   /**
    * Метод считывает строку от текущей позиции до символа конца строки EOL.
-   * @return boolean|string Прочитанная строка или false - если достигнут конец потока (для данной функции концом потока так же являются символы \n и \r).
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае возникновения ошибки при чтении из потока.
+   *
+   * @param string $EOLSymbol [optional] Символ, принимаемый за EOL при данном вызове метода.
+   *
+   * @throws io\IOException Выбрасывается в случае возникновения ошибки при чтении из потока.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return string Прочитанная строка или пустая строка, если достигнут конец потока или символ EOL.
    */
-  public function readLine(){
-    return $this->in->readLine();
+  public function readLine($EOLSymbol = PHP_EOL){
+    if(!$this->isClose()){
+      throw new io\IOException('Невозможно выполнить чтение из закрытого потока.');
+    }
+
+    try{
+      return $this->in->readLine();
+    }
+    catch(io\IOException $e){
+      throw $e;
+    }
+    catch(exceptions\InvalidArgumentException $e){
+      throw $e;
+    }
   }
 
   /**
    * Метод считывает все содержимое потока.
-   * @return boolean|string Прочитанный массив символов или false - если достигнут конец потока.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае возникновения ошибки при чтении из потока.
+   * @throws io\IOException Выбрасывается в случае возникновения ошибки при чтении из потока.
+   * @return string Прочитанный массив символов или пустая строка, если достигнут конец потока.
    */
   public function readAll(){
-    return $this->in->readAll();
+    if(!$this->isClose()){
+      throw new io\IOException('Невозможно выполнить чтение из закрытого потока.');
+    }
+
+    try{
+      return $this->in->readAll();
+    }
+    catch(io\IOException $e){
+      throw $e;
+    }
   }
 
   /**
    * Метод записывает строку в поток.
+   *
    * @param string $data Записываемая строка.
-   * @throws \PPHP\tools\patterns\io\IOException Выбрасывается в случае возникновения ошибки при записи в поток.
+   *
+   * @throws io\IOException Выбрасывается в случае возникновения ошибки при записи в поток.
    * @return integer Число реально записанных байт.
    */
   public function write($data){
-    return $this->out->write($data);
+    if(!$this->isClose()){
+      throw new io\IOException('Невозможно выполнить запись в закрытый поток.');
+    }
+
+    try{
+      return $this->out->write($data);
+    }
+    catch(io\IOException $e){
+      throw $e;
+    }
   }
 
   /**
@@ -111,6 +179,10 @@ class Stream implements \PPHP\tools\patterns\io\Closed, \PPHP\tools\patterns\io\
    * @param integer $readTimeout Время блокировки ожидания данных при чтении в секундах.
    */
   public function setReadTimeout($readTimeout){
+    if(!$this->isClose()){
+      throw new io\IOException('Невозможно установить время блокировки для закрытого потока.');
+    }
+
     $this->in->setReadTimeout($readTimeout);
   }
 

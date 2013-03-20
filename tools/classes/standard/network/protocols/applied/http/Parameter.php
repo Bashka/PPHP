@@ -1,12 +1,14 @@
 <?php
 namespace PPHP\tools\classes\standard\network\protocols\applied\http;
+use \PPHP\tools\patterns\interpreter as interpreter;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет параметр заголовка HTTP запроса.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\network\protocols\applied\http
  */
-class Parameter implements \PPHP\tools\patterns\interpreter\Interpreter, \PPHP\tools\patterns\interpreter\Restorable{
+class Parameter implements interpreter\Interpreter, interpreter\Restorable{
   /**
    * Имя параметра.
    * @var string
@@ -20,14 +22,19 @@ class Parameter implements \PPHP\tools\patterns\interpreter\Interpreter, \PPHP\t
 
   /**
    * Метод восстанавливает объект из строки.
+   * @abstract
+   *
    * @param string $string Исходная строка.
-   * @param null|mixed $driver[optional] Данные для восстановления.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты строки.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты строки.
+   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return mixed Результирующий объект.
    */
   public static function reestablish($string, $driver = null){
     if(strpos($string, ':') === false){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Недостаточно данных для формирования объекта.');
+      throw new exceptions\NotFoundDataException('Недостаточно данных для формирования объекта.');
     }
     $string = explode(':', $string);
     return new static($string[0], trim($string[1]));
@@ -40,7 +47,12 @@ class Parameter implements \PPHP\tools\patterns\interpreter\Interpreter, \PPHP\t
 
   /**
    * Метод возвращает строку, полученную при интерпретации объекта.
-   * @param null|mixed $driver[optional] Данные, позволяющие изменить логику интерпретации объекта.
+   * @abstract
+   *
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){

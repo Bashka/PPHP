@@ -7,5 +7,4 @@ namespace PPHP\tools\patterns\database\query;
  * @package PPHP\tools\patterns\database\query
  */
 interface Condition extends ComponentQuery{
-
 }

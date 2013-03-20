@@ -7,5 +7,4 @@ namespace PPHP\tools\classes\standard\baseType\exceptions;
  * @package PPHP\tools\classes\standard\baseType\exceptions
  */
 class DuplicationException extends \PPHP\tools\classes\standard\baseType\exceptions\RuntimeException{
-
 }

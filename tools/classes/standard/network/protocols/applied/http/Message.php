@@ -1,7 +1,14 @@
 <?php
 namespace PPHP\tools\classes\standard\network\protocols\applied\http;
+use \PPHP\tools\patterns\interpreter as interpreter;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
-abstract class Message implements \PPHP\tools\patterns\interpreter\Restorable, \PPHP\tools\patterns\interpreter\Interpreter{
+/**
+ * Класс представляет HTTP передаваемое или получаемое сообщение.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\network\protocols\applied\http
+ */
+abstract class Message implements interpreter\Restorable, interpreter\Interpreter{
   /**
    * Заголовок.
    * @var Header
@@ -14,8 +21,8 @@ abstract class Message implements \PPHP\tools\patterns\interpreter\Restorable, \
   protected $body;
 
   /**
-   * @param null|Header $header Заголовок запроса.
-   * @param null|string|array $body Тело запроса в виде строки или ассоциативного массива параметров, передаваемых в запросе. В случае передачи массива тело формируется следующим образом: <ключ элемента>:<значение элемента>EOL
+   * @param Header $header [optional] Заголовок запроса.
+   * @param string|array $body [optional] Тело запроса в виде строки или ассоциативного массива параметров, передаваемых в запросе. В случае передачи массива тело формируется следующим образом: <ключ элемента>:<значение элемента>EOL
    */
   function __construct($header=null, $body=null){
     $this->header = ($header !== null)? $header : new Header();
@@ -68,15 +75,17 @@ abstract class Message implements \PPHP\tools\patterns\interpreter\Restorable, \
    *
    * Данный метод позволяет так же задать тип и кодировку передаваемых данных в том случае, если они не были заданы заранее.
    * Выполнение метода сопровождается установкой параметров заголовка Content-Length и Content-MD5.
+   *
    * @param string $body Тело запроса.
-   * @param string $type Тип данных тела.
-   * @param string $charset Кодировка данных тела.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения пустого тела запроса.
+   * @param string $type [optional] Тип данных тела.
+   * @param string $charset [optional] Кодировка данных тела.
+   *
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения пустого тела запроса.
    */
   public function setBody($body, $type = 'application/x-www-form-urlencoded', $charset = 'utf-8'){
     $body = (string) $body;
     if($body === ''){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('В качестве тела запроса должна быть не пустая строка.');
+      throw new exceptions\InvalidArgumentException('В качестве тела запроса должна быть не пустая строка.');
     }
     $this->body = $body;
     if(!$this->header->hasParameter('Content-Type')){
@@ -94,7 +103,7 @@ abstract class Message implements \PPHP\tools\patterns\interpreter\Restorable, \
   }
 
   /**
-   * @return mixed
+   * @return null|string
    */
   public function getBody(){
     return $this->body;

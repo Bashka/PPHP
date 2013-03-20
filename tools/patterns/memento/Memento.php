@@ -18,13 +18,13 @@ class Memento{
 
   /**
    * Хозяин хранителя.
-   * @var \PPHP\tools\patterns\memento\Originator
+   * @var Originator
    */
   private $originator;
 
   /**
-   * @param \PPHP\tools\patterns\memento\Originator $originator Хозяин хранителя.
-   * @param array $savedProperties Сохраняемые значения полей хранителя.
+   * @param Originator $originator Хозяин хранителя.
+   * @param array $savedProperties Ассоциативный массив, ключами которого являются имена свойств хозяина, а значениями их значения.
    */
   function __construct(Originator $originator, array $savedProperties){
     $this->originator = $originator;
@@ -32,10 +32,12 @@ class Memento{
   }
 
   /**
-   * Метод возвращает хранимые значения полей хранителю.
-   * @param \PPHP\tools\patterns\memento\Originator $originator Хозяин хранителя. Метод вернет значения полей только если в данном аргументе передан истинный хозяин хранителя.
-   * @return mixed[] Ассоциативный массив значений полей хозяина.
+   * Метод возвращает хранимые значения свойств хранителю.
+   *
+   * @param Originator $originator Хозяин хранителя. Метод вернет значения полей только если в данном аргументе передан истинный хозяин хранителя.
+   *
    * @throws AccessException Выбрасывается в случае, если в качестве хозяина передан не истинный хозяин хранителя.
+   * @return mixed[] Ассоциативный массив значений полей хозяина.
    */
   public final function getState(Originator $originator){
     if($this->originator !== $originator){

@@ -23,7 +23,7 @@ abstract class State{
 
   /**
    * @param StatesContext $context Контекст состояния.
-   * @param array|null $propertyLinks Массив ссылок на доступные состоянию свойства контекста.
+   * @param array $propertyLinks [optional] Массив ссылок на доступные состоянию свойства контекста.
    */
   public function __construct(StatesContext $context, array &$propertyLinks = null){
     $this->context = $context;

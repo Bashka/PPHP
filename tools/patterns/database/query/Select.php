@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет SQL запрос для получение записей из таблицы.
@@ -53,7 +54,9 @@ class Select implements ComponentQuery{
 
   /**
    * Метод добавляет поле в запрос.
+   *
    * @param Field $field Добавляемое поле.
+   *
    * @throws StandardException Выбрасывается в случае, если указанное поле уже присутствует в запросе.
    */
   public function addField(Field $field){
@@ -65,7 +68,9 @@ class Select implements ComponentQuery{
 
   /**
    * Метод добавляет поле с алиасом в запрос.
+   *
    * @param FieldAlias $field Добавляемое поле.
+   *
    * @throws StandardException Выбрасывается в случае, если указанное поле уже присутствует в запросе.
    */
   public function addAliasField(FieldAlias $field){
@@ -77,7 +82,9 @@ class Select implements ComponentQuery{
 
   /**
    * Метод добавляет таблицу в запрос.
+   *
    * @param Table $table Добавляемая таблица.
+   *
    * @throws StandardException Выбрасывается в случае, если указанная таблица уже присутствует в запросе.
    */
   public function addTable(Table $table){
@@ -89,7 +96,9 @@ class Select implements ComponentQuery{
 
   /**
    * Метод добавляет соединение в запрос.
-   * @param \PPHP\tools\patterns\database\query\Join $join Добавляемое соединение.
+   *
+   * @param Join $join Добавляемое соединение.
+   *
    * @throws StandardException Выбрасывается в случае, если указанное соединение уже присутствует в запросе.
 */
   public function addJoin(Join $join){
@@ -117,7 +126,7 @@ class Select implements ComponentQuery{
 
   /**
    * Метод определяет ограничение выборки.
-   * @param \PPHP\tools\patterns\database\query\Limit $limit Ограничение выборки.
+   * @param Limit $limit Ограничение выборки.
    */
   public function insertLimit(Limit $limit){
     $this->limit = $limit;
@@ -132,40 +141,50 @@ class Select implements ComponentQuery{
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param string|null $driver Используемая СУБД.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
-   * @throws StandardException Выбрасывается в случае, если отсутствуют обязательные компоненты запроса.
-   * @return string Представление элемента в виде части SQL запроса.
+   *
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){
     if(($this->fields->count() == 0 && !$this->allField) || $this->tables->count() == 0){
-      throw new StandardException();
+      throw new exceptions\NotFoundDataException();
     }
 
-    if($this->allField){
-      $fieldsString = '*';
-    }
-    else{
-      $fieldsString = '';
-      foreach($this->fields as $field){
-        $fieldsString .= $field->interpretation() . ',';
+    try{
+      if($this->allField){
+        $fieldsString = '*';
       }
-      $fieldsString = substr($fieldsString, 0, strlen($fieldsString) - 1);
-    }
+      else{
+        $fieldsString = '';
+        foreach($this->fields as $field){
+          $fieldsString .= $field->interpretation($driver) . ',';
+        }
+        $fieldsString = substr($fieldsString, 0, strlen($fieldsString) - 1);
+      }
 
-    $tableString = '';
-    foreach($this->tables as $table){
-      $tableString .= '`' . $table->interpretation() . '`,';
-    }
-    $tableString = substr($tableString, 0, strlen($tableString) - 1);
+      $tableString = '';
+      foreach($this->tables as $table){
+        $tableString .= '`' . $table->interpretation($driver) . '`,';
+      }
+      $tableString = substr($tableString, 0, strlen($tableString) - 1);
 
-    $joinString = '';
-    foreach($this->joins as $join){
-      $joinString .= $join->interpretation();
-    }
+      $joinString = '';
+      foreach($this->joins as $join){
+        $joinString .= $join->interpretation($driver);
+      }
 
-    $whereString = (is_object($this->where)? $this->where->interpretation() : '');
-    $orderByString = (is_object($this->orderBy)? $this->orderBy->interpretation() : '');
+      $whereString = (is_object($this->where)? $this->where->interpretation($driver) : '');
+      $orderByString = (is_object($this->orderBy)? $this->orderBy->interpretation($driver) : '');
+    }
+    catch(exceptions\NotFoundDataException $exc){
+      throw $exc;
+    }
+    catch(exceptions\InvalidArgumentException $exc){
+      throw $exc;
+    }
 
     // Формирование платформо-независимой выборки при отсутствии несовместимых элементов.
     if(empty($this->limit)){
@@ -174,7 +193,7 @@ class Select implements ComponentQuery{
     // Формирования платформо-зависимой выборки при наличии несовместимых элементов.
     else{
       if(!is_string($driver) || empty($driver)){
-        throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $driver);
+        throw new exceptions\InvalidArgumentException('string', $driver);
       }
       // { Обработка LIMIT элемента
       $limitString = $this->limit->interpretation($driver);
@@ -191,7 +210,7 @@ class Select implements ComponentQuery{
         case 'ibm': // DB2
           return trim('SELECT ' . $staticPartString . $orderByString . ' ' . $limitString);
         default:
-          throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
+          throw new exceptions\InvalidArgumentException('Недопустимое значение параметра. Ожидается sqlsrv, firebird, oci, mysql, pgsql или ibm.');
       }
       // }
     }

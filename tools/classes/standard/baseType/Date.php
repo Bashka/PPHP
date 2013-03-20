@@ -15,7 +15,9 @@ class Date extends wrapper{
 
   /**
    * Метод приводит переданные данные к типу обертки.
+   *
    * @param mixed $val Приводимые данные.
+   *
    * @return mixed Приведенные данные.
    */
   protected function transform($val){
@@ -25,7 +27,9 @@ class Date extends wrapper{
   /**
    * Метод определяет, является ли указанное значение календарным числом.
    * @static
+   *
    * @param mixed $val Проверяемые данные.
+   *
    * @return boolean true - если данные являются календарным числом или могут быть приведены к типу Date без потери данных, иначе - false.
    */
   public static function is($val){

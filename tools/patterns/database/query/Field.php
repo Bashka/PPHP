@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет поле таблицы в запросе.
@@ -20,11 +21,11 @@ class Field implements ComponentQuery{
 
   /**
    * @param string $name Имя поля.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($name){
     if(!is_string($name) || empty($name)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $name);
+      throw new exceptions\InvalidArgumentException('string', $name);
     }
     $this->name = $name;
   }
@@ -39,12 +40,24 @@ class Field implements ComponentQuery{
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param string|null $driver Используемая СУБД.
-   * @return string Представление элемента в виде части SQL запроса.
+   *
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return string Результат интерпретации.
    */
   public function interpretation($driver=null){
     if(!empty($this->table)){
-      return $this->table->interpretation() . '.' . $this->name;
+      try{
+        return $this->table->interpretation($driver) . '.' . $this->name;
+      }
+      catch(exceptions\NotFoundDataException $exc){
+        throw $exc;
+      }
+      catch(exceptions\InvalidArgumentException $exc){
+        throw $exc;
+      }
     }
     else{
       return '`' . $this->name . '`';

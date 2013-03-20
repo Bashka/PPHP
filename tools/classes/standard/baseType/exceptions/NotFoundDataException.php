@@ -6,6 +6,5 @@ namespace PPHP\tools\classes\standard\baseType\exceptions;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType\exceptions
  */
-class NotFoundDataException extends \PPHP\tools\classes\standard\baseType\exceptions\RuntimeException{
-
+class NotFoundDataException extends RuntimeException{
 }

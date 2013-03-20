@@ -2,7 +2,7 @@
 namespace PPHP\tools\patterns\state;
 
 /**
- * Классическая реализация интерфейса \PPHP\tools\patterns\state\StatesContext.
+ * Классическая реализация интерфейса StatesContext.
  * Для полной реализации контекста, необходимо определить класс буфера состояний, инициализирующий и возвращающий требуемое в контексте состояние. Так же в конструкторе необходимо определить начальное состояние контекста.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\state
@@ -16,7 +16,7 @@ trait TStatesContext{
   protected $currentState;
   /**
    * Буфер, хранящий все инициализированные состояния.
-   * @var \PPHP\tools\patterns\state\StateBuffer
+   * @var StateBuffer
    */
   private $statesBuffer;
 
@@ -35,9 +35,8 @@ trait TStatesContext{
    * links - null или массив доступных для состояния свойств контекста.
    *
    * @param $stateName Устанавливаемое состояние.
-   * @param \PPHP\tools\patterns\state\State|\PPHP\tools\patterns\state\StatesContext $substate Подсостояние, запрашивающее изменение.
+   * @param State|StatesContext $substate Подсостояние, запрашивающее изменение.
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\RuntimeException Исключение выбрасывается при попытке программного изменения состояния.
-   * @return void
    */
   public function passageState($stateName, $substate){
     if($this->currentState === $substate || $this === $substate){

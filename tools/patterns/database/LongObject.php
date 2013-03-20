@@ -1,5 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\database;
+use \PPHP\tools\patterns\metadata\reflection as reflection;
+use \PPHP\tools\patterns\memento as memento;
 
 /**
  * Корневой родительский класс для всех энергонезависимых объектов.
@@ -10,12 +12,9 @@ namespace PPHP\tools\patterns\database;
  * Поле, содержащее первичный ключ объекта не следует помечать метаданными NameFieldTable.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\database
- * @see PPHP\tools\patterns\database\identification\OID
- * @see PPHP\tools\patterns\metadata
- * @see PPHP\tools\patterns\memento
  */
-abstract class LongObject implements \PPHP\tools\patterns\metadata\reflection\Reflect, \PPHP\tools\patterns\database\identification\OID, \PPHP\tools\patterns\memento\Originator{
-  use \PPHP\tools\patterns\metadata\reflection\TReflect;
-  use \PPHP\tools\patterns\memento\TOriginator;
-  use \PPHP\tools\patterns\database\identification\TOID;
+abstract class LongObject implements reflection\Reflect, identification\OID, memento\Originator{
+  use reflection\TReflect;
+  use memento\TOriginator;
+  use identification\TOID;
 }

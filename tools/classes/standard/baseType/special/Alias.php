@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special;
+use \PPHP\tools\classes\standard\baseType as baseType;
 
 /**
  * Класс-обертка служит для представления и верификации имен.
@@ -7,7 +8,7 @@ namespace PPHP\tools\classes\standard\baseType\special;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType\special
  */
-class Alias extends \PPHP\tools\classes\standard\baseType\wrapper{
+class Alias extends baseType\wrapper{
   /**
    * Тип данной обертки.
    * @var string

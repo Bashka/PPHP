@@ -15,7 +15,9 @@ class Boolean extends wrapper{
 
   /**
    * Метод приводит переданные данные к типу обертки.
+   *
    * @param mixed $val Приводимые данные.
+   *
    * @return mixed Приведенные данные.
    */
   protected function transform($val){

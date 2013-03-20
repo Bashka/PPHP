@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\network;
+use \PPHP\tools\classes\standard\baseType as baseType;
 
 /**
  * Класс-обертка служит для представления и верификации адресов электронной почты.
@@ -7,7 +8,7 @@ namespace PPHP\tools\classes\standard\baseType\special\network;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType\special\network
  */
-class EMail extends \PPHP\tools\classes\standard\baseType\wrapper{
+class EMail extends baseType\wrapper{
   /**
    * Тип данной обертки.
    * @var string
@@ -21,7 +22,7 @@ class EMail extends \PPHP\tools\classes\standard\baseType\wrapper{
   protected $local;
   /**
    * Домен электронной почты.
-   * @var \PPHP\tools\classes\standard\baseType\special\network\DomainName
+   * @var DomainName
    */
   protected $domain;
 
@@ -56,7 +57,7 @@ class EMail extends \PPHP\tools\classes\standard\baseType\wrapper{
   }
 
   /**
-   * @return \PPHP\tools\classes\standard\baseType\special\network\DomainName
+   * @return DomainName
    */
   public function getDomain(){
     return $this->domain;

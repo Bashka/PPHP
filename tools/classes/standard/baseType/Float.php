@@ -15,7 +15,9 @@ class Float extends wrapper{
 
   /**
    * Метод приводит переданные данные к типу обертки.
+   *
    * @param mixed $val Приводимые данные.
+   *
    * @return mixed Приведенные данные.
    */
   protected function transform($val){
@@ -26,7 +28,9 @@ class Float extends wrapper{
   /**
    * Метод определяет, является ли указанное значение дробным числом.
    * @static
+   *
    * @param mixed $val Проверяемые данные.
+   *
    * @return boolean true - если данные являются дробным числом или могут быть приведены к типу float без потери данных, иначе - false.
    */
   public static function is($val){
@@ -34,7 +38,7 @@ class Float extends wrapper{
       return true;
     }
     elseif(is_string($val)){
-      $strVal = new \PPHP\tools\classes\standard\baseType\String($val);
+      $strVal = new String($val);
       if($strVal->match('/^-?[0-9]+(.[0-9]+)?$/u')){
         return true;
       }
@@ -44,8 +48,10 @@ class Float extends wrapper{
 
   /**
    * Метод выполняет верификацию числа в соответствии с указанными параметрами.
-   * @param null|integer $min Минимально допустимое значение. Если null, то ограничения нет.
-   * @param null|integer $max Максимально допустимое значение. Если null, то ограничения нет.
+   *
+   * @param integer $min [optional] Минимально допустимое значение. Если null, то ограничения нет.
+   * @param integer $max [optional] Максимально допустимое значение. Если null, то ограничения нет.
+   *
    * @return boolean true - если верификация пройдена, иначе - false.
    */
   public function verify($min = null, $max = null){
@@ -57,16 +63,18 @@ class Float extends wrapper{
 
   /**
    * Метод приводит число к указанному интервалу.
-   * @param null|integer $min Минимально допустимое значение. Если null, то ограничения нет.
-   * @param null|integer $max Максимально допустимое значение. Если null, то ограничения нет.
-   * @return \PPHP\tools\classes\standard\baseType\Integer Результирующее число.
+   *
+   * @param integer $min [optional] Минимально допустимое значение. Если null, то ограничения нет.
+   * @param integer $max [optional] Максимально допустимое значение. Если null, то ограничения нет.
+   *
+   * @return Integer Результирующее число.
    */
   public function prevent($min = null, $max = null){
     if(!is_null($min) && $this->val < $min){
-      return new \PPHP\tools\classes\standard\baseType\Float($min);
+      return new Float($min);
     }
     if(!is_null($max) && $this->val > $max){
-      return new \PPHP\tools\classes\standard\baseType\Float($max);
+      return new Float($max);
     }
     return $this;
   }

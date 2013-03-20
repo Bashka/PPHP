@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\classes\standard\network\protocols\applied\http;
-
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use \PPHP\tools\classes\standard\baseType as baseType;
 /**
  * Класс представляет HTTP запрос клиента.
  * @author Artur Sh. Mamedbekov
@@ -29,44 +30,49 @@ class Request extends Message{
 
   /**
    * Метод восстанавливает объект из строки.
+   * @abstract
+   *
    * @param string $string Исходная строка.
-   * @param null|mixed $driver[optional] Данные для восстановления. Данный метод принимает символ конца строки для парсинга запроса.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты строки.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты строки.
+   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return mixed Результирующий объект.
    */
   public static function reestablish($string, $driver = null){
     if($string == ''){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта.');
+      throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта.');
     }
-    $string = new \PPHP\tools\classes\standard\baseType\String($string);
+    $string = new baseType\String($string);
 
     $generalHeader = $string->nextComponent($driver);
     if($generalHeader === false){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует стартовая строка запроса.');
+      throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует стартовая строка запроса.');
     }
     $method = $generalHeader->nextComponent(' ')->getVal();
     if($method === false){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует данные о методе запроса.');
+      throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует данные о методе запроса.');
     }
     $URI = $generalHeader->nextComponent(' ')->getVal();
     if($URI === false){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует данные о URI запроса.');
+      throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует данные о URI запроса.');
     }
 
     $header = $string->nextComponent($driver.$driver);
     if($header === false){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует заголовок запроса.');
+      throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует заголовок запроса.');
     }
     $header = Header::reestablish($header->getVal(), $driver);
     if(!$header->hasParameter('Host')){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует адрес узла запроса.');
+      throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует адрес узла запроса.');
     }
     $host = $header->getParameter('Host')->getValue();
 
     if($header->hasParameter('Content-Length')){
       $body = $string->subByte(null, (int)$header->getParameter('Content-Length')->getValue())->getVal();
       if($body === ''){
-        throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует заявленное тело запроса.');
+        throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует заявленное тело запроса.');
       }
     }
     else{
@@ -79,9 +85,9 @@ class Request extends Message{
   /**
    * @param string $host Узел запроса и порт запроса.
    * @param string $URI Адрес ресурса.
-   * @param string $method[optional] Метод запроса.
-   * @param Header $header Заголовок запроса.
-   * @param string|array $body[optional] Тело запроса в виде строки или ассоциативного массива параметров.
+   * @param string $method [optional] Метод запроса.
+   * @param Header $header [optional] Заголовок запроса.
+   * @param string|array $body [optional] Тело запроса в виде строки или ассоциативного массива параметров.
    */
   function __construct($host, $URI, $method = self::GET, Header $header = null, $body = null){
     $this->URI = $URI;
@@ -104,13 +110,25 @@ class Request extends Message{
 
   /**
    * Метод возвращает строку, полученную при интерпретации объекта.
-   * @param null|mixed $driver[optional] Данные, позволяющие изменить логику интерпретации объекта. Данный метод принимает символ конца строки для сериализации запроса.
+   * @abstract
+   *
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
+   *
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){
     $generalHeader = $this->method . ' ' . $this->URI . ' HTTP/1.1';
-    return $generalHeader . $driver . $this->header->interpretation($driver) . $driver . $this->body;
-
+    try{
+      return $generalHeader . $driver . $this->header->interpretation($driver) . $driver . $this->body;
+    }
+    catch(exceptions\NotFoundDataException $e){
+      throw $e;
+    }
+    catch(exceptions\InvalidArgumentException $e){
+      throw $e;
+    }
   }
 
   /**

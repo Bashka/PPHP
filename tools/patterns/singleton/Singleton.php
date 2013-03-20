@@ -13,7 +13,7 @@ interface Singleton{
    * Метод возвращает экземпляр данного класса.
    * @static
    * @abstract
-   * @return static
+   * @return static Единственный экземпляр данного класса.
    */
   static public function getInstance();
 }

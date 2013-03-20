@@ -1,6 +1,6 @@
 <?php
 namespace PPHP\tools\patterns\database\identification;
-
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 /**
  * Данный интерфейс реализуется классами, экземпляры которых имеют ключевой идентификатор.
  *
@@ -20,10 +20,11 @@ interface OID{
   /**
    * Метод устанавливает идентификатор нового объекта.
    * @abstract
+   *
    * @param integer $OID Идентификатор объекта.
+   *
    * @throws UpdatingOIDException Выбрасывается при попытке изменения идентификатора.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
-   * @return void
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   public function setOID($OID);
 
@@ -37,7 +38,7 @@ interface OID{
   /**
    * Метод возвращает ссылку на объект в виде строки.
    * @abstract
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если на момент вызова метода объект не был идентифицирован.
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если на момент вызова метода объект не был идентифицирован.
    * @return string Ссылка формата $ИмяКласса:ЗначениеИдентификатора.
    */
   public function getLinkOID();
@@ -49,8 +50,10 @@ interface OID{
    * Такого рода объект может быть использован как объектная ссылка на свое состояние для последующего восстановления.
    * @static
    * @abstract
+   *
    * @param integer $OID Идентификатор объекта.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   *
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @return static Фиктивный (proxy) объект.
    */
   public static function getProxy($OID);
