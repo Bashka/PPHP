@@ -15,5 +15,5 @@ interface Singleton{
    * @abstract
    * @return static Единственный экземпляр данного класса.
    */
-  static public function getInstance();
+   public static function getInstance();
 }

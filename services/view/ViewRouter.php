@@ -41,7 +41,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     $screen = null;
     if(($screen = $this->cache->get('ViewRouter_Screens_' . $moduleName . '_' . $screenName)) === false){
       if(!$this->conf->isExists('Screens', $moduleName . '_' . $screenName)){
-        throw new ScreenNotFoundException($moduleName, $screenName);
+        throw ScreenNotFoundException::getException($moduleName, $screenName);
       }
       $screen = $this->conf->get('Screens', $moduleName . '_' . $screenName);
       $this->cache->set('ViewRouter_Screens_' . $moduleName . '_' . $screenName, $screen);

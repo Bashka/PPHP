@@ -1,10 +1,18 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
+use \PPHP\tools\patterns\interpreter as interpreter;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
- * Классы, реализующие данный интерфейс должны иметь механизм интерпретации себя в строку SQL запроса.
+ * Классы, реализующие данный класс являются частью унифицированной SQL инструкции.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\database\query
  */
-interface ComponentQuery extends \PPHP\tools\patterns\interpreter\Interpreter{
+abstract class ComponentQuery implements interpreter\Interpreter, interpreter\Restorable{
+  use interpreter\TRestorable;
+
+  public static function updateString(&$string){
+    $string = preg_replace('/(\n|\t|\r)/u', '', $string);
+    $string = preg_replace('/(  +)/u', ' ', $string);
+  }
 }

@@ -8,7 +8,7 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\network\protocols\applied\http
  */
-class Header implements interpreter\Interpreter, interpreter\Restorable{
+class Header extends interpreter\RestorableAdapter implements interpreter\Interpreter{
   /**
    * Используемые в заголовке параметры.
    * @var Parameter[]
@@ -16,31 +16,43 @@ class Header implements interpreter\Interpreter, interpreter\Restorable{
   protected $parameters = [];
 
   /**
+   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @return string[]
+   */
+  public static function getMasks($driver = null){
+    if(is_null($driver)){
+      $driver = "\r\n";
+    }
+    return [
+      '(?:'.$driver.')|(?:(?:'.Parameter::getMasks()[0].$driver.')+)'
+    ];
+  }
+
+  /**
    * Метод восстанавливает объект из строки.
-   * @abstract
-   *
    * @param string $string Исходная строка.
-   * @param mixed $driver [optional] Разделитель компонентов заголовка.
-   *
-   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты строки.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
    * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return mixed Результирующий объект.
+   * @return static Результирующий объект.
    */
   public static function reestablish($string, $driver = null){
-    if(!is_string($string)){
-      throw new exceptions\InvalidArgumentException('string', $string);
+    if(is_null($driver)){
+      $driver = "\r\n";
     }
+    // Контроль типа и верификация выполняется в вызываемом родительском методе.
+    parent::reestablish($string, $driver);
 
-    $string = explode($driver, $string);
-    $resultObj = new static;
-    foreach($string as $parameter){
-      if($parameter !== ''){
-        $parameter = Parameter::reestablish($parameter);
-        $resultObj->addParameter($parameter);
+    $o = new self;
+    $string = trim($string);
+    if($string !== ''){
+      $parameters = explode($driver, $string);
+      foreach($parameters as $param){
+        $o->addParameter(Parameter::reestablish($param));
       }
     }
-    return $resultObj;
+    return $o;
   }
 
   /**
@@ -73,27 +85,20 @@ class Header implements interpreter\Interpreter, interpreter\Restorable{
    * Метод возвращает строку, полученную при интерпретации объекта.
    * @abstract
    *
-   * @param mixed $driver [optional] Разделитель компонентов заголовка.
+   * @param mixed $driver [optional] Разделитель компонентов заголовка. По умолчанию \r\n.
    *
-   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){
+    if(is_null($driver)){
+      $driver = "\r\n";
+    }
     if(count($this->parameters) == 0){
       return $driver;
     }
     $result = '';
     foreach($this->parameters as $parameter){
-      try{
-        $result .= $parameter->interpretation($driver) . $driver;
-      }
-      catch(exceptions\NotFoundDataException $e){
-        throw $e;
-      }
-      catch(exceptions\InvalidArgumentException $e){
-        throw $e;
-      }
+      $result .= $parameter->interpretation($driver) . $driver;
     }
     return $result;
   }

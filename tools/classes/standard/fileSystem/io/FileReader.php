@@ -1,29 +1,25 @@
 <?php
 namespace PPHP\tools\classes\standard\fileSystem\io;
+use \PPHP\tools\patterns\io as io;
 
 /**
  * Класс представляет входной поток из файла.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\fileSystem\io
  */
-class FileReader extends \PPHP\tools\patterns\io\InStream implements \PPHP\tools\patterns\io\SeekIO, \PPHP\tools\patterns\io\Closed{
+class FileReader extends io\InStream implements io\SeekIO, io\Closed{
 use FileSeekIO, FileClosed;
 
   /**
-   * Метод считывает один символ из потока.
-   * @throws \PPHP\tools\patterns\io\IOException Выбрасывается в случае возникновения ошибки при чтении из потока.
-   * @return string|boolean Возвращает текущий символ из потока или false, если поток закончет.
+   * Метод считывает один байт из потока.
+   * @throws io\IOException Выбрасывается в случае возникновения ошибки при чтении из потока.
+   * @return string Возвращает текущий байт из потока или пустую строку, если поток закончет.
    */
   public function read(){
     $result = fread($this->resource, 1);
-    return ($result == '')? false : $result;
-  }
-
-  /**
-   * Метод считывает заданное число байт из файла.
-   * @deprecated
-   * @param $length Число считываемых байт.
-   * @return string Прочитанные символы.
-   */
-  public function readSet($length){
-    return fread($this->resource, $length);
+    if($result === false){
+      throw new io\IOException('Ошибка использования потока ввода.');
+    }
+    return $result;
   }
 }

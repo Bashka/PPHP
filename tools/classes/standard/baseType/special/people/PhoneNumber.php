@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\people;
 use \PPHP\tools\classes\standard\baseType as baseType;
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс-обертка служит для представления и верификации телефонных номеров.
@@ -8,13 +9,7 @@ use \PPHP\tools\classes\standard\baseType as baseType;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType\special\people
  */
-class PhoneNumber extends baseType\wrapper{
-  /**
-   * Тип данной обертки.
-   * @var string
-   */
-  protected static $type = 'phoneNumber';
-
+class PhoneNumber extends baseType\Wrapper{
   /**
    * Регион.
    * @var string
@@ -32,33 +27,33 @@ class PhoneNumber extends baseType\wrapper{
   protected $number;
 
   /**
-   * Метод приводит переданные данные к типу обертки.
-   * @param mixed $val Приводимые данные.
-   * @return mixed Приведенные данные.
+   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @return string[]
    */
-  protected function transform($val){
-    $val = (string)$val;
-    $components = [];
-    preg_match('/^\+([0-9]+)\(([0-9]+)\)([0-9]+)$/i', $val, $components);
-    $this->region = $components[1];
-    $this->code = $components[2];
-    $this->number = $components[3];
-    return $val;
+  public static function getMasks($driver = null){
+    return [
+      '\+([1-9][0-9]*)\(([0-9]+)\)([0-9]+)'
+    ];
   }
 
   /**
-   * Метод определяет, является ли указанное значение допустимым типом.
-   * @static
-   * @param mixed $val Проверяемое значение.
-   * @return boolean true - если данные являются допустимым типом или могут быть приведены к нему без потери данных, иначе - false.
+   * Метод восстанавливает объект из строки.
+   * @param string $string Исходная строка.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return static Результирующий объект.
    */
-  public static function is($val){
-    if(is_string($val)){
-      if(preg_match('/^\+[0-9]+\([0-9]+\)[0-9]+$/', $val)){
-        return true;
-      }
-    }
-    return false;
+  public static function reestablish($string, $driver = null){
+    // Контроль типа и верификация выполняется в вызываемом родительском методе.
+    $m = parent::reestablish($string);
+
+    $o = new self($string);
+    $o->region = $m[1];
+    $o->code = $m[2];
+    $o->number = $m[3];
+    return $o;
   }
 
   public function getCode(){

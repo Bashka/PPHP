@@ -20,7 +20,7 @@ class PDOTest extends \PHPUnit_Framework_TestCase{
   /**
    * Имя БД.
    */
-  const dbName = 'testingDB';
+  const dbName = 'test';
   /**
    * Пользователь БД.
    */

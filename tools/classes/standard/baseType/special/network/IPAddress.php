@@ -7,5 +7,4 @@ namespace PPHP\tools\classes\standard\baseType\special\network;
  * @package PPHP\tools\classes\standard\baseType\special\network
  */
 interface IPAddress{
-
 }

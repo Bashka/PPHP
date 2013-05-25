@@ -6,5 +6,5 @@ namespace PPHP\tools\patterns\memento;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\memento
  */
-class AccessException extends \PPHP\tools\classes\standard\baseType\exceptions\LogicException{
+class AccessException extends \PPHP\tools\classes\standard\baseType\exceptions\SemanticException{
 }

@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\state;
 use PPHP\tools\patterns\buffer\MapBuffer as MapBuffer;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс является основой для буфера состояний объекта.
@@ -13,11 +14,21 @@ abstract class StateBuffer extends MapBuffer{
    *
    * @param string $stateName Имя состояния.
    * @param StatesContext $context Контекст.
-   * @param array $links Открытые для состояния свойства контекста.
+   * @param mixed[] $links Открытые для состояния свойства контекста.
    *
-   * @return mixed
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае отсутствия состояния с указанным именем.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @return State Объект состояния, связанный с данным именем.
    */
   public function getState($stateName, StatesContext $context, array $links){
-    return $this->getData($stateName, ['context' => $context, 'links' => $links]);
+    try{
+      return $this->getData($stateName, ['context' => $context, 'links' => $links]);
+    }
+    catch(exceptions\InvalidArgumentException $e){
+      throw $e;
+    }
+    catch(exceptions\NotFoundDataException $e){
+      throw $e;
+    }
   }
 }

@@ -1,52 +1,48 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType;
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс-обертка служит для предоставления дополнительной логики календарным числам.
+ * Допустимый тип: строка вида d.m.y|Y
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType
  */
-class Date extends wrapper{
+class Date extends Wrapper{
   /**
-   * Тип данной обертки.
-   * @var string
+   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @return string[]
    */
-  protected static $type = 'date';
-
-  /**
-   * Метод приводит переданные данные к типу обертки.
-   *
-   * @param mixed $val Приводимые данные.
-   *
-   * @return mixed Приведенные данные.
-   */
-  protected function transform($val){
-    return \DateTime::createFromFormat('d.m.Y', $val);
+  public static function getMasks($driver = null){
+    return [
+      '(?:(?:[1-9])|(?:[1-2][0-9])|(?:3[0-1]))\.(?:(?:[1-9])|(?:1[0-2]))\.[0-9]+'
+    ];
   }
 
   /**
-   * Метод определяет, является ли указанное значение календарным числом.
-   * @static
-   *
-   * @param mixed $val Проверяемые данные.
-   *
-   * @return boolean true - если данные являются календарным числом или могут быть приведены к типу Date без потери данных, иначе - false.
+   * Метод восстанавливает объект из строки.
+   * @param string $string Исходная строка.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return static Результирующий объект.
    */
-  public static function is($val){
-    if(preg_match('/^[0-3]?[0-9]\.[0-1]?[0-9]\.[0-9]+$/', $val)){
-      return true;
+  public static function reestablish($string, $driver = null){
+    // Контроль типа и верификация выполняется в вызываемом родительском методе.
+    parent::reestablish($string);
+
+    return new self(\DateTime::createFromFormat('d.m.Y', $string));
+  }
+
+  function __construct($val){
+    if(!is_a($val, '\DateTime')){
+      throw exceptions\InvalidArgumentException::getTypeException('DateTime', gettype($val));
     }
-    return false;
-  }
-
-  /**
-   * @return \DateTime
-   */
-  public function getDate(){
-    return $this->val;
+    parent::__construct($val);
   }
 
   function __toString(){
-    return $this->val->format('d.m.Y');
+    return (string) $this->val->format('d.m.Y');
   }
 }

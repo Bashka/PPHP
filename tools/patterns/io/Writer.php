@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\patterns\io;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Интерфейс определяет выходной поток.
@@ -17,7 +18,7 @@ interface Writer{
    * @param string $data Записываемая строка.
    *
    * @throws IOException Выбрасывается в случае возникновения ошибки при записи в поток.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return integer Число реально записанных байт.
    */
   public function write($data);

@@ -15,6 +15,7 @@ class Response extends Message{
    * @var string
    */
   protected $code;
+
   /**
    * Сообщение ответа.
    * @var string
@@ -22,62 +23,66 @@ class Response extends Message{
   protected $message;
 
   /**
+   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @return string[]
+   */
+  public static function getMasks($driver = null){
+    if(is_null($driver)){
+      $driver = "\r\n";
+    }
+    return ['HTTP\/1.1 ([0-9]{1,3}) ([A-Za-z ]+)' . $driver . '(' . Header::getMasks($driver)[0] . ')?' . $driver . '(.*)'];
+  }
+
+  /**
    * Метод восстанавливает объект из строки.
-   * @abstract
-   *
    * @param string $string Исходная строка.
-   * @param mixed  $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   *
-   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты строки.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
    * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return mixed Результирующий объект.
+   * @return static Результирующий объект.
    */
   public static function reestablish($string, $driver = null){
-    if($string == ''){
-      throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта.');
+    if(is_null($driver)){
+      $driver = "\r\n";
     }
-    $string = new baseType\String($string);
+    // Контроль типа и верификация выполняется в вызываемом родительском методе.
+    $m = parent::reestablish($string, $driver);
 
-    $generalHeader = $string->nextComponent($driver);
-    if($generalHeader === false){
-      throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует стартовая строка ответа.');
-    }
-    $generalHeader->nextComponent(' ');
-    $code = $generalHeader->nextComponent(' ')->getVal();
-    if($code === false){
-      throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует данные о коде ответа.');
-    }
-    $message = $generalHeader->sub()->getVal();
-    if($message === false){
-      throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует данные о сообщении ответа.');
+    $code = $m[1];
+    $message = $m[2];
+
+    $body = $m[6];
+    if($body === ''){
+      $body = null;
     }
 
-    $header = $string->nextComponent($driver . $driver);
-    if($header === false){
-      if($string->sub()->getVal() == $driver){
-        $header = new baseType\String('');
-      }
-      else{
-        throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует заголовок запроса.');
-      }
-    }
-    $header = Header::reestablish($header->getVal(), $driver);
+    if($m[3] !== ''){
+      $header = Header::reestablish($m[3]);
 
-    if($header->hasParameter('Content-Length')){
-      $body = $string->subByte(null, (int)$header->getParameter('Content-Length')->getValue())->getVal();
-      if($body === ''){
-        throw new exceptions\NotFoundDataException('Отсутствуют данные для формирования объекта. Отсутствует заявленное тело запроса.');
+      if(!is_null($body)){
+        if($header->hasParameter('Content-Length')){
+          $body = substr($body, 0, (int)$header->getParameterValue('Content-Length'));
+        }
       }
     }
     else{
-      $body = $string->sub()->getVal();
+      $header = null;
     }
 
-    return new static($code, $message, $header, $body);
+    return new self($code, $message, $header, $body);
   }
 
+  /**
+   * @param integer|string $code Код ответа.
+   * @param string $message Сообщение ответа.
+   * @param Header $header [optional] Заголовок запроса.
+   * @param string|array $body [optional] Тело запроса в виде строки или ассоциативного массива параметров, передаваемых в запросе. В случае передачи массива тело формируется следующим образом: <ключ элемента>:<значение элемента>EOL
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   */
   function __construct($code, $message, $header = null, $body = null){
+    exceptions\InvalidArgumentException::verifyType($code, 'iS');
+    exceptions\InvalidArgumentException::verifyType($message, 'S');
     parent::__construct($header, $body);
     $this->code = $code;
     $this->message = $message;
@@ -87,23 +92,16 @@ class Response extends Message{
    * Метод возвращает строку, полученную при интерпретации объекта.
    * @abstract
    *
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
+   * @param mixed $driver [optional] Разделитель компонентов ответа. По умолчанию PHP_EOL.
    *
-   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){
+    if(is_null($driver)){
+      $driver = "\r\n";
+    }
     $generalHeader = 'HTTP/1.1 ' . $this->code . ' ' . $this->message;
-    try{
-      return $generalHeader . $driver . $this->header->interpretation($driver) . $driver . $this->body;
-    }
-    catch(exceptions\NotFoundDataException $e){
-      throw $e;
-    }
-    catch(exceptions\InvalidArgumentException $e){
-      throw $e;
-    }
+    return $generalHeader . $driver . $this->header->interpretation($driver) . $driver . $this->body;
   }
 
   public function getCode(){

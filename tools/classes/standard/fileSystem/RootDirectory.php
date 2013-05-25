@@ -3,6 +3,8 @@ namespace PPHP\tools\classes\standard\fileSystem;
 
 /**
  * Класс представляет корневой каталог файловой системы.
+ * @author  Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\fileSystem
  */
 class RootDirectory extends Directory{
   /**
@@ -31,7 +33,7 @@ class RootDirectory extends Directory{
   /**
    * Метод запрещен в данном классе и генерирует исключение при обращении к нему.
    * @param string $newName
-   * @throws UpdatingRoodException
+   * @throws UpdatingRoodException Выбрасывается при попытке изменения или удаления корневого каталога.
    */
   public function rename($newName){
     throw new UpdatingRoodException('Невозможно модифицировать корневой каталог.');
@@ -40,7 +42,7 @@ class RootDirectory extends Directory{
   /**
    * Метод запрещен в данном классе и генерирует исключение при обращении к нему.
    * @param Directory $location
-   * @throws UpdatingRoodException
+   * @throws UpdatingRoodException Выбрасывается при попытке изменения или удаления корневого каталога.
    */
   public function move(Directory $location){
     throw new UpdatingRoodException('Невозможно модифицировать корневой каталог.');
@@ -48,7 +50,7 @@ class RootDirectory extends Directory{
 
   /**
    * Метод всегда возвращает true.
-   * @return bool
+   * @return boolean
    */
   public function isExists(){
     return true;
@@ -57,7 +59,7 @@ class RootDirectory extends Directory{
   /**
    * Метод запрещен в данном классе и генерирует исключение при обращении к нему.
    * @param Directory $location
-   * @throws UpdatingRoodException
+   * @throws UpdatingRoodException Выбрасывается при попытке изменения или удаления корневого каталога.
    */
   public function copyPaste(Directory $location){
     throw new UpdatingRoodException('Невозможно модифицировать корневой каталог.');
@@ -65,7 +67,7 @@ class RootDirectory extends Directory{
 
   /**
    * Метод всегда возвращает 0.
-   * @return int
+   * @return integer
    */
   public function getSize(){
     return 0;
@@ -74,7 +76,7 @@ class RootDirectory extends Directory{
   /**
    * Метод запрещен в данном классе и генерирует исключение при обращении к нему.
    * @param int $mode
-   * @throws UpdatingRoodException
+   * @throws UpdatingRoodException Выбрасывается при попытке изменения или удаления корневого каталога.
    */
   public function create($mode = 0777){
     throw new UpdatingRoodException('Невозможно модифицировать корневой каталог.');

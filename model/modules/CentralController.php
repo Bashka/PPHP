@@ -1,6 +1,6 @@
 <?php
 namespace PPHP\model\modules;
-
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 spl_autoload_register(function($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
@@ -69,6 +69,7 @@ class CentralController{
   /**
    * Данный метод отвечает за передачу модулю сообщения от слоя представления и возврат ответа.
    * @static
+   * @throws exceptions\ComponentClassException Выбрасывается в случае отсутствия запрашиваемого метода модуля.
    * @throws AccessException Выбрасывается в случае, если доступ к данному методу модуля запрещен.
    */
   public static function main(){
@@ -80,7 +81,7 @@ class CentralController{
 
     $send = new \stdClass();
     if(!method_exists($controller, $method)){
-      $send->exception = new \PPHP\tools\classes\standard\baseType\exceptions\LogicException('Запрашиваемый интерфейс ' . $method . ' модуля ' . $module . ' отсутствует.');
+      $send->exception = new exceptions\ComponentClassException('Запрашиваемый метод ['.$method.'] модуля ['.$module.'] отсутствует.');
     }
     else{
       // Проверка прав доступа к методу модуля

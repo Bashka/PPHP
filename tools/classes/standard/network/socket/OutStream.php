@@ -31,11 +31,11 @@ class OutStream extends io\OutStream implements io\Closed{
     else{
       if(socket_shutdown($this->resource) === false){
         $code = socket_last_error($this->resource);
-        throw new io\IOException('Ошибка закрытия сокета.'.socket_strerror($code), $code);
+        throw new io\IOException('Ошибка закрытия сокета. '.socket_strerror($code), $code);
       }
       if(socket_close($this->resource) === false){
         $code = socket_last_error($this->resource);
-        throw new io\IOException('Ошибка закрытия сокета.'.socket_strerror($code), $code);
+        throw new io\IOException('Ошибка закрытия сокета. '.socket_strerror($code), $code);
       }
       $this->isClose = true;
       return true;

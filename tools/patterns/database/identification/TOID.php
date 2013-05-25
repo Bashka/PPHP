@@ -12,32 +12,52 @@ trait TOID{
    * Целочисленный идентификатор объекта или null - если объект не идентифицирован.
    * @var integer|null
    */
-  protected $OID;
+  private $OID = null;
+
+  /**
+   * Метод возвращает фиктивный (proxy), идентифицированный объект.
+   * Фиктивный объект, возвращаемый данным методом, не имеет состояния, но идентифицирован по средствам установки указанного целочисленного идентификатора.
+   * Такого рода объект может быть использован как объектная ссылка на свое состояние для последующего восстановления.
+   * Данная реализация использует конструктор класса не передавая ему параметров, это может привести к ошибке в случае, если конструктор ожидает параметры при вызове. Для решения этой проблемы следует переопределить метод.
+   * @static
+   *
+   * @param integer $OID Идентификатор объекта.
+   *
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа или недопустимого значения.
+   * @return static Фиктивный (proxy) объект.
+   */
+  public static function getProxy($OID){
+    exceptions\InvalidArgumentException::verifyType($OID, 'i');
+    exceptions\InvalidArgumentException::verifyVal($OID, 'i > 0');
+
+    $proxy = new static;
+    $proxy->setOID($OID);
+    return $proxy;
+  }
 
   /**
    * Метод возвращает идентификатор объекта.
    * @return integer|null Идентификатор объекта или null - если объект не идентифицирован.
    */
-  public function getOID(){
+  public final function getOID(){
     return $this->OID;
   }
 
   /**
-   * Метод устанавливает идентификатор нового объекта.
+   * Метод устанавливает идентификатор для не идентифицированного объекта.
    *
    * @param integer $OID Идентификатор объекта.
    *
-   * @throws UpdatingOIDException Выбрасывается при попытке изменения идентификатора.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws OIDException Выбрасывается при передаче в качестве параметра уже идентифицированного объекта.
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа или недопустимого значения.
    */
-  public function setOID($OID){
+  public final function setOID($OID){
     if(!empty($this->OID)){
-      throw new UpdatingOIDException();
+      throw new OIDException('Предотвращение коллизии.');
     }
-    $OID = (integer)$OID;
-    if(!is_integer($OID)){
-      throw new exceptions\InvalidArgumentException('integer', $OID);
-    }
+    exceptions\InvalidArgumentException::verifyType($OID, 'i');
+    exceptions\InvalidArgumentException::verifyVal($OID, 'i > 0');
+
     $this->OID = $OID;
   }
 
@@ -45,41 +65,7 @@ trait TOID{
    * Метод проверяет, идентифицирован ли объект.
    * @return boolean true - если объект идентифицирован, иначе - false
    */
-  public function isOID(){
-    return !is_null($this->getOID());
-  }
-
-  /**
-   * Метод возвращает ссылку на объект в виде строки.
-   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если на момент вызова метода объект не был идентифицирован.
-   * @return string Ссылка формата $ИмяКласса:ЗначениеИдентификатора.
-   */
-  public function getLinkOID(){
-    if(!$this->isOID()){
-      throw new exceptions\NotFoundDataException('Невозможно получить строковую ссылку на неидентифицированный объект.');
-    }
-    return '$/' . str_replace('\\', '/', get_class($this)) . ':' . $this->getOID();
-  }
-
-  /**
-   * Метод возвращает фиктивный (proxy), идентифицированный объект.
-   *
-   * Фиктивный объект, возвращаемый данным методом, не имеет состояния, но идентифицирован по средствам установки указанного целочисленного идентификатора.
-   * Такого рода объект может быть использован как объектная ссылка на свое состояние для последующего восстановления.
-   * @static
-   *
-   * @param integer $OID Идентификатор объекта.
-   *
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
-   * @return static Фиктивный (proxy) объект.
-   */
-  public static function getProxy($OID){
-    $OID = (integer)$OID;
-    if(!is_integer($OID)){
-      throw new exceptions\InvalidArgumentException('integer', $OID);
-    }
-    $proxy = new static;
-    $proxy->setOID($OID);
-    return $proxy;
+  public final function isOID(){
+    return !is_null($this->OID);
   }
 }

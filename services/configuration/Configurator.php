@@ -37,12 +37,8 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException
    */
   public function get($section, $key){
-    if(!is_string($section) || empty($section)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $section);
-    }
-    if(!is_string($key) || empty($key)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $key);
-    }
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($section, 'S');
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($key, 'S');
     if(!$this->ini->isDataExists($key, $section)){
       return false;
     }
@@ -58,12 +54,8 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException
    */
   public function set($section, $key, $value){
-    if(!is_string($section) || empty($section)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $section);
-    }
-    if(!is_string($key) || empty($key)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $key);
-    }
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($section, 'S');
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($key, 'S');
     $value = (string)$value;
     $this->ini->set($key, $value, $section);
     $this->ini->rewrite();
@@ -78,12 +70,8 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException
    */
   public function isExists($section, $key){
-    if(!is_string($section) || empty($section)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $section);
-    }
-    if(!is_string($key) || empty($key)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $key);
-    }
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($section, 'S');
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($key, 'S');
     return $this->ini->isDataExists($key, $section);
   }
 
@@ -95,12 +83,8 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException
    */
   public function delete($section, $key){
-    if(!is_string($section) || empty($section)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $section);
-    }
-    if(!is_string($key) || empty($key)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $key);
-    }
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($section, 'S');
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($key, 'S');
     $this->ini->remove($key, $section);
     $this->ini->rewrite();
     return true;

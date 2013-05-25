@@ -19,7 +19,7 @@ class InStream extends io\InStream implements io\Closed{
   protected $isClose = false;
 
   /**
-   * Таймаут ожидания при чтении данных.
+   * Таймаут ожидания при чтении данных (сек).
    * @var integer [optional]
    */
   protected $readTimeout = 1;
@@ -71,6 +71,10 @@ class InStream extends io\InStream implements io\Closed{
     socket_set_block($this->resource); // Остановка выполнения до выполнения чтения из потока
     if($char === false){
       $code = socket_last_error($this->resource);
+      // В случае превышения интервала ожидания, предполагается конец потока
+      if($code == 11){
+        return '';
+      }
       throw new io\IOException('Невозможно выполнть чтение из потока ('.$code.': '.socket_strerror($code).'). Возможно сокетное соединение было сброшено.');
     }
     else{
@@ -89,12 +93,8 @@ class InStream extends io\InStream implements io\Closed{
    * @return string Прочитанная строка или пустая строка если нет данных для чтения.
    */
   public function readPackage($length){
-    if(!is_integer($length)){
-      throw new exceptions\InvalidArgumentException('integer', $length);
-    }
-    elseif($length < 1){
-      throw new exceptions\InvalidArgumentException('Ожидается длина большая 0');
-    }
+    exceptions\InvalidArgumentException::verifyType($length, 'i');
+    exceptions\InvalidArgumentException::verifyVal($length, 'i > 0');
 
     $char = socket_read($this->resource, $length);
     socket_set_block($this->resource); // Остановка выполнения до выполнения чтения из потока

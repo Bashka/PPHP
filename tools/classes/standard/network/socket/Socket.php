@@ -77,9 +77,9 @@ class Socket{
   }
 
   /**
-   * @param integer $domain[optional] Домен соединения.
-   * @param integer $type[optional] Тип сокета.
-   * @param integer $protocol[optional] Протокол передачи данных.
+   * @param integer $domain [optional] Домен соединения.
+   * @param integer $type [optional] Тип сокета.
+   * @param integer $protocol [optional] Протокол передачи данных.
    *
    * @throws exceptions\RuntimeException Выбрасывается в случае невозможности создания сокета.
    */
@@ -113,12 +113,14 @@ class Socket{
       throw new exceptions\RuntimeException('Невозможно выполнить соединение с удаленным сокетом. '. socket_strerror($code), $code);
     }
     $stream = new Stream(new InStream($this->resource), new OutStream($this->resource));
+    // Обновление сокета с целью повторного соединения
     try{
       $this->createSocket();
     }
     catch(exceptions\RuntimeException $e){
       throw $e;
     }
+
     return $stream;
   }
 
@@ -139,6 +141,7 @@ class Socket{
         throw new exceptions\RuntimeException('Невозможно изменить свойства сокета. '. socket_strerror($code), $code);
       }
     }
+    socket_set_option($this->resource, SOL_SOCKET, SO_RCVTIMEO, ["sec"=>1, "usec"=>0]);
     if(socket_bind($this->resource, $address, $port) === false){
       $code = socket_last_error($this->resource);
       throw new exceptions\RuntimeException('Невозможно привязать сокет к адресу. '. socket_strerror($code), $code);
@@ -154,8 +157,8 @@ class Socket{
    * @return boolean|Stream Возвращает поток к удаленному клиенскому сокету или false - если на момент вызова метода нет ожидающих клиенских сокетов.
    */
   public function accept(){
-    if($steam = socket_accept($this->resource)){
-      return new Stream(new InStream($steam), new OutStream($steam));
+    if($stream = socket_accept($this->resource)){
+      return new Stream(new InStream($stream), new OutStream($stream));
     }
     else{
       return false;
@@ -165,6 +168,8 @@ class Socket{
   /**
    * Метод отключает серверный сокет от прослушиваемого порта узла.
    * После выполнения этого метода сокет можно использовать повторно как серверный, а так же как клиенский.
+   * Серверный сокет должен быть закрыт только после закрытия всех клиентских соединений, иначе это приведет к ошибке.
+   * В случае, если соединение с клиенстким сокетом было выполнено, серверный сокет не закрывается сразу, а ждет несколько секунд дополнительных данных, которые могли отстать от основного потока.
    * @throws io\IOException Выбрасывается в случае невозможности отключения сокета.
    * @throws exceptions\RuntimeException Выбрасывается в случае невозможности обнуления сокета.
    */

@@ -9,13 +9,7 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType\special\network
  */
-class DomainName extends baseType\wrapper{
-  /**
-   * Тип данной обертки.
-   * @var string
-   */
-  protected static $type = 'domainName';
-
+class DomainName extends baseType\Wrapper{
   /**
    * Компоненты адреса.
    * @var string[]
@@ -23,41 +17,43 @@ class DomainName extends baseType\wrapper{
   protected $subDomains = [];
 
   /**
-   * Метод приводит переданные данные к типу обертки.
-   * @param mixed $val Приводимые данные.
-   * @return mixed Приведенные данные.
+   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @return string[]
    */
-  protected function transform($val){
-    $val = (string)$val;
-    $this->subDomains = array_reverse(explode('.', $val));
-    return $val;
+  public static function getMasks($driver = null){
+    return [
+      '[A-Za-z0-9][A-Za-z0-9-]*(?:(?:\.[A-Za-z0-9-]+)*|\.)[A-Za-z0-9]'
+    ];
   }
 
   /**
-   * Метод определяет, является ли указанное значение допустимым типом.
-   * @static
-   * @param mixed $val Проверяемое значение.
-   * @return boolean true - если данные являются допустимым типом или могут быть приведены к нему без потери данных, иначе - false.
+   * Метод восстанавливает объект из строки.
+   * @param string $string Исходная строка.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return static Результирующий объект.
    */
-  public static function is($val){
-    if(is_string($val)){
-      if(preg_match('/^[a-z0-9][a-z0-9-]*((\.[a-z0-9-]+)*|\.)[a-z0-9]$/i', $val)){
-        return true;
-      }
-    }
-    return false;
+  public static function reestablish($string, $driver = null){
+    // Контроль типа и верификация выполняется в вызываемом родительском методе.
+    parent::reestablish($string);
+
+    $o = new self($string);
+    $o->subDomains = array_reverse(explode('.', $string));
+    return $o;
   }
 
   /**
    * Метод возвращает указанное значение компонента адреса.
    * @param integer $index Индекс компонента в диапазоне от 0 до порядкового номера поддомена.
    * @return string Значение компонента адреса.
-   * @throws exceptions\LogicException Выбрасывается в случае, если индек выходит за границы допустимого диапазона.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае передаче параметра недопустимого типа.
    */
   public function getComponent($index){
-    if($index < 0 || $index >= count($this->subDomains)){
-      throw new exceptions\LogicException('Недопустимый индекс массива.');
-    }
+    exceptions\InvalidArgumentException::verifyType($index, 'i');
+    exceptions\InvalidArgumentException::verifyVal($index, 'i [] 0 '.count($this->subDomains));
+
     return $this->subDomains[$index];
   }
 }

@@ -8,7 +8,7 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\network\protocols\applied\http
  */
-class Parameter implements interpreter\Interpreter, interpreter\Restorable{
+class Parameter extends interpreter\RestorableAdapter implements interpreter\Interpreter{
   /**
    * Имя параметра.
    * @var string
@@ -21,23 +21,29 @@ class Parameter implements interpreter\Interpreter, interpreter\Restorable{
   protected $value;
 
   /**
+   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @return string[]
+   */
+  public static function getMasks($driver = null){
+    return [
+      '([A-Za-z0-9_\-]+):([^\n\r]*)'
+    ];
+  }
+
+  /**
    * Метод восстанавливает объект из строки.
-   * @abstract
-   *
    * @param string $string Исходная строка.
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   *
-   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты строки.
    * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return mixed Результирующий объект.
+   * @return static Результирующий объект.
    */
   public static function reestablish($string, $driver = null){
-    if(strpos($string, ':') === false){
-      throw new exceptions\NotFoundDataException('Недостаточно данных для формирования объекта.');
-    }
-    $string = explode(':', $string);
-    return new static($string[0], trim($string[1]));
+    // Контроль типа и верификация выполняется в вызываемом родительском методе.
+    $m = parent::reestablish($string);
+
+    return new self($m[1], trim($m[2]));
   }
 
   function __construct($name, $value){
@@ -51,8 +57,6 @@ class Parameter implements interpreter\Interpreter, interpreter\Restorable{
    *
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
    *
-   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){

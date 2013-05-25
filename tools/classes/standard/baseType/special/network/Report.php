@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\network;
 use \PPHP\tools\classes\standard\baseType as baseType;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс-обертка служит для представления и верификации имен протоколов обмена данными.
@@ -8,13 +9,7 @@ use \PPHP\tools\classes\standard\baseType as baseType;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType\special\network
  */
-class Report extends \PPHP\tools\classes\standard\baseType\wrapper{
-  /**
-   * Тип данной обертки.
-   * @var string
-   */
-  protected static $type = 'report';
-
+class Report extends baseType\Wrapper{
   const HTTP = 'http';
   const HTTPS = 'https';
   const FTP = 'ftp';
@@ -30,30 +25,31 @@ class Report extends \PPHP\tools\classes\standard\baseType\wrapper{
   protected $name;
 
   /**
-   * Метод приводит переданные данные к типу обертки.
-   * @param mixed $val Приводимые данные.
-   * @return mixed Приведенные данные.
+   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @return string[]
    */
-  protected function transform($val){
-    $val = (string)$val;
-    $strVal = new baseType\String($val);
-    $this->name = strtolower($strVal->subLeft($strVal->search(':'))->getVal());
-    return $val;
+  public static function getMasks($driver = null){
+    return [
+      '('.self::HTTP.'|'.self::HTTPS.'|'.self::FTP.'|'.self::DNS.'|'.self::SSH.'|'.self::POP3.'|'.self::SMTP.'):\/\/'
+    ];
   }
 
   /**
-   * Метод определяет, является ли указанное значение допустимым типом.
-   * @static
-   * @param mixed $val Проверяемое значение.
-   * @return boolean true - если данные являются допустимым типом или могут быть приведены к нему без потери данных, иначе - false.
+   * Метод восстанавливает объект из строки.
+   * @param string $string Исходная строка.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return static Результирующий объект.
    */
-  public static function is($val){
-    if(is_string($val)){
-      if(preg_match('/^('.self::HTTP.'|'.self::HTTPS.'|'.self::FTP.'|'.self::DNS.'|'.self::SSH.'|'.self::POP3.'|'.self::SMTP.'):\/\/$/i', $val)){
-        return true;
-      }
-    }
-    return false;
+  public static function reestablish($string, $driver = null){
+    // Контроль типа и верификация выполняется в вызываемом родительском методе.
+    $m = parent::reestablish($string);
+
+    $o = new self($string);
+    $o->name = $m[1];
+    return $o;
   }
 
   public function getName(){

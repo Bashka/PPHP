@@ -115,9 +115,8 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если в качестве свойства задан недопустимый аргумент или значения переданных аргументов имеют неверный тип.
    */
   public function setAttribute($attributeName, $value){
-    if(!is_string($attributeName) || !is_string($value)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException();
-    }
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($attributeName, 'S');
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($value, 'S');
     if(array_search($attributeName, ['Driver', 'Host', 'DBName', 'Article', 'Password']) == -1){
       throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException();
     }
@@ -157,9 +156,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * @return null|string
    */
   public function getAttribute($attributeName){
-    if(!is_string($attributeName)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $attributeName);
-    }
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($attributeName, 'S');
 
     switch($attributeName){
       case 'Driver':

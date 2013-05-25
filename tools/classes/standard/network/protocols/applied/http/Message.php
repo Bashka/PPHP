@@ -8,7 +8,7 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\network\protocols\applied\http
  */
-abstract class Message implements interpreter\Restorable, interpreter\Interpreter{
+abstract class Message extends interpreter\RestorableAdapter implements interpreter\Interpreter{
   /**
    * Заголовок.
    * @var Header
@@ -22,7 +22,7 @@ abstract class Message implements interpreter\Restorable, interpreter\Interprete
 
   /**
    * @param Header $header [optional] Заголовок запроса.
-   * @param string|array $body [optional] Тело запроса в виде строки или ассоциативного массива параметров, передаваемых в запросе. В случае передачи массива тело формируется следующим образом: <ключ элемента>:<значение элемента>EOL
+   * @param string|array $body [optional] Тело запроса в виде строки или ассоциативного массива параметров, передаваемых в запросе. В случае передачи массива тело формируется следующим образом: <ключ элемента>:<значение элемента>&
    */
   function __construct($header=null, $body=null){
     $this->header = ($header !== null)? $header : new Header();
@@ -76,17 +76,16 @@ abstract class Message implements interpreter\Restorable, interpreter\Interprete
    * Данный метод позволяет так же задать тип и кодировку передаваемых данных в том случае, если они не были заданы заранее.
    * Выполнение метода сопровождается установкой параметров заголовка Content-Length и Content-MD5.
    *
-   * @param string $body Тело запроса.
+   * @param string|integer|float $body Тело запроса.
    * @param string $type [optional] Тип данных тела.
    * @param string $charset [optional] Кодировка данных тела.
    *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения пустого тела запроса.
    */
   public function setBody($body, $type = 'application/x-www-form-urlencoded', $charset = 'utf-8'){
+    exceptions\InvalidArgumentException::verifyType($body, 'sif');
     $body = (string) $body;
-    if($body === ''){
-      throw new exceptions\InvalidArgumentException('В качестве тела запроса должна быть не пустая строка.');
-    }
+
     $this->body = $body;
     if(!$this->header->hasParameter('Content-Type')){
       $this->header->addParameterStr('Content-Type', $type . ';charset=' . $charset);

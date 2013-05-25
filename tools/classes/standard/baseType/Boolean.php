@@ -1,46 +1,51 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType;
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс-обертка служит для верификации и представления логических данных в системе.
+ * Истинной здесь являются следующие данные: логическое true; строка "true".
+ * Ложью здесь являются следующие данные: логическое false; строка "false".
+ * Другие данные приводят к выбросу исключения exceptions\InvalidArgumentException.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType
  */
-class Boolean extends wrapper{
+class Boolean extends Wrapper{
   /**
-   * Тип данной обертки.
-   * @var string
+   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @return string[]
    */
-  protected static $type = 'boolean';
-
-  /**
-   * Метод приводит переданные данные к типу обертки.
-   *
-   * @param mixed $val Приводимые данные.
-   *
-   * @return mixed Приведенные данные.
-   */
-  protected function transform($val){
-    if($val === 'false'){
-      return false;
-    }
-    return (boolean) $val;
+  public static function getMasks($driver = null){
+    return [
+      '((?:true)|(?:false))'
+    ];
   }
 
-
   /**
-   * Метод определяет, является ли указанное значение допустимым типом.
-   * @static
-   * @param mixed $val Проверяемые данные.
-   * @return boolean true - если данные являются допустимым типом или могут быть приведены к нему без потери данных, иначе - false.
+   * Метод восстанавливает объект из строки.
+   * @param string $string Исходная строка.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return static Результирующий объект.
    */
-  public static function is($val){
-    if(is_bool($val)){
-      return true;
+  public static function reestablish($string, $driver = null){
+    // Контроль типа и верификация выполняется в вызываемом родительском методе.
+    parent::reestablish($string);
+
+    if($string == 'true'){
+      return new self(true);
     }
-    if($val === 1 || $val === 0 || $val === 'true' || $val === 'false'){
-      return true;
+    else{
+      return new self(false);
     }
-    return false;
+  }
+
+  function __construct($val){
+    if(!is_bool($val)){
+      throw exceptions\InvalidArgumentException::getTypeException('boolean', gettype($val));
+    }
+    parent::__construct($val);
   }
 }

@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\classes\standard\essence\structures\hierarchical;
 use \PPHP\tools\patterns\database as database;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет сущности, имеющие неограниченные по вертикали и горизонтали иерархические связи между другими сужностями.
@@ -25,7 +26,14 @@ abstract class HierarchicalEntity extends database\LongObject{
     return $this->hierarchicalParent;
   }
 
+
+  /**
+   * @param integer $parentOID
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   */
   public function setHierarchicalParent($parentOID){
+    exceptions\InvalidArgumentException::verifyType($parentOID, 'i');
+
     $this->hierarchicalParent = $parentOID;
   }
 

@@ -5,10 +5,11 @@ use \PPHP\tools\patterns\metadata as metadata;
 use \PPHP\tools\classes\standard\fileSystem as fileSystem;
 use \PPHP\model\classes\Installer as Installer;
 use \PPHP\services as services;
+use \PPHP\tools\patterns\io as io;
 
 /**
+ * @todo: повысить уровень абстракции исключений и исключить лишние обработчики
  * Отражение модуля.
- *
  * Данный класс является отражением модуля системы с устойчивым состоянием и возможностью аннотирования.
  * Класс может быть инстанциирован только для установленных в системе модулей.
  * @author  Artur Sh. Mamedbekov
@@ -21,6 +22,7 @@ class ReflectionModule implements metadata\Described{
    * Тип модуля - конкретный.
    */
   const SPECIFIC = 'specific';
+
   /**
    * Тип модуля - виртуальный.
    */
@@ -28,7 +30,7 @@ class ReflectionModule implements metadata\Described{
 
   /**
    * Файл состояния модуля.
-   * @var FileINI
+   * @var fileSystem\FileINI
    */
   private $ini;
 
@@ -37,26 +39,31 @@ class ReflectionModule implements metadata\Described{
    * @var string
    */
   protected $name;
+
   /**
    * Тип модуля.
    * @var string
    */
   protected $type;
+
   /**
    * Расположение модуля относительно хранилища модулей.
    * @var string
    */
   protected $location;
+
   /**
    * Расположение модуля относительно корня системы.
    * @var string
    */
   protected $address;
+
   /**
    * Версия  модуля.
    * @var string
    */
   protected $version;
+
   /**
    * Внутренний инсталятор модуля или null - если модуль не имеет внутреннего инсталлятора.
    *
@@ -97,29 +104,65 @@ class ReflectionModule implements metadata\Described{
   protected $access;
 
   /**
+   * Метод перезаписывает указанное множественное свойство разделяя его элементы запятой.
+   *
+   * @param string $propertyName Имя свойства.
+   * @param string $section      Имя раздела.
+   *
+   * @throws exceptions\RuntimeException Выбрасывается в случае блокировки, отсутствия файла состояния модуля или ошибки при работе с потоком вывода.
+   */
+  protected function rewriteProperty($propertyName, $section){
+    try{
+      $this->ini->set($propertyName, implode(',', $this->$propertyName), $section);
+      $this->ini->rewrite();
+    }
+    catch(fileSystem\LockException $e){
+      throw new exceptions\RuntimeException('Отсутствует доступ к файлу состояния модуля.');
+    }
+    catch(fileSystem\NotExistsException $e){
+      throw new exceptions\RuntimeException('Отсутствует доступ к файлу состояния модуля.');
+    }
+    catch(io\IOException $e){
+      throw new exceptions\RuntimeException('Отсутствует доступ к файлу состояния модуля.');
+    }
+  }
+
+  /**
    * @param string $moduleName     Имя модуля.
    * @param string $locationModule Расположение каталога модуля относительно хранилаща модулей.
    * @param string $addressModule  Расположение каталога модуля относительно корня системы.
    *
-   * @throws fileSystem\NotExistsException Выбрасывается в случае отсутствия файла состояния модуля.
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws exceptions\RuntimeException Выбрасывается в случае отсутствия доступа к файлу состояния модуля.
+   * @throws fileSystem\NotExistsException Выбрасывается в случае отсутствия файла состояния модуля или каталога модуля.
    */
   public function __construct($moduleName, $locationModule, $addressModule){
-    // @todo: обработать возможные исключения
+    exceptions\InvalidArgumentException::verifyType($moduleName, 'S');
+    exceptions\InvalidArgumentException::verifyType($locationModule, 'S');
+    exceptions\InvalidArgumentException::verifyType($locationModule, 'S');
+
     $this->modulesRouter = services\modules\ModulesRouter::getInstance();
     $this->name = $moduleName;
     $this->location = $locationModule;
     $this->address = $addressModule;
-    // @todo: обработать возможные исключения
     $iniFile = fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/' . $this->address . '/state.ini');
-    // @todo: обработать возможные исключения
-    if(!$iniFile->isExists()){
-      throw new fileSystem\NotExistsException('Требуемый файл состояния модуля не найден.');
+    try{
+      if(!$iniFile->isExists()){
+        throw new fileSystem\NotExistsException('Требуемый файл состояния модуля не найден.');
+      }
     }
-    // @todo: обработать возможные исключения
-    $this->ini = new fileSystem\FileINI($iniFile, true);
+    catch(fileSystem\NotExistsException $e){
+      throw $e;
+    }
 
-    // @todo: обработать возможные исключения
-    $this->version = $this->ini->get('version', 'Module');
+    $this->ini = new fileSystem\FileINI($iniFile, true);
+    try{
+      $this->version = $this->ini->get('version', 'Module');
+    }
+    catch(fileSystem\LockException $e){
+      throw new exceptions\RuntimeException('Отсутствует доступ к файлу состояния модуля.');
+    }
+    // Последующий перехват данного исключения не выполняется по причине не возможности его появления
     $this->type = $this->ini->get('type', 'Module');
     $installerAddress = $_SERVER['DOCUMENT_ROOT'] . '/' . $this->address . '/Installer.php';
     if(file_exists($installerAddress)){
@@ -130,12 +173,10 @@ class ReflectionModule implements metadata\Described{
       $this->installer = null;
     }
 
-    // @todo: обработать возможные исключения
     $this->parent = $this->ini->get('parent', 'Depending');
     if($this->parent == ''){
       $this->parent = null;
     }
-    // @todo: обработать возможные исключения
     $this->children = trim((string)$this->ini->get('children', 'Depending'));
     if($this->children == ''){
       $this->children = [];
@@ -143,6 +184,7 @@ class ReflectionModule implements metadata\Described{
     else{
       $this->children = explode(',', $this->children);
     }
+
 
     if($this->type == self::SPECIFIC){
       $this->used = trim((string)$this->ini->get('used', 'Depending'));
@@ -153,7 +195,6 @@ class ReflectionModule implements metadata\Described{
         $this->used = explode(',', $this->used);
       }
 
-      // @todo: обработать возможные исключения
       $this->destitute = trim((string)$this->ini->get('destitute', 'Depending'));
       if($this->destitute == ''){
         $this->destitute = [];
@@ -162,7 +203,6 @@ class ReflectionModule implements metadata\Described{
         $this->destitute = explode(',', $this->destitute);
       }
 
-      // @todo: обработать возможные исключения
       if($this->ini->isSectionExists('Access')){
         $this->access = $this->ini->getSection('Access');
         foreach($this->access as &$access){
@@ -177,27 +217,15 @@ class ReflectionModule implements metadata\Described{
 
   /**
    * Метод возвращает контроллер данного модуля, если он является конкретным.
-   * @throws exceptions\LogicException Выбрасывается в случае, если модуль не явлется конкретным.
+   * @throws exceptions\RuntimeException Выбрасывается в случае, если модуль не явлется конкретным.
    * @return \PPHP\model\classes\ModuleController Контроллер модуля.
    */
   public function getController(){
     if($this->type == self::VIRTUAL){
-      throw new exceptions\LogicException('Виртуальный модуль не может использовать контроллер.');
+      throw new exceptions\RuntimeException('Виртуальный модуль не может использовать контроллер.');
     }
     $controller = '\\' . str_replace('/', '\\', $this->address) . '\\Controller';
     return $controller::getInstance();
-  }
-
-  /**
-   * Метод перезаписывает указанное множественное свойство разделяя его элементы запятой.
-   *
-   * @param string $propertyName Имя свойства.
-   * @param string $section      Имя раздела.
-   */
-  protected function rewriteProperty($propertyName, $section){
-    // @todo: обработать возможные исключения
-    $this->ini->set($propertyName, implode(',', $this->$propertyName), $section);
-    $this->ini->rewrite();
   }
 
   /**
@@ -205,13 +233,20 @@ class ReflectionModule implements metadata\Described{
    *
    * @param string $childModuleName Имя добавляемого дочернего модуля.
    *
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws exceptions\RuntimeException Выбрасывается в случае блокировки, отсутствия файла состояния модуля или ошибки при работе с потоком вывода.
    * @return boolean true - если связь успешно добавлена, иначе - false.
    */
   public function addChild($childModuleName){
+    exceptions\InvalidArgumentException::verifyType($childModuleName, 'S');
     if(($key = array_search($childModuleName, $this->children)) === false){
       $this->children[] = $childModuleName;
-      // @todo: обработать возможные исключения
-      $this->rewriteProperty('children', 'Depending');
+      try{
+        $this->rewriteProperty('children', 'Depending');
+      }
+      catch(exceptions\RuntimeException $e){
+        throw $e;
+      }
       return true;
     }
     return false;
@@ -222,13 +257,20 @@ class ReflectionModule implements metadata\Described{
    *
    * @param string $childModuleName Имя удаляемого дочернего модуля.
    *
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws exceptions\RuntimeException Выбрасывается в случае блокировки, отсутствия файла состояния модуля или ошибки при работе с потоком вывода.
    * @return boolean true - если связь успешно удалена, иначе - false.
    */
   public function removeChild($childModuleName){
+    exceptions\InvalidArgumentException::verifyType($childModuleName, 'S');
     if(($key = array_search($childModuleName, $this->children)) !== false){
       unset($this->children[$key]);
-      // @todo: обработать возможные исключения
-      $this->rewriteProperty('children', 'Depending');
+      try{
+        $this->rewriteProperty('children', 'Depending');
+      }
+      catch(exceptions\RuntimeException $e){
+        throw $e;
+      }
       return true;
     }
     return false;
@@ -239,13 +281,20 @@ class ReflectionModule implements metadata\Described{
    *
    * @param string $moduleName Имя добавляемого зависимого модуля.
    *
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws exceptions\RuntimeException Выбрасывается в случае блокировки, отсутствия файла состояния модуля или ошибки при работе с потоком вывода.
    * @return boolean true - если связь успешно добавлена, иначе - false.
    */
   public function addDestitute($moduleName){
+    exceptions\InvalidArgumentException::verifyType($moduleName, 'S');
     if(($key = array_search($moduleName, $this->destitute)) === false){
       $this->destitute[] = $moduleName;
-      // @todo: обработать возможные исключения
-      $this->rewriteProperty('destitute', 'Depending');
+      try{
+        $this->rewriteProperty('destitute', 'Depending');
+      }
+      catch(exceptions\RuntimeException $e){
+        throw $e;
+      }
       return true;
     }
     return false;
@@ -256,26 +305,46 @@ class ReflectionModule implements metadata\Described{
    *
    * @param string $moduleName Имя уталяемого зависимого модуля.
    *
+   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws exceptions\RuntimeException Выбрасывается в случае блокировки, отсутствия файла состояния модуля или ошибки при работе с потоком вывода.
    * @return boolean true - если связь успешно удалена, иначе - false.
    */
   public function removeDestitute($moduleName){
+    exceptions\InvalidArgumentException::verifyType($moduleName, 'S');
     if(($key = array_search($moduleName, $this->destitute)) !== false){
       unset($this->destitute[$key]);
-      // @todo: обработать возможные исключения
-      $this->rewriteProperty('destitute', 'Depending');
+      try{
+        $this->rewriteProperty('destitute', 'Depending');
+      }
+      catch(exceptions\RuntimeException $e){
+        throw $e;
+      }
       return true;
     }
     return false;
   }
 
   /**
-   * @param string $version
+   * @param float $version
+   *
+   * @throws exceptions\RuntimeException Выбрасывается в случае блокировки, отсутствия файла состояния модуля или ошибки при работе с потоком вывода.
    */
   public function setVersion($version){
-    $this->version = $version;
-    // @todo: обработать возможные исключения
-    $this->ini->set('version', $version, 'Module');
-    $this->ini->rewrite();
+    exceptions\InvalidArgumentException::verifyType($version, 'f');
+    $this->version = (string)$version;
+    try{
+      $this->ini->set('version', $version, 'Module');
+      $this->ini->rewrite();
+    }
+    catch(fileSystem\LockException $e){
+      throw new exceptions\RuntimeException('Отсутствует доступ к файлу состояния модуля.');
+    }
+    catch(fileSystem\NotExistsException $e){
+      throw new exceptions\RuntimeException('Отсутствует доступ к файлу состояния модуля.');
+    }
+    catch(io\IOException $e){
+      throw new exceptions\RuntimeException('Отсутствует доступ к файлу состояния модуля.');
+    }
   }
 
   /**

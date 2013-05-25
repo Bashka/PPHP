@@ -112,7 +112,6 @@ class Message implements \PPHP\tools\patterns\interpreter\Interpreter{
   /**
    * Метод возвращает строку, полученную при интерпретации объекта.
    * @param null|mixed $driver[optional] Данные, позволяющие изменить логику интерпретации объекта.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){

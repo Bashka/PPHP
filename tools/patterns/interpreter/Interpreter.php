@@ -3,7 +3,7 @@ namespace PPHP\tools\patterns\interpreter;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
- * Классы, реализующие данный интерфейс объединяются в шаблоне "Интерпретатор".
+ * Объекты классов, реализующие данный интерфейс, могут быть интерпретированы в строку.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\interpreter
  */

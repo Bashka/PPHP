@@ -1,9 +1,5 @@
 <?php
 namespace PPHP\tests\tools\patterns\buffer;
-spl_autoload_register(function($className){
-  $root = 'C:/WebServers/home/dic/www';
-  require_once $root . '/' . str_replace('\\', '/', $className) . '.php';
-});
 
 class TestBuffer extends \PPHP\tools\patterns\buffer\MapBuffer{
   /**

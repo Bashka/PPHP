@@ -1,9 +1,9 @@
 <?php
 namespace PPHP\tools\patterns\state;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Интерфейс определяет классы, которые изменяют свое поведение с изменением состояния.
- *
  * Класс, реализующий данный интерфейс является контекстым, то есть может изменять свое поведение в зависимости от текущего состояния.
  * Как правило, такого рода класс делегирует поведение объектам-состояниям, что позволяет полиморфно заменять их при смене состояния.
  * В случае, если в качестве состояние установлен контекстный объект, то реализуется архитектура вложенного состояния объекта.
@@ -18,7 +18,9 @@ interface StatesContext{
    * @param string $stateName Устанавливаемое состояние.
    * @param State|StatesContext $substate Подсостояние, запрашивающее изменение.
    *
-    @throws \PPHP\tools\classes\standard\baseType\exceptions\RuntimeException Исключение выбрасывается при попытке программного изменения состояния.
+   * @throws exceptions\RuntimeException Исключение выбрасывается при попытке программного изменения состояния.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае отсутствия состояния с указанным именем.
    */
   public function passageState($stateName, $substate);
 

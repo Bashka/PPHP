@@ -1,59 +1,24 @@
 <?php
 namespace PPHP\tests\tools\patterns\metadata;
-spl_autoload_register(function($className){
-  $root = 'C:/WebServers/home/dic/www';
-  require_once $root . '/' . str_replace('\\', '/', $className) . '.php';
-});
-/*
- * 5 свойств
- * 2 метода
- */
-class TestParentReflect implements \PPHP\tools\patterns\metadata\reflection\Reflect{
-use \PPHP\tools\patterns\metadata\reflection\TReflect;
+use \PPHP\tools\patterns\metadata\reflection as reflection;
 
-  private $prop;
+class TestReflect extends ParentReflectMock{
+  private $e;
 
-  protected $parentProp;
+  protected $f;
 
-  private function method(){
+  static private $g;
+
+  private function h(){
   }
 
-  protected function method2(){
-  }
-}
-
-TestParentReflect::getReflectionClass()->setMetadata('Metadata', 'TestParent');
-
-TestParentReflect::getReflectionProperty('prop')->setMetadata('Metadata', 'TestParent');
-
-TestParentReflect::getReflectionProperty('parentProp')->setMetadata('Metadata', 'TestParent');
-
-TestParentReflect::getReflectionMethod('method')->setMetadata('Metadata', 'TestParent');
-
-/*
- * 7 свойств
- * 9 метода
- */
-class TestReflect extends TestParentReflect{
-  private $prop;
-
-  protected $childProp;
-
-  static private $propStatic;
-
-  private function method(){
-  }
-
-  static private function methodStatic(){
+  static private function j(){
   }
 }
 
 TestReflect::getReflectionClass()->setMetadata('Metadata', 'Test');
 
-TestReflect::getReflectionProperty('prop')->setMetadata('Metadata', 'Test');
-
-TestReflect::getReflectionProperty('propStatic')->setMetadata('Metadata', 'Test');
-
-TestReflect::getReflectionMethod('method')->setMetadata('Metadata', 'Test');
-
-TestReflect::getReflectionMethod('methodStatic')->setMetadata('Metadata', 'Test');
+TestReflect::getReflectionProperty('e')->setMetadata('Metadata', 'Test');
+TestReflect::getReflectionProperty('g')->setMetadata('Metadata', 'Test');
+TestReflect::getReflectionMethod('h')->setMetadata('Metadata', 'Test');
+TestReflect::getReflectionMethod('j')->setMetadata('Metadata', 'Test');

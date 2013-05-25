@@ -1,6 +1,8 @@
 <?php
 namespace PPHP\model\modules\Console;
 
+use PPHP\tools\classes\standard\baseType\exceptions\DuplicationException;
+
 /**
  * Модуль предоставляет текстовый интерфейс доступа к установленным модулям системы.
  * @author Artur Sh. Mamedbekov
@@ -51,7 +53,7 @@ class Controller extends \PPHP\model\classes\ModuleController{
     try{
       $file->move(\PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files'));
     }
-    catch(\PPHP\tools\classes\standard\fileSystem\ComponentDuplicationException $exc){
+    catch(DuplicationException $exc){
       return 'The file already exists';
     }
     $file->rename($newNameFile);

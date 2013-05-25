@@ -51,9 +51,8 @@ class CacheSystem implements \PPHP\tools\patterns\singleton\Singleton{
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException
    */
   public static function setAttribute($attributeName, $value){
-    if(!is_string($attributeName) || !is_string($value)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $attributeName);
-    }
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($attributeName, 'S');
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($value, 'S');
     if(!array_search($attributeName, ['Driver', 'Server'])){
       throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
     }

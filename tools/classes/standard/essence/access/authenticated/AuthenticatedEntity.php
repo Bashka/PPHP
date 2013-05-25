@@ -5,7 +5,6 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет аутентифицируемую сущность.
- *
  * Аутентифицируемая сущность, представляемая данным классам, является доступной только при получении правильной ключевой пары.
  * Механизм аутентификации не является частью класса сущности, он вынесен в менеджер аутентификации и используется совместно с экземплярами данного класса и его потомков.
  * Все дочерние классы используют получаемую ключевую пару, для аутентификации запроса.
@@ -27,9 +26,8 @@ abstract class AuthenticatedEntity extends database\LongObject{
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   public function setPassword($password){
-    if(!is_string($password) || empty($password)){
-      throw new exceptions\InvalidArgumentException('string', $password);
-    }
+    exceptions\InvalidArgumentException::verifyType($password, 'S');
+
     $this->password = $password;
   }
 

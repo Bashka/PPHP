@@ -5,7 +5,6 @@ use \PPHP\tools\patterns\metadata as metadata;
 
 /**
  * Отражение метода класса, расширенное возможностью добавления метаданных.
- *
  * Данный класс является отображением метода с устойчивым состоянием и возможностью аннотирования.
  * Класс наследует все возможности своего родителя, что позволяет использовать его в контексте родительского класса.
  * Класс так же дополнен возможностью получения отражений своих аргументов с устойчивым состоянием и возможностью аннотирования.
@@ -23,12 +22,31 @@ class ReflectionMethod extends \ReflectionMethod implements metadata\Described{
   protected $reflectionParameters;
 
   /**
+   * Данная реализация позволяет добавлять аннотации в объект из PHPDoc.
+   * @param mixed $class
+   * @param string $name
+   */
+  public function __construct($class, $name){
+    parent::__construct($class, $name);
+
+    $docs = explode("\n", $this->getDocComment());
+    $docs = array_splice($docs, 1, -1);
+    foreach($docs as $doc){
+      $doc = substr(trim($doc), 2);
+      if($doc[0] == '@'){
+        $point = strpos($doc, ' ');
+        $this->setMetadata(substr($doc, 1, $point-1), substr($doc, $point+1));
+      }
+    }
+  }
+
+  /**
    * Метод возвращает отражение параметра метода.
    *
    * @param integer|string $param Порядковый индекс или имя параметра.
    *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
-   * @throws exceptions\LogicException Выбрасывается в случае, если указанного параметра не существует в методе.
+   * @throws exceptions\ComponentClassException Выбрасывается в случае, если указанного параметра не существует в методе.
    * @return ReflectionParameter Отражение параметра.
    */
   public function getParameter($param){
@@ -45,11 +63,11 @@ class ReflectionMethod extends \ReflectionMethod implements metadata\Described{
         return $this->reflectionParameters[$param];
       }
       else{
-        throw new exceptions\LogicException('Запрашиваемого параметра метода не существует.');
+        throw new exceptions\ComponentClassException('Запрашиваемого параметра ['.$param.'] метода ['.$this->getName().'] не существует.');
       }
     }
     else{
-      throw new exceptions\InvalidArgumentException('Недопустимое значение аргумента. Ожидается integer или string.');
+      throw exceptions\InvalidArgumentException::getTypeException(['integer', 'string'], gettype($param));
     }
   }
 }

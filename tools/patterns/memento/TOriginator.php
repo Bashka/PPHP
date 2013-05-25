@@ -14,7 +14,7 @@ trait TOriginator{
    * @abstract
    * @return mixed[]
    */
-  abstract protected function getSavedState();
+  protected abstract function getSavedState();
 
   /**
    * Метод создает хранителя с текущим состоянием объекта и возвращает его.
@@ -50,10 +50,22 @@ trait TOriginator{
    * @param mixed[] $state Ассоциативный массив, содержащий восстанавливаемое состояние объекта.
    */
   protected function setSavedState(array $state){
-    // parent::setSavedState($state); // Удалить коментарий в случае реализации класса, наследующего данную реализацию.
-
     foreach($state as $k => $v){
-      $this->$k = $v;
+      if(property_exists(get_called_class(), $k)){
+        $this->$k = $state[$k];
+      }
     }
   }
+  /*
+  // Переопределить метод данным при необходимости доступа к private свойтсвам родительских объектов.
+  protected function setSavedState(array $state){
+    // parent::setSavedState($state); // Расскоментировать в дочерних классах
+
+    foreach($state as $k => $v){
+      if(property_exists($this, $k) && $this::getReflectionProperty($k)->getDeclaringClass()->getName() === get_class()){
+        $this->$k = $state[$k];
+      }
+    }
+  }
+  */
 }

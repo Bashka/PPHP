@@ -7,22 +7,25 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\database\query
  */
-class Update implements ComponentQuery{
+class Update extends ComponentQuery{
   /**
    * Целевая таблица.
    * @var Table
    */
   private $table;
+
   /**
    * Множество полей, используемых в таблице.
-   * @var \SplObjectStorage
+   * @var Field[]
    */
   private $fields;
+
   /**
    * Множество значений, устанавливаемых в поля записи.
-   * @var \SplQueue
+   * @var mixed[]
    */
   private $values;
+
   /**
    * Условие отбора.
    * @var Where
@@ -30,40 +33,86 @@ class Update implements ComponentQuery{
   private $where;
 
   /**
+   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @return string[]
+   */
+  public static function getMasks($driver = null){
+    return ['UPDATE `(' . Table::getPatterns()['tableName'] . ')` SET ('.self::getPatterns()['setValue'].'(, ?'.self::getPatterns()['setValue'].')*)( '.Where::getMasks()[0].')?'];
+  }
+
+  /**
+   * Метод возвращает массив шаблонов, описывающих различные компоненты шаблонов верификации.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @return string[]
+   */
+  public static function getPatterns($driver = null){
+    return ['setValue' => '('.Field::getMasks()[0] . '|' . Field::getMasks()[1].') = '.LogicOperation::getPatterns()['stringValue']];
+  }
+
+  /**
+   * Метод восстанавливает объект из строки.
+   * @param string $string Исходная строка.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return static Результирующий объект.
+   */
+  public static function reestablish($string, $driver = null){
+    // Контроль типа и верификация выполняется в вызываемом родительском методе.
+    $mask = parent::reestablish($string);
+
+    $o = new self(Table::reestablish($mask[1]));
+    $data = explode(',', $mask[2]);
+
+    // Запись данных в запрос
+    foreach($data as $v){
+      $v = explode('=', $v);
+      $o->addData(Field::reestablish(trim($v[0])), substr(trim($v[1]), 1, -1));
+    }
+
+    if(($p = strrpos($string, 'WHERE')) !== false){
+      $o->insertWhere(Where::reestablish(substr($string, $p)));
+    }
+    return $o;
+  }
+
+  /**
    * @param Table $table Целевая таблица.
    */
   function __construct(Table $table){
-    $this->fields = new \SplObjectStorage();
-    $this->values = new \SplQueue();
+    $this->fields = [];
+    $this->values = [];
     $this->table = $table;
   }
 
   /**
    * Метод устанавливает условие отбора для запроса.
    * @param Where $where Условие отбора.
+   * @return $this Метод возвращает вызываемый объект.
    */
   public function insertWhere(Where $where){
     $this->where = $where;
+    return $this;
   }
 
   /**
    * Метод добавляет данные в запрос.
    * @param Field $field Целевое поле.
    * @param string|number|boolean $value Значение целевого поля.
-   * @throws StandardException Выбрасывается в случае, если указанное поле уже присутствует в запросе.
+   * @throws exceptions\DuplicationException Выбрасывается в случае, если указанное поле уже присутствует в запросе.
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @return $this Метод возвращает вызываемый объект.
    */
   public function addData(Field $field, $value){
-    if($this->fields->offsetExists($field)){
-      throw new StandardException('Ошибка дублирования компонента.');
+    if(array_search($field, $this->fields) !== false){
+      throw new exceptions\DuplicationException('Ошибка дублирования компонента.');
     }
-    if(is_object($value) || is_array($value)){
-      throw new exceptions\InvalidArgumentException('Неверный тип аргумента. Ожидается string, number, boolean.');
-    }
-    $this->fields->attach($field);
-    $this->values->enqueue($value);
+    exceptions\InvalidArgumentException::verifyType($value, 'sifb');
+    $this->fields[] = $field;
+    $this->values[] = $value;
+    return $this;
   }
-
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
@@ -75,33 +124,43 @@ class Update implements ComponentQuery{
    * @return string Результат интерпретации.
    */
   public function interpretation($driver=null){
-    if($this->values->count() == 0){
-      throw new StandardException();
+    if(count($this->values) == 0){
+      throw new exceptions\NotFoundDataException('Недостаточно данных для интерпретации [values = 0].');
     }
 
-    try{
       $resultString = 'UPDATE `' . $this->table->interpretation($driver) . '` SET ';
-      $this->fields->rewind();
-      $this->values->rewind();
-      do{
-        $resultString .= $this->fields->current()->interpretation($driver) . ' = "' . $this->values->current() . '",';
-        $this->fields->next();
-        $this->values->next();
-      }
-      while($this->values->valid());
-      $resultString = substr($resultString, 0, strlen($resultString) - 1);
+    foreach($this->fields as $k => $field){
+      $resultString .= $field->interpretation($driver) . ' = "' . $this->values[$k] . '",';
+    }
+      $resultString = substr($resultString, 0, -1);
+
       if(!empty($this->where)){
+        exceptions\InvalidArgumentException::verifyType($driver, 'Sn');
+        try{
         $resultString .= ' ' . $this->where->interpretation($driver);
+        }
+        catch(exceptions\NotFoundDataException $exc){
+          throw $exc;
+        }
+        catch(exceptions\InvalidArgumentException $exc){
+          throw $exc;
+        }
       }
-    }
-    catch(exceptions\NotFoundDataException $exc){
-      throw $exc;
-    }
-    catch(exceptions\InvalidArgumentException $exc){
-      throw $exc;
-    }
 
     return $resultString;
   }
 
+  /**
+   * @return Table
+   */
+  public function getTable(){
+    return $this->table;
+  }
+
+  /**
+   * @return Where
+   */
+  public function getWhere(){
+    return $this->where;
+  }
 }

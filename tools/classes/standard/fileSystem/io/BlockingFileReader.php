@@ -3,6 +3,8 @@ namespace PPHP\tools\classes\standard\fileSystem\io;
 
 /**
  * Класс расширяет входной поток файла, добавляя ему механизмы регистрации оповещения наблюдателей.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\fileSystem\io
  */
 class BlockingFileReader extends FileReader implements \SplSubject{
 use \PPHP\tools\patterns\observer\TSubject;

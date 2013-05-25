@@ -9,13 +9,7 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType\special\network
  */
-class IPAddress4 extends baseType\wrapper{
-  /**
-   * Тип данной обертки.
-   * @var string
-   */
-  protected static $type = 'IPAddress';
-
+class IPAddress4 extends baseType\Wrapper implements IPAddress{
   /**
    * Компоненты адреса.
    * @var integer[]
@@ -23,60 +17,67 @@ class IPAddress4 extends baseType\wrapper{
   protected $trio = [0,0,0,0];
 
   /**
-   * Метод приводит переданные данные к типу обертки.
-   * @param mixed $val Приводимые данные.
-   * @return mixed Приведенные данные.
+   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @return string[]
    */
-  protected function transform($val){
-    $val = (string)$val;
-    $this->trio = explode('.', $val);
-    foreach($this->trio as &$v){
-      $v = (integer)$v;
-    }
-    return $val;
+  public static function getMasks($driver = null){
+    return [
+      '('.self::getPatterns()['component'].')\.('.self::getPatterns()['component'].')\.('.self::getPatterns()['component'].')\.('.self::getPatterns()['component'].')'
+    ];
   }
 
   /**
-   * Метод определяет, является ли указанное значение допустимым типом.
-   * @static
-   * @param mixed $val Проверяемое значение.
-   * @return boolean true - если данные являются допустимым типом или могут быть приведены к нему без потери данных, иначе - false.
+   * Метод должен возвращать массив шаблонов, описывающих различные компоненты шаблонов верификации.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @return string[]
    */
-  public static function is($val){
-    if(is_string($val)){
-      $trio = [];
-      if(preg_match('/^([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})$/', $val, $trio)){
-        for($i=1; $i<4; $i++){
-          $trio[$i] = (integer)$trio[$i];
-          if($trio[$i] < 0 || $trio[$i] > 255){
-            return false;
-          }
-        }
-        return true;
-      }
-    }
-    return false;
+  public static function getPatterns($driver = null){
+    return [
+      'component' => '(?:[0-9])|(?:[1-9][0-9])|(?:1[0-9][0-9])|(?:2[0-5][0-5])'
+    ];
+  }
+
+  /**
+   * Метод восстанавливает объект из строки.
+   * @param string $string Исходная строка.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return static Результирующий объект.
+   */
+  public static function reestablish($string, $driver = null){
+    // Контроль типа и верификация выполняется в вызываемом родительском методе.
+    $m = parent::reestablish($string);
+
+    $o = new self($string);
+    $o->trio[0] = $m[1];
+    $o->trio[1] = $m[2];
+    $o->trio[2] = $m[3];
+    $o->trio[3] = $m[4];
+    return $o;
   }
 
   /**
    * Метод возвращает указанное значение компонента адреса.
    * @param integer $index Индекс компонента в диапазоне от 0 до 3.
    *
-   * @throws exceptions\LogicException Выбрасывается в случае, если индек выходит за границы допустимого диапазона.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае передаче параметра недопустимого типа.
    * @return integer Значение компонента адреса.
    */
   public function getTrio($index){
-    if($index < 0 || $index > 3){
-      throw new exceptions\LogicException('Недопустимый индекс массива.');
-    }
+    exceptions\InvalidArgumentException::verifyType($index, 'i');
+    exceptions\InvalidArgumentException::verifyVal($index, 'i [] 0 3');
+
     return $this->trio[$index];
   }
 
   /**
    * Метод возвращает значение компонента адреса в двоичной форме.
+   *
    * @param integer $index Индекс компонента в диапазоне от 0 до 3.
    *
-   * @throws exceptions\LogicException Выбрасывается в случае, если индек выходит за границы допустимого диапазона.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае передаче параметра недопустимого типа.
    * @return string Значение компонента адреса в двоичной форме.
    */
   public function getTrioBin($index){

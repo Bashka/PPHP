@@ -7,10 +7,10 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\database\query
  */
-class OrderBy implements ComponentQuery{
+class OrderBy extends ComponentQuery{
   /**
    * Используемые в сортировке поля.
-   * @var \SplObjectStorage
+   * @var Field[]
    */
   private $fields;
   /**
@@ -20,24 +20,69 @@ class OrderBy implements ComponentQuery{
   private $sortedType;
 
   /**
+   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @return string[]
+   */
+  public static function getMasks($driver = null){
+    return ['ORDER BY (?:(?:'.Field::getMasks()[0].')|(?:'.Field::getMasks()[1].'))(?:, ?(?:(?:'.Field::getMasks()[0].')|(?:'.Field::getMasks()[1].')))* '.self::getPatterns()['types']];
+  }
+
+  /**
+   * Метод возвращает массив шаблонов, описывающих различные компоненты шаблонов верификации.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @return string[]
+   */
+  public static function getPatterns($driver = null){
+    return ['types' => '(?:ASC|DESC)'];
+  }
+
+  /**
+   * Метод восстанавливает объект из строки.
+   * @param string $string Исходная строка.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return static Результирующий объект.
+   */
+  public static function reestablish($string, $driver = null){
+    // Контроль типа и верификация выполняется в вызываемом родительском методе.
+    parent::reestablish($string);
+
+    $type = trim(substr($string, -4));
+    $orderBy = new static($type);
+    $fields = explode(',', substr(substr($string, 9), 0, -4));
+    foreach($fields as $field){
+      $field = trim($field);
+      try{
+        $orderBy->addField(Field::reestablish($field));
+      }
+      catch(exceptions\StructureException $e){
+        throw $e;
+      }
+      catch(exceptions\InvalidArgumentException $e){
+        throw $e;
+      }
+    }
+    return $orderBy;
+  }
+
+  /**
    * @param string $sortedType [ASC] Способ сортировки.
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($sortedType = 'ASC'){
-    if(array_search($sortedType, ['ASC', 'DESC']) == -1){
-      throw new exceptions\InvalidArgumentException('Недопустимое значение аргумента. Ожидается ASC или DESC.');
-    }
-    $this->fields = new \SplObjectStorage();
+    exceptions\InvalidArgumentException::verifyVal($sortedType, 's # ASC|DESC');
+    $this->fields = [];
     $this->sortedType = $sortedType;
   }
-
 
   /**
    * Метод добавляет поле для сортировки.
    * @param Field $field Поле для сортировки.
    */
   public function addField(Field $field){
-    $this->fields->attach($field);
+    $this->fields[] = $field;
   }
 
   /**
@@ -50,22 +95,29 @@ class OrderBy implements ComponentQuery{
    * @return string Результат интерпретации.
    */
   public function interpretation($driver=null){
-    if($this->fields->count() == 0){
+    exceptions\InvalidArgumentException::verifyType($driver, 'Sn');
+    if(count($this->fields) == 0){
       throw new exceptions\NotFoundDataException('Недостаточно данных для формирования строки.');
     }
+
     $result = 'ORDER BY ';
     foreach($this->fields as $field){
-      try{
         $result .= $field->interpretation($driver) . ',';
-      }
-      catch(exceptions\NotFoundDataException $exc){
-        throw $exc;
-      }
-      catch(exceptions\InvalidArgumentException $exc){
-        throw $exc;
-      }
     }
     return substr($result, 0, strlen($result) - 1) . ' ' . $this->sortedType;
   }
 
+  /**
+   * @return \SplObjectStorage
+   */
+  public function getFields(){
+    return $this->fields;
+  }
+
+  /**
+   * @return string
+   */
+  public function getSortedType(){
+    return $this->sortedType;
+  }
 }

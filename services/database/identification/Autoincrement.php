@@ -111,9 +111,8 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если аргумент имеет неверный тип или меньше 1.
    */
   public function setOID($OID){
-    if(!is_integer($OID) || $OID < 1){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('integer', $OID);
-    }
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($OID, 'i');
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyVal($OID, 'i > 0');
     $this->set($OID);
   }
 }

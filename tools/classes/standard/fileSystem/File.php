@@ -1,18 +1,21 @@
 <?php
 namespace PPHP\tools\classes\standard\fileSystem;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет файл файловой системы и предоставляет входные выходные потоки для работы с содержимым.
+ * @author  Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\fileSystem
  */
 class File extends ComponentFileSystem implements \SplObserver{
   /**
    * Текущий входной поток данного файла.
-   * @var \PPHP\tools\classes\standard\fileSystem\io\BlockingFileReader
+   * @var io\BlockingFileReader
    */
   protected $reader;
   /**
    * Текущий выходной поток данного файла.
-   * @var \PPHP\tools\classes\standard\fileSystem\io\BlockingFileWriter
+   * @var io\BlockingFileWriter
    */
   protected $writer;
 
@@ -37,55 +40,53 @@ class File extends ComponentFileSystem implements \SplObserver{
 
   /**
    * Метод изменяет имя компонента на заданное, если это возможно.
+   *
    * @param string $newName Новое имя компонента.
-   * @throws ComponentDuplicationException Выбрасывается в случае, если переименование компонента приведет к дублированию.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывает в случае, если в качестве нового имени передано значение не string типа, или если новое имя содержит симол /.
+   *
+   * @throws exceptions\DuplicationException Выбрасывается в случае, если переименование компонента приведет к дублированию.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @return boolean
+   * @return boolean true - в случае успешного завершения операции, иначе - false.
    */
   public function rename($newName){
-    if(!$this->isExists()){
-      throw new NotExistsException('Невозможно выполнить действие. В файловой системе компонент не найден.');
-    }
-    if(!is_string($newName) || strpos($newName, '/') > -1){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $newName);
-    }
     if($this->getLocation()->isFileExists($newName)){
-      throw new ComponentDuplicationException('Невозможно выполнить действие. Компонент с данным именем уже существует.');
+      throw new exceptions\DuplicationException('Невозможно выполнить действие. Компонент с данным именем уже существует.');
     }
     return parent::rename($newName);
   }
 
   /**
    * Метод перемещает компонент в данный каталог.
+   *
    * @param Directory $location Целевой каталог.
-   * @throws ComponentDuplicationException Выбрасывается в случае, если целевой каталог уже содержит компонент с тем же именем, что и перемещаемый.
+   *
+   * @throws exceptions\DuplicationException Выбрасывается в случае, если целевой каталог уже содержит компонент с тем же именем, что и перемещаемый.
    * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @return boolean
+   * @throws exceptions\RuntimeException Выбрасывается в случае нарушения логики работы файловой системы путем перемещения компонента в себя.
+   * @return boolean true - в случае успешного завершения операции, иначе - false.
    */
   public function move(Directory $location){
-    if(!$this->isExists()){
-      throw new NotExistsException('Невозможно выполнить действие. В файловой системе компонент не найден.');
-    }
     if($location->isFileExists($this->getName())){
-      throw new ComponentDuplicationException('Невозможно выполнить действие. Компонент с данным именем уже существует.');
+      throw new exceptions\DuplicationException('Невозможно выполнить действие. Компонент с данным именем уже существует.');
     }
     return parent::move($location);
   }
 
   /**
    * Метод копирует компонента в данный каталог.
+   *
    * @param Directory $location Целевой каталог.
-   * @throws ComponentDuplicationException Выбрасывается в случае, если целевой каталог уже содержит копируемый компонент.
+   *
+   * @throws exceptions\DuplicationException Выбрасывается в случае, если целевой каталог уже содержит копируемый компонент.
    * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @return boolean
+   * @return boolean true - в случае успешного завершения операции, иначе - false.
    */
   public function copyPaste(Directory $location){
     if(!$this->isExists()){
       throw new NotExistsException('Невозможно выполнить действие. В файловой системе компонент не найден.');
     }
     if($location->isFileExists($this->getName())){
-      throw new ComponentDuplicationException('Невозможно выполнить действие. Компонент с данным именем уже существует.');
+      throw new exceptions\DuplicationException('Невозможно выполнить действие. Компонент с данным именем уже существует.');
     }
     return copy($this->getAddress(), $location->getAddress() . '/' . $this->getName());
   }
@@ -93,7 +94,7 @@ class File extends ComponentFileSystem implements \SplObserver{
   /**
    * Метод возвращает размер в байтах данного компонента.
    * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @return integer
+   * @return integer Размер компонента в байтах.
    */
   public function getSize(){
     if(!$this->isExists()){
@@ -112,19 +113,19 @@ class File extends ComponentFileSystem implements \SplObserver{
       return $this->getLocation()->isFileExists($this->getName());
     }
     catch(NotExistsException $exception){
-      throw new NotExistsException('Невозможно выполнить действие. В файловой системе родительский каталог ('.$this->getLocation()->getName().') не найден ('.$this->getAddress().').', 0, $exception);
+      throw new NotExistsException('Невозможно выполнить действие. В файловой системе родительский каталог ['.$this->getLocation()->getName().'] не найден ['.$this->getAddress().'].', 0, $exception);
     }
+    // Дальнейший перехват исключений не выполняется в связи с невозможностью их появления
   }
 
   /**
    * Метод пытается создать вызывающий файл в файловой системе.
-   * @throws ComponentDuplicationException Выбрасывается в случае, если создание компонента приведет к дублированию.
-   * @throws NotExistsException Выбрасывается в случае, если родительского каталога не существует.
+   * @throws exceptions\DuplicationException Выбрасывается в случае, если создание компонента приведет к дублированию.
    * @return bool true - в случае успеха, иначе - false.
    */
   public function create(){
     if($this->isExists()){
-      throw new ComponentDuplicationException('Невозможно выполнить действие. Компонент с данным именем уже существует.');
+      throw new exceptions\DuplicationException('Невозможно выполнить действие. Компонент с данным именем уже существует.');
     }
     fclose(fopen($this->getAddress(), 'a+'));
     return true;
@@ -134,7 +135,7 @@ class File extends ComponentFileSystem implements \SplObserver{
    * Метод возвращает входной поток для данного файла и блокирует его разделяемой блокировкой. В сдучае, если полученный поток будет закрыт, блокировка снимется автоматически.
    * @throws LockException Выбрасывается в случае, если невозможно вернуть поток из за того, что уже был открыт выходной поток.
    * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @return \PPHP\tools\classes\standard\fileSystem\io\BlockingFileReader
+   * @return io\BlockingFileReader
    */
   public function getReader(){
     if(!empty($this->reader)){
@@ -148,7 +149,7 @@ class File extends ComponentFileSystem implements \SplObserver{
     }
     $des = fopen($this->getAddress(), 'r+b');
     flock($des, 1);
-    $this->reader = new \PPHP\tools\classes\standard\fileSystem\io\BlockingFileReader($des);
+    $this->reader = new io\BlockingFileReader($des);
     $this->reader->attach($this);
     return $this->reader;
   }
@@ -157,7 +158,7 @@ class File extends ComponentFileSystem implements \SplObserver{
    * Метод возвращает выходной поток для данного файла и блокирует его исключительной блокировкой. В сдучае, если полученный поток будет закрыт, блокировка снимется автоматически.
    * @throws LockException Выбрасывается в случае, если невозможно вернуть поток из за того, что уже был открыт выходной поток.
    * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @return \PPHP\tools\classes\standard\fileSystem\io\BlockingFileWriter
+   * @return io\BlockingFileWriter
    */
   public function getWriter(){
     if(!empty($this->writer)){
@@ -171,16 +172,18 @@ class File extends ComponentFileSystem implements \SplObserver{
     }
     $des = fopen($this->getAddress(), 'r+b');
     flock($des, 2);
-    $this->writer = new \PPHP\tools\classes\standard\fileSystem\io\BlockingFileWriter($des);
+    $this->writer = new io\BlockingFileWriter($des);
     $this->writer->attach($this);
     return $this->writer;
   }
 
   /**
    * Метод удаляет текущий компонент из файловой системы.
-   * @throws LockException Выбрасывается в случае, если на момент удаления компонента он блокирован открытым потоком.
+   * @abstract
    * @throws NotExistsException Выбрасывается в случае, если удаляемого компонента не существует.
-   * @return boolean true - если компонент был успешно удален.
+   * @throw LockException Выбрасывается в случае запрета доступа к компоненту.
+   *
+   * @return boolean true - в случае успешного завершения операции, иначе - false.
    */
   public function delete(){
     if(!$this->isExists()){

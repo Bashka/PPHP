@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\patterns\state;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Классическая реализация интерфейса StatesContext.
@@ -22,7 +23,7 @@ trait TStatesContext{
 
   /**
    * Метод может быть переопределен, для возврата массива ссылок на свойства объекта, доступ к которым разрешен из подсостояний.
-   * @return array
+   * @return mixed[]
    */
   protected function getLinksForState(){
     return [];
@@ -34,16 +35,28 @@ trait TStatesContext{
    * context - ссылка на контекст;
    * links - null или массив доступных для состояния свойств контекста.
    *
-   * @param $stateName Устанавливаемое состояние.
+   * @param string $stateName Устанавливаемое состояние.
    * @param State|StatesContext $substate Подсостояние, запрашивающее изменение.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\RuntimeException Исключение выбрасывается при попытке программного изменения состояния.
+   *
+   * @throws exceptions\RuntimeException Исключение выбрасывается при попытке программного изменения состояния.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае отсутствия состояния с указанным именем.
    */
   public function passageState($stateName, $substate){
+    // Контроль типа второго параметра перегружается контролем программного изменения состояния
     if($this->currentState === $substate || $this === $substate){
-      $this->currentState = $this->statesBuffer->getState($stateName, $this, $this->getLinksForState());
+      try{
+        $this->currentState = $this->statesBuffer->getState($stateName, $this, $this->getLinksForState());
+      }
+      catch(exceptions\InvalidArgumentException $e){
+        throw $e;
+      }
+      catch(exceptions\NotFoundDataException $e){
+        throw $e;
+      }
     }
     else{
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\RuntimeException('Изменение состояния контекста не текущим состоянием запрещено.');
+      throw new exceptions\RuntimeException('Изменение состояния контекста не текущим состоянием запрещено.');
     }
   }
 

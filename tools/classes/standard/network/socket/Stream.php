@@ -54,10 +54,10 @@ class Stream implements io\Closed, io\Reader, io\Writer{
   /**
    * Метод считывает один байт из потока.
    * @throws io\IOException Выбрасывается в случае возникновения ошибки при чтении из потока.
-   * @return string|boolean Возвращает текущий байт из потока или false, если поток закончет.
+   * @return string Возвращает текущий байт из потока или пустую строку, если поток закончет.
    */
   public function read(){
-    if(!$this->isClose()){
+    if($this->isClose()){
       throw new io\IOException('Невозможно выполнить чтение из закрытого потока.');
     }
 
@@ -76,10 +76,10 @@ class Stream implements io\Closed, io\Reader, io\Writer{
    *
    * @throws exceptions\InvalidArgumentException  Выбрасывается в случае возникновения ошибки при чтении из потока.
    * @throws io\IOException  Выбрасывается в случае возникновения ошибки при чтении из потока.
-   * @return boolean|string Прочитанная строка или false - если достигнут конец потока.
+   * @return string Прочитанная строка или пустая строка - если достигнут конец потока.
    */
   public function readString($length){
-    if(!$this->isClose()){
+    if($this->isClose()){
       throw new io\IOException('Невозможно выполнить чтение из закрытого потока.');
     }
 
@@ -104,7 +104,7 @@ class Stream implements io\Closed, io\Reader, io\Writer{
    * @return string Прочитанная строка или пустая строка, если достигнут конец потока или символ EOL.
    */
   public function readLine($EOLSymbol = PHP_EOL){
-    if(!$this->isClose()){
+    if($this->isClose()){
       throw new io\IOException('Невозможно выполнить чтение из закрытого потока.');
     }
 
@@ -125,7 +125,7 @@ class Stream implements io\Closed, io\Reader, io\Writer{
    * @return string Прочитанный массив символов или пустая строка, если достигнут конец потока.
    */
   public function readAll(){
-    if(!$this->isClose()){
+    if($this->isClose()){
       throw new io\IOException('Невозможно выполнить чтение из закрытого потока.');
     }
 
@@ -146,7 +146,7 @@ class Stream implements io\Closed, io\Reader, io\Writer{
    * @return integer Число реально записанных байт.
    */
   public function write($data){
-    if(!$this->isClose()){
+    if($this->isClose()){
       throw new io\IOException('Невозможно выполнить запись в закрытый поток.');
     }
 
@@ -179,7 +179,7 @@ class Stream implements io\Closed, io\Reader, io\Writer{
    * @param integer $readTimeout Время блокировки ожидания данных при чтении в секундах.
    */
   public function setReadTimeout($readTimeout){
-    if(!$this->isClose()){
+    if($this->isClose()){
       throw new io\IOException('Невозможно установить время блокировки для закрытого потока.');
     }
 

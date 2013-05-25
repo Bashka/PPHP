@@ -7,7 +7,7 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\database\query
  */
-class INLogicOperation implements Condition{
+class INLogicOperation extends Condition{
   /**
    * Сравниваемое поле.
    * @var Field
@@ -15,8 +15,8 @@ class INLogicOperation implements Condition{
   private $field;
 
   /**
-   * Доступные значения.
-   * @var string[]
+   * Доступные значения string|integer|float|boolean.
+   * @var mixed[]
    */
   private $values;
 
@@ -25,6 +25,35 @@ class INLogicOperation implements Condition{
    * @var Select
    */
   private $selectQuery;
+
+  /**
+   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @return string[]
+   */
+  public static function getMasks($driver = null){
+    return ['\(((?:'.Field::getMasks()[0].')|(?:'.Field::getMasks()[1].')) IN \(('.LogicOperation::getPatterns()['stringValue'].'(, ?'.LogicOperation::getPatterns()['stringValue'].')*)\)\)'];
+  }
+
+  /**
+   * Метод восстанавливает объект из строки.
+   * @param string $string Исходная строка.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return static Результирующий объект.
+   */
+  public static function reestablish($string, $driver = null){
+    // Контроль типа и верификация выполняется в вызываемом родительском методе.
+    $mask = parent::reestablish($string);
+
+    $o = new self(Field::reestablish($mask[1]));
+    $values = explode(',', $mask[2]);
+    foreach($values as $value){
+      $o->addValue(substr(trim($value), 1, -1));
+    }
+    return $o;
+  }
 
   /**
    * @param Field $field Проверяемое поле.
@@ -40,22 +69,26 @@ class INLogicOperation implements Condition{
    * @param string|integer|float|boolean $value Добавляемое значение.
    *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @return $this Метод возвращает вызываемый объект.
    */
   public function addValue($value){
-    if(!is_string($value) && !is_integer($value) && !is_float($value) && !is_bool($value)){
-      throw new exceptions\InvalidArgumentException('Неверный тип аргумента, ожидается string, integer, float, boolean.');
+    exceptions\InvalidArgumentException::verifyType($value, 'sifb');
+    if(is_bool($value)){
+      $value = 'true';
     }
     $this->values[] = $value;
+    return $this;
   }
 
   /**
    * Метод определяет SQL инструкцию, возвращающую список допустимых значений.
    * @param Select $selectQuery SQL инструкция, возвращающая список допустимых значений.
+   * @return $this Метод возвращает вызываемый объект.
    */
   public function setSelectQuery(Select $selectQuery){
     $this->selectQuery = $selectQuery;
+    return $this;
   }
-
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
@@ -67,6 +100,7 @@ class INLogicOperation implements Condition{
    * @return string Результат интерпретации.
    */
   public function interpretation($driver=null){
+    exceptions\InvalidArgumentException::verifyType($driver, 'Sn');
     try{
       return '(' . $this->field->interpretation($driver) . ' IN ("' . ((empty($this->selectQuery))? implode('","', $this->values) : $this->selectQuery->interpretation($driver)) . '"))';
     }
@@ -76,5 +110,26 @@ class INLogicOperation implements Condition{
     catch(exceptions\InvalidArgumentException $exc){
       throw $exc;
     }
+  }
+
+  /**
+   * @return Field
+   */
+  public function getField(){
+    return $this->field;
+  }
+
+  /**
+   * @return Select
+   */
+  public function getSelectQuery(){
+    return $this->selectQuery;
+  }
+
+  /**
+   * @return mixed[]
+   */
+  public function getValues(){
+    return $this->values;
   }
 }

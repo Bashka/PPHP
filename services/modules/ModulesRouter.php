@@ -1,11 +1,13 @@
 <?php
 namespace PPHP\services\modules;
-
+use \PPHP\tools\patterns\singleton as singleton;
 /**
- * Класс отвечает за регистрацию, удаление и предоставление модулей в роутере.
+ * Класс отвечает за регистрацию, удаление и предоставление модулей.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\services\modules
  */
-class ModulesRouter implements \PPHP\tools\patterns\singleton\Singleton{
-use \PPHP\tools\patterns\singleton\TSingleton;
+class ModulesRouter implements singleton\Singleton{
+use singleton\TSingleton;
 
   /**
    * Адрес хранилища модулей.
@@ -50,7 +52,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     $module = null;
     if(($module = $this->cache->get('ModulesRouter_Modules_'.$moduleName)) === false){
       if(!$this->conf->isExists('Modules', $moduleName)){
-        throw new ModuleNotFoundException($moduleName);
+        throw ModuleNotFoundException::getException($moduleName);
       }
       $module = $this->conf->get('Modules', $moduleName);
       $this->cache->set('ModulesRouter_Modules_'.$moduleName, $module);
@@ -97,11 +99,11 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * Метод добавляет новой модуль в роутер.
    * @param string $moduleName Имя модуля.
    * @param string $parentModule Имя родительского модуля.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Вырасывается в случае, если добавляемый модуль уже присутствует в системе.
+   * @throws ModuleDuplicationException Вырасывается в случае, если добавляемый модуль уже присутствует в системе.
    */
   public function addModule($moduleName, $parentModule = null){
     if($this->hasModule($moduleName)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('Указанный модуль ' . $moduleName . ' уже установлен в системе.');
+      throw ModuleDuplicationException::getException($moduleName);
     }
     if(!is_null($parentModule)){
       $addressModuleDir = $this->getModule($parentModule) . '/';
@@ -117,12 +119,12 @@ use \PPHP\tools\patterns\singleton\TSingleton;
   /**
    * Метод удаляет данные модуля из роутера.
    * @param string $moduleName Имя модуля.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если целевой модуль не установлен в системе.
+   * @throws ModuleNotFoundException Выбрасывается в случае, если целевой модуль не установлен в системе.
    * @return boolean true - если модуль был успешно удален из роутера, иначе - false.
    */
   public function removeModule($moduleName){
     if(!$this->hasModule($moduleName)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('Указанный модуль ' . $moduleName . ' не установлен в системе.');
+      throw ModuleNotFoundException::getException($moduleName);
     }
     $this->cache->remove('ModulesRouter_Modules_'.$moduleName);
     return $this->conf->delete('Modules', $moduleName);

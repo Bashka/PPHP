@@ -65,9 +65,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если передано значение аргумента неожиданного типа.
    */
   public function localiseMessage(\PPHP\tools\patterns\metadata\reflection\ReflectionClass $class, $message){
-    if(!is_string($message)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $message);
-    }
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($message, 'S');
     $addressLocaliseFile = $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $class->getName()) . '_' . $this->currentLocalise . '.ini';
     try{
       $localiseData = $this->buffer->getLocaliseData($addressLocaliseFile);

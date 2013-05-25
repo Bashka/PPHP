@@ -1,12 +1,9 @@
 <?php
 namespace PPHP\tests\tools\patterns\memento;
-spl_autoload_register(function($className){
-  $root = 'C:/WebServers/home/dic/www';
-  require_once $root . '/' . str_replace('\\', '/', $className) . '.php';
-});
+use \PPHP\tools\patterns\memento as memento;
 
-class TestOriginator implements \PPHP\tools\patterns\memento\Originator{
-use \PPHP\tools\patterns\memento\TOriginator;
+class TestOriginator implements memento\Originator{
+use memento\TOriginator;
 
   private $testVar = 5;
 
@@ -17,5 +14,9 @@ use \PPHP\tools\patterns\memento\TOriginator;
 
   public function setTestVar($testVar){
     $this->testVar = $testVar;
+  }
+
+  protected function getSavedState(){
+    return ['testVar' => $this->testVar];
   }
 }

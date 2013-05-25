@@ -64,12 +64,8 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае передачи неверного аргумента.
    */
   public function setType($type){
-    if(!is_string($type)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $type);
-    }
-    if($type != self::ERROR && $type != self::WARNING && $type != self::NOTICE && $type != self::INFO){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('Недопустимое значение аргумента.');
-    }
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($type, 'S');
+    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyVal($type, 's # '.self::ERROR.'|'.self::WARNING.'|'.self::NOTICE.'|'.self::INFO);
 
     $this->type = $type;
     $this->conf->Log_Type = $type;

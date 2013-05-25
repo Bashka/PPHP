@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\network;
 use \PPHP\tools\classes\standard\baseType as baseType;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс-обертка служит для представления и верификации URL адреса.
@@ -8,13 +9,7 @@ use \PPHP\tools\classes\standard\baseType as baseType;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType\special\network
  */
-class URL extends \PPHP\tools\classes\standard\baseType\wrapper{
-  /**
-   * Тип данной обертки.
-   * @var string
-   */
-  protected static $type = 'URL';
-
+class URL extends baseType\Wrapper{
   /**
    * Протокол.
    * @var Report
@@ -37,64 +32,39 @@ class URL extends \PPHP\tools\classes\standard\baseType\wrapper{
   protected $fileSystemAddress;
 
   /**
-   * Метод приводит переданные данные к типу обертки.
-   * @param mixed $val Приводимые данные.
-   * @return mixed Приведенные данные.
+   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @return string[]
    */
-  protected function transform($val){
-    $components = [];
-    preg_match('/^([a-z0-9]+:\/\/)([a-z-.0-9]+)(:[0-9]{1,5})?(\/[^:*?"<>\|\0\\\]*)?$/i', (string)$val, $components);
-    $this->report = new Report($components[1]);
-
-    if(DomainName::is($components[2])){
-      $this->address = new DomainName($components[2]);
-    }
-    else{
-      $this->address = new IPAddress4($components[2]);
-    }
-
-    if(!empty($components[3])){
-      $this->port = new Port(substr($components[3], 1));
-    }
-
-    if(!empty($components[4]) && $components[4] != '/'){
-        $this->fileSystemAddress = new baseType\special\fileSystem\FileSystemAddress($components[4]);
-    }
-
-    return (string) $val;
+  public static function getMasks($driver = null){
+    return [
+      Report::getMasks()[0].'((?:'.DomainName::getMasks()[0].')|(?:'.IPAddress4::getMasks()[0].'))(?::('.Port::getMasks()[0].'))?('.baseType\special\fileSystem\FileSystemAddress::getMasks()[0].')?'
+    ];
   }
 
   /**
-   * Метод определяет, является ли указанное значение допустимым типом.
-   * @static
-   * @param mixed $val Проверяемое значение.
-   * @return boolean true - если данные являются допустимым типом или могут быть приведены к нему без потери данных, иначе - false.
+   * Метод восстанавливает объект из строки.
+   * @param string $string Исходная строка.
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
+   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return static Результирующий объект.
    */
-  public static function is($val){
-    $components = [];
-    preg_match('/^([a-z0-9]+:\/\/)([a-z-.0-9]+)(:[0-9]{1,5})?(\/[^:*?"<>\|\0\\\]*)?$/i', (string)$val, $components);
+  public static function reestablish($string, $driver = null){
+    // Контроль типа и верификация выполняется в вызываемом родительском методе.
+    $m = parent::reestablish($string);
 
-    // Протокол
-    if(!isset($components[1]) || !Report::is($components[1])){
-      return false;
+    $o = new self($string);
+    $o->report = Report::reestablish($m[1].'://');
+    if(DomainName::isReestablish($m[2])){
+      $o->address = DomainName::reestablish($m[2]);
     }
-    // Домен/IP
-    if(!isset($components[2]) || (!DomainName::is($components[2]) && !IPAddress4::is($components[2]))){
-      return false;
+    else{
+      $o->address = IPAddress4::reestablish($m[2]);
     }
-    // Порт
-    if(!empty($components[3])){
-      if(!Port::is(substr($components[3], 1))){
-        return false;
-      }
-    }
-    // Адрес ресурса
-    if(!empty($components[4]) && $components[4] != '/'){
-      if(!baseType\special\fileSystem\FileSystemAddress::is($components[4])){
-        return false;
-      }
-    }
-    return true;
+    $o->port = Port::reestablish($m[7]);
+    $o->fileSystemAddress = baseType\special\fileSystem\FileSystemAddress::reestablish($m[8]);
+    return $o;
   }
 
   /**

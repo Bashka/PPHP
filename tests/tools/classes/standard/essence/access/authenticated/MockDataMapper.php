@@ -5,9 +5,9 @@ class MockDataMapper extends \PPHP\tools\classes\standard\storage\database\DataM
   protected $OID = 1;
   protected $pass = 'pass';
 
-  public function recoverFinding(\PPHP\tools\patterns\database\LongObject $object, array $requiredProperties){
-    $OID = $requiredProperties['OID'];
-    $pass = $requiredProperties['password'];
+  public function recoverFinding(\PPHP\tools\patterns\database\LongObject $object, array $conditions){
+    $OID = $conditions['OID'];
+    $pass = $conditions['password'];
     if(!($this->OID === $OID && $pass === $this->pass)){
       throw new \PPHP\tools\classes\standard\storage\database\UncertaintyException;
     }

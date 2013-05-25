@@ -1,20 +1,33 @@
 <?php
 namespace PPHP\tools\classes\standard\fileSystem\io;
+use \PPHP\tools\patterns\io as io;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет выходной поток в файл.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\fileSystem\io
  */
-class FileWriter extends \PPHP\tools\patterns\io\OutStream implements \PPHP\tools\patterns\io\SeekIO, \PPHP\tools\patterns\io\Closed{
+class FileWriter extends io\OutStream implements io\SeekIO, io\Closed{
 use FileClosed, FileSeekIO;
 
   /**
-   * Метод записывает строку в поток.
+   * Метод записывает байт или строку в поток.
+   * @abstract
+   *
    * @param string $data Записываемая строка.
-   * @throws \PPHP\tools\patterns\io\IOException Выбрасывается в случае возникновения ошибки при чтении из потока.
+   *
+   * @throws io\IOException Выбрасывается в случае возникновения ошибки при записи в поток.
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return integer Число реально записанных байт.
    */
   public function write($data){
-    return fwrite($this->resource, $data);
+    exceptions\InvalidArgumentException::verifyType($data, 'S');
+    $result = fwrite($this->resource, $data);
+    if($result === false){
+      throw new io\IOException('Ошибка использования потока вывода.');
+    }
+    return $result;
   }
 
   /**

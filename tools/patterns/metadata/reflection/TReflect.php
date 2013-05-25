@@ -4,7 +4,6 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Классическая реализация интерфейса Reflect.
- *
  * @author  Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\metadata\reflection
  */
@@ -32,23 +31,27 @@ trait TReflect{
   static protected $reflectionMethods = [];
 
   /**
-   * Метод возвращает отражение свойства вызываемого класса.
+   * Метод возвращает отражение свойства вызываемого класса в том числе, если свойство относится к родительскому классу.
    * @static
    *
    * @param string $propertyName Имя свойства.
    *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws exceptions\ComponentClassException Выбрасывается при запросе отражения не определенного члена.
    * @return ReflectionProperty Отражение свойства класса.
    */
   static public function &getReflectionProperty($propertyName){
-    if(!is_string($propertyName)){
-      throw new exceptions\InvalidArgumentException('string', $propertyName);
-    }
-    elseif(empty($propertyName) || !property_exists(get_called_class(), $propertyName)){
-      throw new exceptions\InvalidArgumentException('Указанное свойства ' . $propertyName . ' отсутствует в вызываемом классе.');
-    }
+    exceptions\InvalidArgumentException::verifyType($propertyName, 'S');
 
-    $reflectionProperty = new ReflectionProperty(get_called_class(), $propertyName);
+    $class = get_called_class();
+    while(!property_exists($class, $propertyName)){
+      $parentClass = $class::getReflectionClass()->getParentClass();
+      if($parentClass === false){
+        throw new exceptions\ComponentClassException('Указанное свойство [' . $propertyName . '] отсутствует в вызываемом классе и его надклассах.');
+      }
+      $class = $parentClass->getName();
+    }
+    $reflectionProperty = new ReflectionProperty($class, $propertyName);
 
     // Проверка отношения получаемого отражения к классам в иерархии наследования
     $ownerClassName = $reflectionProperty->getDeclaringClass()->getName();
@@ -63,23 +66,27 @@ trait TReflect{
   }
 
   /**
-   * Метод возвращает отражение метода вызываемого класса.
+   * Метод возвращает отражение метода вызываемого класса в том числе, если метод относится к родительскому классу.
    * @static
    *
    * @param string $methodName Имя метода.
    *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws exceptions\ComponentClassException Выбрасывается при запросе отражения не определенного члена.
    * @return ReflectionMethod Отражение метода класса.
    */
   static public function &getReflectionMethod($methodName){
-    if(!is_string($methodName)){
-      throw new exceptions\InvalidArgumentException('string', $methodName);
-    }
-    elseif(empty($methodName) || !method_exists(get_called_class(), $methodName)){
-      throw new exceptions\InvalidArgumentException('Указанный метод ' . $methodName . ' отсутствует в вызываемом классе.');
-    }
+    exceptions\InvalidArgumentException::verifyType($methodName, 'S');
 
-    $reflectionMethod = new ReflectionMethod(get_called_class(), $methodName);
+    $class = get_called_class();
+    while(!method_exists($class, $methodName)){
+      $parentClass = $class::getReflectionClass()->getParentClass();
+      if($parentClass === false){
+        throw new exceptions\ComponentClassException('Указанный метод [' . $methodName . '] отсутствует в вызываемом классе и его надклассах.');
+      }
+      $class = $parentClass->getName();
+    }
+    $reflectionMethod = new ReflectionMethod($class, $methodName);
 
     // Проверка отношения получаемого отражения к классам в иерархии наследования
     $ownerClassName = $reflectionMethod->getDeclaringClass()->getName();
@@ -126,42 +133,50 @@ trait TReflect{
   }
 
   /**
-   * Метод возвращает отражения всех свойств вызываемого класса, в том числе видимых свойств родительского класса.
-   * Следует учитывать, что данная реализация не позволяет получить private члены родительских классов. Для решения этой проблемы достаточно вызвать переопределеный метод в родительском классе и сконкатенировать результат переопределяющего метода.
+   * Метод возвращает отражения всех свойств вызываемого класса и его родителей.
    *
    * @static
-   * @return \SplObjectStorage Отражение всех свойств класса.
+   * @return ReflectionProperty[] Отражение всех свойств класса в виде ассоциативного массива, ключами которого являются имена, а значениями отражения свойств класса.
    */
   static public function getAllReflectionProperties(){
-    $reflectionProperties = new \SplObjectStorage();
-    $namesAllProperties = static::getReflectionClass()->getProperties();
-    foreach($namesAllProperties as $v){
-      try{
-        $reflectionProperties->attach(static::getReflectionProperty($v->getName()));
+    $reflectionProperties = [];
+    $class = get_called_class();
+    $class = $class::getReflectionClass();
+    do{
+      $properties = $class->getProperties();
+      foreach($properties as $property){
+        if(array_key_exists($property->getName(), $reflectionProperties)){
+          continue;
+        }
+        $className = $class->getName();
+        $reflectionProperties[$property->getName()] = $className::getReflectionProperty($property->getName());
       }
-      catch(exceptions\InvalidArgumentException $exc){
-      }
-    }
+      $class = $class->getParentClass();
+    }while($class !== false);
     return $reflectionProperties;
   }
 
   /**
-   * Метод возвращает отражения всех методов вызываемого класса, в том числе видимых методов родительского класса.
-   * Следует учитывать, что данная реализация не позволяет получить private члены родительских классов. Для решения этой проблемы достаточно вызвать переопределеный метод в родительском классе и сконкатенировать результат переопределяющего метода.
+   * Метод возвращает отражения всех методов вызываемого класса и его родителей.
    *
    * @static
-   * @return \SplObjectStorage Отражение всех методов класса.
+   * @return ReflectionMethod[] Отражение всех методов класса в виде ассоциативного массива, ключами которого являются имена, а значениями отражения методов класса
    */
   static public function getAllReflectionMethods(){
-    $reflectionMethods = new \SplObjectStorage();
-    $namesAllMethods = static::getReflectionClass()->getMethods();
-    foreach($namesAllMethods as $v){
-      try{
-        $reflectionMethods->attach(self::getReflectionMethod($v->getName()));
+    $reflectionMethods = [];
+    $class = get_called_class();
+    $class = $class::getReflectionClass();
+    do{
+      $methods = $class->getMethods();
+      foreach($methods as $method){
+        if(array_key_exists($method->getName(), $reflectionMethods)){
+          continue;
+        }
+        $className = $class->getName();
+        $reflectionMethods[$method->getName()] = $className::getReflectionMethod($method->getName());;
       }
-      catch(exceptions\InvalidArgumentException $exc){
-      }
-    }
+      $class = $class->getParentClass();
+    }while($class !== false);
     return $reflectionMethods;
   }
 }

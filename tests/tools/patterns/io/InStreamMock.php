@@ -1,7 +1,8 @@
 <?php
 namespace PPHP\tests\tools\patterns\io;
+use \PPHP\tools\patterns\io as io;
 
-class InStreamMock extends \PPHP\tools\patterns\io\InStream{
+class InStreamMock extends io\InStream{
   private $descriptor;
 
   function __construct($descriptor){
@@ -10,13 +11,13 @@ class InStreamMock extends \PPHP\tools\patterns\io\InStream{
 
   /**
    * Метод считывает один байт из потока.
-   * @throws \PPHP\tools\patterns\io\IOException Выбрасывается в случае возникновения ошибки при чтении из потока.
-   * @return string|boolean Возвращает текущий байт из потока или false, если поток закончет.
+   * @throws io\IOException Выбрасывается в случае возникновения ошибки при чтении из потока.
+   * @return string Возвращает текущий байт из потока или пустую строку, если поток закончет.
    */
   public function read(){
     $char = fgetc($this->descriptor);
     if($char === false){
-      return false;
+      return '';
     }
     else{
       return $char;

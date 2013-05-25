@@ -3,7 +3,6 @@ namespace PPHP\tools\patterns\state;
 
 /**
  * Класс реализует поведение состояний объектов.
- *
  * Дочерние классы являются состояниями некоторого объекта-контекста, позволяя изменять его поведение через делегирование вызова.
  * Каждый объект-состояние необходимо реализовывать с использованием семантики объекта-контектса, чтобы механизм делегирования работал верно.
  * @author Artur Sh. Mamedbekov
@@ -17,13 +16,13 @@ abstract class State{
   protected $context;
   /**
    * Массив ссылок на доступные состоянию свойства контекста.
-   * @var array
+   * @var mixed[]
    */
   protected $propertyLinks = [];
 
   /**
    * @param StatesContext $context Контекст состояния.
-   * @param array $propertyLinks [optional] Массив ссылок на доступные состоянию свойства контекста.
+   * @param mixed[] $propertyLinks [optional] Массив ссылок на доступные состоянию свойства контекста.
    */
   public function __construct(StatesContext $context, array &$propertyLinks = null){
     $this->context = $context;

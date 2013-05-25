@@ -6,5 +6,5 @@ namespace PPHP\tools\classes\standard\baseType\exceptions;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType\exceptions
  */
-class PDOException extends RuntimeException{
+class PDOException extends ToolsException{
 }

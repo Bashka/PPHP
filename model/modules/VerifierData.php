@@ -21,7 +21,7 @@ class VerifierData{
         $verifyClass = $method->getParameter($i++)->getClass();
       }
         // Обработка динамических аргументов
-      catch(\PPHP\tools\classes\standard\baseType\exceptions\LogicException $exc){
+      catch(\PPHP\tools\classes\standard\baseType\exceptions\ComponentClassException $exc){
         $verifyClass = false;
       }
       if($verifyClass){

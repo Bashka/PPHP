@@ -1,8 +1,11 @@
 <?php
 namespace PPHP\tools\classes\standard\fileSystem\io;
+use \PPHP\tools\patterns\io as io;
 
 /**
  * Реализация интерфейса Closed для файловых потоков.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\tools\classes\standard\fileSystem\io
  */
 trait FileClosed{
   /**
@@ -13,6 +16,7 @@ trait FileClosed{
 
   /**
    * Метод закрывает данный поток.
+   * @throws io\IOException Выбрасывается в случае невозможности закрытия потока.
    * @return boolean true - если поток закрыт, иначе - false.
    */
   public function close(){
@@ -25,7 +29,6 @@ trait FileClosed{
 
   /**
    * Метод проверяет, закрыт ли поток.
-   * @abstract
    * @return boolean true - если поток закрыт, иначе - false.
    */
   public function isClose(){

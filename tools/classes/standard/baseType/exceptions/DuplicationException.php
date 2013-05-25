@@ -6,5 +6,5 @@ namespace PPHP\tools\classes\standard\baseType\exceptions;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\baseType\exceptions
  */
-class DuplicationException extends \PPHP\tools\classes\standard\baseType\exceptions\RuntimeException{
+class DuplicationException extends EnvironmentException{
 }

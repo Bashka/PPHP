@@ -9,7 +9,8 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 abstract class InStream implements Reader{
   /**
-   * @var resource Указатель на входной поток, с которым работает объект.
+   * Указатель на входной поток, с которым работает объект.
+   * @var resource
    */
   protected $resource;
 
@@ -30,12 +31,8 @@ abstract class InStream implements Reader{
    * @return string Если размер входного потока больше или равен размеру считываемой строки, то прочитанная строка указанного размера, если меньше, то оставшаяся в потоке строка, если в потоке нет данных - пустая строка.
    */
   public function readString($length){
-    if(!is_int($length)){
-      throw new exceptions\InvalidArgumentException('integer', $length);
-    }
-    elseif($length < 1){
-      throw new exceptions\InvalidArgumentException('Ожидается целочисленный параметр больший нуля.');
-    }
+    exceptions\InvalidArgumentException::verifyType($length, 'i');
+    exceptions\InvalidArgumentException::verifyVal($length, 'i > 0');
 
     $result = '';
     while($length--){
@@ -64,12 +61,7 @@ abstract class InStream implements Reader{
    * @return string Прочитанная строка или пустая строка, если достигнут конец потока или символ EOL.
    */
   public function readLine($EOLSymbol = PHP_EOL){
-    if(!is_string($EOLSymbol)){
-      throw new exceptions\InvalidArgumentException('string', $EOLSymbol);
-    }
-    elseif($EOLSymbol === ''){
-      throw new exceptions\InvalidArgumentException('Ожидается не пустая строка в качестве параметра.');
-    }
+    exceptions\InvalidArgumentException::verifyType($EOLSymbol, 'S');
 
     $EOLLength = strlen($EOLSymbol);
     $result = '';
