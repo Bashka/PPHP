@@ -2,13 +2,16 @@
 namespace PPHP\tests\tools\classes\standard\storage\database\ORM;
 use PPHP\tools\patterns\database\LongObject;
 
+// Сущности класса записываются в таблицу ParentTable и проецируют свойство OID на поле OID
 /**
  * @ORM\Table ParentTable
  * @ORM\PK OID
  */
 class ParentMock extends LongObject{
+  // Свойство проецируется на поле af таблицы класса и загружает ассоциированную сущность сразу
   /**
    * @ORM\ColumnName af
+   * @ORM\Full
    */
   private $a = 1;
   protected $b = 2;

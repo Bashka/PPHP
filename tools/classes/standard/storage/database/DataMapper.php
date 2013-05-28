@@ -24,6 +24,16 @@ class DataMapper{
   const ORM_ASSOC_FK = 'ORM\FK';
 
   /**
+   * Маркер, определяющий композиционную множественную ассоциацию. Свойства множественных ассоциаций, помеченные данным маркером, определяют классы, объекты которых должны быть удалены при удалении агрегата.
+   */
+  const ORM_COMPOSITION = 'ORM\Composition';
+
+  /**
+   * Маркерная аннотация, определяющая ассоциативное свойство, которое выполняет полную инициализацию связанных объектов.
+   */
+  const ORM_FULL = 'ORM\Full';
+
+  /**
    * Соединение с базой данных через PDO интерфейс.
    * @var PDO;
    */
@@ -43,9 +53,13 @@ class DataMapper{
     }
 
     // Преобразование объектных ссылок в Proxy
-    foreach($data as &$value){
+    foreach($data as $name => &$value){
       if(is_string($value) && LongObject::isReestablish($value)){
         $value = LongObject::reestablish($value);
+        // Полное восстановление связи
+        if($object->getReflectionProperty($name)->isMetadataExists(self::ORM_FULL)){
+          $this->recover($value);
+        }
       }
     }
 
@@ -57,7 +71,12 @@ class DataMapper{
         $reflectionAssocCLass = $property->getMetadata(self::ORM_ASSOC_CLASS);
         $reflectionAssocCLass = $reflectionAssocCLass::getReflectionClass();
         try{
-          $data[$property->getName()] = new LongAssociation(ORM\Select::metamorphoseAssociation($reflectionAssocCLass, [[$property->getMetadata(self::ORM_ASSOC_FK), '=', $object->interpretation()]]), $reflectionAssocCLass);
+          $assoc = new LongAssociation(ORM\Select::metamorphoseAssociation($reflectionAssocCLass, [[$property->getMetadata(self::ORM_ASSOC_FK), '=', $object->interpretation()]]), $reflectionAssocCLass);
+          // Полное восстановление связи
+          if($property->isMetadataExists(self::ORM_FULL)){
+            $this->recoverAssoc($assoc);
+          }
+          $data[$property->getName()] = $assoc;
         }
         catch(exceptions\NotFoundDataException $e){
           throw new exceptions\StructureException('Недопустимый персистентный объект.', 1, $e);
@@ -134,11 +153,13 @@ class DataMapper{
 
   /**
    * Метод удаляет данные из базы данных.
+   * Если одно или несколько свойств объекта, определяющих множественную ассоциацию аннотированы композитным маркером, то объекты, ассоциированны с данным классом, будут так же удалены.
    * @param LongObject $object Удаляемый объект.
    * @throws exceptions\PDOException Выбрасывается в случае, если запрос к БД выполнен с ошибкой.
    * @throws exceptions\StructureException Выбрасывается в случае передачи недопустимого для работы объекта.
    */
   public function delete(LongObject $object){
+    // Формирование транзакции на удаление сущности
     try{
       $updates = ORM\Delete::metamorphose($object);
     }
@@ -147,6 +168,21 @@ class DataMapper{
     }
     // Выброс исключения exceptions\InvalidArgumentException не предполагается
 
+    // Удаление композита
+    $reflectionProperties = $object->getAllReflectionProperties();
+    foreach($reflectionProperties as $property){
+      // Работа только со свойствами, имеющими соответствующие аннотации
+      if($property->isMetadataExists(self::ORM_ASSOC_CLASS) && $property->isMetadataExists(self::ORM_ASSOC_FK) && $property->isMetadataExists(self::ORM_COMPOSITION)){
+        $reflectionAssocCLass = $property->getMetadata(self::ORM_ASSOC_CLASS);
+        $reflectionAssocCLass = $reflectionAssocCLass::getReflectionClass();
+        $components = $this->recoverGroupFinding($reflectionAssocCLass, [[$property->getMetadata(self::ORM_ASSOC_FK), '=', $object]]);
+        foreach($components as $component){
+          $this->delete($component);
+        }
+      }
+    }
+
+    // Удаление сущности
     try{
       $this->PDO->multiQuery($updates);
     }

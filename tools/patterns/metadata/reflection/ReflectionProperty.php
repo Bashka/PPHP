@@ -26,7 +26,12 @@ class ReflectionProperty extends \ReflectionProperty implements metadata\Describ
       $doc = substr(trim($doc), 2);
       if($doc[0] == '@'){
         $point = strpos($doc, ' ');
-        $this->setMetadata(substr($doc, 1, $point-1), substr($doc, $point+1));
+        if($point !== false){
+          $this->setMetadata(substr($doc, 1, $point-1), substr($doc, $point+1));
+        }
+        else{
+          $this->setMetadata(substr($doc, 1), '');
+        }
       }
     }
   }

@@ -1,6 +1,12 @@
 <?php
 namespace PPHP\model\modules;
+use PPHP\model\classes\ModuleController;
+use PPHP\services\modules\ModuleNotFoundException;
+use PPHP\services\modules\ModulesRouter;
+use PPHP\services\view\ViewProvider;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
+
 spl_autoload_register(function($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
@@ -34,7 +40,7 @@ register_shutdown_function(function (){
       $send->exception->line = $error['line'];
       $send->exception->buffer = $buffer;
 
-      $viewProvider = \PPHP\services\view\ViewProvider::getInstance();
+      $viewProvider = ViewProvider::getInstance();
       $viewProvider->sendMessage($send);
     }
   }
@@ -52,18 +58,26 @@ set_error_handler(function($code, $message, $file, $line){
 }, E_NOTICE|E_USER_NOTICE|E_STRICT);
 
 /**
- * Класс является центральным контроллером системы и отвечает за вызов и передачу модулю сообщений вида, а так же за возврат ему ответа модуля.
+ * Класс является единой точной входа системы и отвечает за вызов и передачу модулю сообщений от слоя view, а так же за возврат ему ответа модуля.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\model\modules
  */
 class CentralController{
   /**
    * Метод возвращает контроллер указанного конкретного модуля.
    * @static
    * @param string $moduleName Имя зарпашиваемого модуля.
-   * @throws \PPHP\services\modules\ModuleNotFoundException Выбрасывается в случае, если требуемого модуля не существует в системе.
-   * @return \PPHP\model\classes\ModuleController Контроллер целевого модуля.
+   * @throws ModuleNotFoundException Выбрасывается в случае, если требуемого модуля не существует в системе.
+   * @throws NotFoundDataException Выбрасывается в случае, если не удалось получить доступ к конфигурации системы.
+   * @return ModuleController Контроллер целевого модуля.
    */
   public static function getControllerModule($moduleName){
-    return \PPHP\services\modules\ModulesRouter::getInstance()->getController($moduleName);
+    try{
+      return ModulesRouter::getInstance()->getController($moduleName);
+    }
+    catch(NotFoundDataException $e){
+      throw $e;
+    }
   }
 
   /**
@@ -73,7 +87,7 @@ class CentralController{
    * @throws AccessException Выбрасывается в случае, если доступ к данному методу модуля запрещен.
    */
   public static function main(){
-    $viewProvider = \PPHP\services\view\ViewProvider::getInstance();
+    $viewProvider = ViewProvider::getInstance();
     $viewMessage = $viewProvider->getMessage();
     $module = $viewMessage['module'];
     $method = $viewMessage['active'];

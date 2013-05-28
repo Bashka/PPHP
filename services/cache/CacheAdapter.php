@@ -3,6 +3,8 @@ namespace PPHP\services\cache;
 
 /**
  * Объекты-адаптеры, предоставляющие интерфейс для работы с кэш-системами.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\services\cache
  */
 abstract class CacheAdapter{
   /**
@@ -19,7 +21,7 @@ abstract class CacheAdapter{
    * Метод возвращает данные из кэша.
    * @abstract
    * @param string $key Ключ запрашиваемого значения.
-   * @return string|boolean Ассоциированное с ключем значение или false, если значение не установленно.
+   * @return string|null Ассоциированное с ключем значение или null, если значение не установленно.
    */
   public abstract function get($key);
 
@@ -49,7 +51,7 @@ abstract class CacheAdapter{
   }
 
   function __isset($name){
-    return $this->get($name) !== false;
+    return $this->get($name) !== null;
   }
 
   function __unset($name){

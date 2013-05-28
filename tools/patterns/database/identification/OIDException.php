@@ -2,7 +2,7 @@
 namespace PPHP\tools\patterns\database\identification;
 
 /**
- * Данное исключение свидетельствует о том, что была предпринята попытка обновления идентификатора.
+ * Данное исключение свидетельствует о том, что произошла ошибка при работе с идентификатором.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\database\identification
  */

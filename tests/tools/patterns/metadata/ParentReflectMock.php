@@ -4,12 +4,14 @@ use \PPHP\tools\patterns\metadata\reflection as reflection;
 
 /**
  * @testMetadata testValue
+ * @testMarker
  */
 class ParentReflectMock implements reflection\Reflect{
   use reflection\TReflect;
 
   /**
    * @testMetadata testValue
+   * @testMarker
    */
   private $a;
 
@@ -17,6 +19,7 @@ class ParentReflectMock implements reflection\Reflect{
 
   /**
    * @testMetadata testValue
+   * @testMarker
    */
   private function c(){
   }

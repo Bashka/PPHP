@@ -1,6 +1,5 @@
 <?php
 namespace PPHP\tools\classes\standard\storage\database;
-
 use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 use PPHP\tools\patterns\database\query\ComponentQuery;
 
@@ -27,7 +26,7 @@ class PDO extends \PDO{
   public function query($statement){
     $resultQuery = parent::query($statement);
     if((int) $this->errorCode() != 0){
-      throw new exceptions\PDOException($this->errorInfo()[2], (int) $this->errorInfo()[0], null, $this->errorInfo()[1]);
+      throw new exceptions\PDOException($this->errorInfo()[2], (int) $this->errorInfo()[0]);
     }
     return $resultQuery;
   }

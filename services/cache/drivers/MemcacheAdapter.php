@@ -1,11 +1,14 @@
 <?php
 namespace PPHP\services\cache\drivers;
+use PPHP\services\cache\CacheAdapter;
 
 
 /**
  * Адаптер, для взаимодействия с memcache.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\services\cache\drivers
  */
-class MemcacheAdapter extends \PPHP\services\cache\CacheAdapter{
+class MemcacheAdapter extends CacheAdapter{
   /**
    * Не адаптированный объект взаимодействия с кэш-системой.
    * @var \Memcache
@@ -30,10 +33,14 @@ class MemcacheAdapter extends \PPHP\services\cache\CacheAdapter{
   /**
    * Метод возвращает данные из кэша.
    * @param string $key Ключ запрашиваемого значения.
-   * @return string|boolean Ассоциированное с ключем значение или false, если значение не установленно.
+   * @return string|null Ассоциированное с ключем значение или null, если значение не установленно.
    */
   public function get($key){
-    return $this->cache->get($key);
+    $result = $this->cache->get($key);
+    if($result === false){
+      return null;
+    }
+    return $result;
   }
 
   /**

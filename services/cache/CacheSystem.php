@@ -1,10 +1,16 @@
 <?php
 namespace PPHP\services\cache;
+use PPHP\services\configuration\Configurator;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\patterns\singleton\Singleton;
+use PPHP\tools\classes\standard\fileSystem\NotExistsException;
 
 /**
  * Класс представляет глобальную фабрику адаптеров, для работы с используемыми кэш-системами.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\services\cache
  */
-class CacheSystem implements \PPHP\tools\patterns\singleton\Singleton{
+class CacheSystem implements Singleton{
   /**
    * Текущий адаптер кэш-системы.
    * @var CacheAdapter
@@ -14,15 +20,21 @@ class CacheSystem implements \PPHP\tools\patterns\singleton\Singleton{
   /**
    * Метод возвращает экземпляр класса драйвера.
    * @static
-   * @throws \PPHP\services\InitializingDataNotFoundException Выбрасывается в случае, если не удалось инициализировать кэш-систему.
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если не удалось инициализировать кэш-систему.
    * @return CacheAdapter
    */
   public static function getInstance(){
     if(empty(self::$adapter)){
-      $conf = \PPHP\services\configuration\Configurator::getInstance();
-      if(!isset($conf->Cache_Driver) || !isset($conf->Cache_Server)){
-        throw new \PPHP\services\InitializingDataNotFoundException('Недостаточно данных для инициализации, необходимыми полями являются: Driver, Server');
+      try{
+        $conf = Configurator::getInstance();
       }
+      catch(NotExistsException $e){
+        throw new exceptions\NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
+      }
+      if(!isset($conf->Cache_Driver) || !isset($conf->Cache_Server)){
+        throw new exceptions\NotFoundDataException('Недостаточно данных для инициализации, необходимыми полями являются: Driver, Server');
+      }
+
       $adapterName = '\PPHP\services\cache\drivers\\' . $conf->Cache_Driver;
       $adapter = new $adapterName;
       $serverOption = $conf->Cache_Server;
@@ -36,10 +48,16 @@ class CacheSystem implements \PPHP\tools\patterns\singleton\Singleton{
   /**
    * Метод определяет, используется ли утилита кэширования в системе.
    * @static
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если не удалось инициализировать кэш-систему.
    * @return boolean true - если кэширование используется, иначе - false.
    */
   public static function hasCache(){
-    $conf = \PPHP\services\configuration\Configurator::getInstance();
+    try{
+      $conf = Configurator::getInstance();
+    }
+    catch(NotExistsException $e){
+      throw new exceptions\NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
+    }
     return $conf->Cache_Driver != 'NullAdapter';
   }
 
@@ -48,15 +66,20 @@ class CacheSystem implements \PPHP\tools\patterns\singleton\Singleton{
    * @static
    * @param string $attributeName Свойство конфигурации. Доступными свойствами являются: Driver - имя адапрета; Server - кэш-сервер.
    * @param string $value Значение конфигурации.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException
+   * @throws exceptions\InvalidArgumentException Выбрасывается в случае, если недопустимый параметр или значения переданных параметров имеют неверный тип.
+   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если не удалось инициализировать кэш-систему.
    */
   public static function setAttribute($attributeName, $value){
-    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($attributeName, 'S');
-    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($value, 'S');
-    if(!array_search($attributeName, ['Driver', 'Server'])){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
+    exceptions\InvalidArgumentException::verifyType($attributeName, 'S');
+    exceptions\InvalidArgumentException::verifyType($value, 'S');
+    exceptions\InvalidArgumentException::verifyVal($attributeName, 's # Driver|Server');
+
+    try{
+      $conf = Configurator::getInstance();
     }
-    $conf = \PPHP\services\configuration\Configurator::getInstance();
+    catch(NotExistsException $e){
+      throw new exceptions\NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
+    }
     $conf->set('Cache', $attributeName, $value);
   }
 }

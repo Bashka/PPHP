@@ -1,10 +1,14 @@
 <?php
 namespace PPHP\services\log;
 
+use PPHP\tools\patterns\interpreter\Interpreter;
+
 /**
  * Представление сообщения журнала в системе.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\services\log
  */
-class Message implements \PPHP\tools\patterns\interpreter\Interpreter{
+class Message implements Interpreter{
   /**
    * Содержание сообщения.
    * @var string
@@ -40,7 +44,7 @@ class Message implements \PPHP\tools\patterns\interpreter\Interpreter{
    * Метод формирует сообщений журнала типа Notice.
    * @static
    * @param string $content Содержание сообщения.
-   * @param \Exception|null $exception Исклюлчение - основание.
+   * @param \Exception $exception [optional] Исклюлчение - основание.
    * @return Message
    */
   public static function createNotice($content, \Exception $exception=null){
@@ -51,7 +55,7 @@ class Message implements \PPHP\tools\patterns\interpreter\Interpreter{
    * Метод формирует сообщений журнала типа Warning.
    * @static
    * @param string $content Содержание сообщения.
-   * @param \Exception|null $exception Исклюлчение - основание.
+   * @param \Exception $exception [optional] Исклюлчение - основание.
    * @return Message
    */
   public static function createWarning($content, \Exception $exception=null){
@@ -62,7 +66,7 @@ class Message implements \PPHP\tools\patterns\interpreter\Interpreter{
    * Метод формирует сообщений журнала типа Error.
    * @static
    * @param string $content Содержание сообщения.
-   * @param \Exception $exception Исклюлчение - основание.
+   * @param \Exception $exception [optional] Исклюлчение - основание.
    * @return Message
    */
   public static function createError($content, \Exception $exception=null){
@@ -72,7 +76,7 @@ class Message implements \PPHP\tools\patterns\interpreter\Interpreter{
   /**
    * @param string $content Содержание сообщения.
    * @param string $type Тип сообщения.
-   * @param \Exception $exception Исклюлчение - основание.
+   * @param \Exception $exception [optional] Исклюлчение - основание.
    */
   private function __construct($content, $type=LogManager::ERROR, \Exception $exception=null){
     $this->date = date('d.m.Y H:i:s', time());
@@ -111,7 +115,7 @@ class Message implements \PPHP\tools\patterns\interpreter\Interpreter{
 
   /**
    * Метод возвращает строку, полученную при интерпретации объекта.
-   * @param null|mixed $driver[optional] Данные, позволяющие изменить логику интерпретации объекта.
+   * @param mixed $driver[optional] Данные, позволяющие изменить логику интерпретации объекта.
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){

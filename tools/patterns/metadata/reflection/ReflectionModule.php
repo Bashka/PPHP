@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\patterns\metadata\reflection;
+use PPHP\model\classes\ModuleController;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 use \PPHP\tools\patterns\metadata as metadata;
 use \PPHP\tools\classes\standard\fileSystem as fileSystem;
@@ -218,7 +219,7 @@ class ReflectionModule implements metadata\Described{
   /**
    * Метод возвращает контроллер данного модуля, если он является конкретным.
    * @throws exceptions\RuntimeException Выбрасывается в случае, если модуль не явлется конкретным.
-   * @return \PPHP\model\classes\ModuleController Контроллер модуля.
+   * @return ModuleController Контроллер модуля.
    */
   public function getController(){
     if($this->type == self::VIRTUAL){

@@ -1,11 +1,14 @@
 <?php
 namespace PPHP\services\cache\drivers;
+use PPHP\services\cache\CacheAdapter;
 
 
 /**
  * Объект-пустышка, применяемый в случае отсутствия кэш-системы.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\services\cache\drivers
  */
-class NullAdapter extends \PPHP\services\cache\CacheAdapter{
+class NullAdapter extends CacheAdapter{
   /**
    * Метод записывает значение в кэш.
    * @param string $key Ключ значения.
@@ -20,10 +23,10 @@ class NullAdapter extends \PPHP\services\cache\CacheAdapter{
   /**
    * Метод возвращает данные из кэша.
    * @param string $key Ключ запрашиваемого значения.
-   * @return string|boolean Ассоциированное с ключем значение или false, если значение не установленно.
+   * @return string|null Ассоциированное с ключем значение или null, если значение не установленно.
    */
   public function get($key){
-    return false;
+    return null;
   }
 
   /**

@@ -1,6 +1,12 @@
 <?php
 namespace PPHP\model\modules\SystemPackages;
 
+use PPHP\tools\classes\standard\fileSystem\ComponentFileSystem;
+use PPHP\tools\classes\standard\fileSystem\Directory;
+use PPHP\tools\classes\standard\fileSystem\File;
+use PPHP\tools\classes\standard\fileSystem\FileINI;
+use PPHP\tools\classes\standard\fileSystem\NotExistsException;
+
 /**
  * Класс, обеспечивающий доступ к архивам компонентов слоя домена для установки.
  * @author Artur Sh. Mamedbekov
@@ -10,17 +16,17 @@ class ArchiveManager{
   /**
    * Каталог для временных файлов компоненты.
    * @static
-   * @var \PPHP\tools\classes\standard\fileSystem\Directory
+   * @var Directory
    */
   protected static $tmpDir;
   /**
    * Файл конфигурации компоненты.
-   * @var \PPHP\tools\classes\standard\fileSystem\File
+   * @var File
    */
   protected $confFile;
   /**
    * Конфигурация компоненты.
-   * @var \PPHP\tools\classes\standard\fileSystem\FileINI
+   * @var FileINI
    */
   protected $conf;
   /**
@@ -31,24 +37,24 @@ class ArchiveManager{
 
   public function __construct(){
     if(!self::$tmpDir){
-      self::$tmpDir = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/SystemPackages/tmp');
+      self::$tmpDir = ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/SystemPackages/tmp');
     }
   }
 
   /**
    * Метод открывает архив компоненты для чтения. Данный метод должен быть запущен до вызова других методов.
    * @param string $archiveAddress Физический адрес до архива компоненты.
-   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если компонент не содержит требуемых файлов.
+   * @throws NotExistsException Выбрасывается в случае, если компонент не содержит требуемых файлов.
    */
   public function open($archiveAddress){
     $this->zip = new \ZipArchive;
     $this->zip->open($archiveAddress);
     if(!$this->zip->statName('conf.ini')){
-      throw new \PPHP\tools\classes\standard\fileSystem\NotExistsException('Нарушена структура модуля.');
+      throw new NotExistsException('Нарушена структура модуля.');
     }
     $this->zip->extractTo(self::$tmpDir->getAddress(), ['conf.ini']);
     $this->confFile = self::$tmpDir->getFile('conf.ini');
-    $this->conf = new \PPHP\tools\classes\standard\fileSystem\FileINI($this->confFile, true);
+    $this->conf = new FileINI($this->confFile, true);
   }
 
   /**
@@ -69,12 +75,12 @@ class ArchiveManager{
    * Метод вызывает переданную лямбда функцию передавая ей в качестве единственного аргумента указанный файл.
    * @param string $fileName Имя требуемого файла.
    * @param callback $callback Лямбда функция, призваная работать с файлом.
-   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если требуемого файла не найдено.
+   * @throws NotExistsException Выбрасывается в случае, если требуемого файла не найдено.
    * @return mixed Данные, возвращаемые лямбда функцией.
    */
   public function getFile($fileName, $callback){
     if(!$this->isFilesExists([$fileName])){
-      throw new \PPHP\tools\classes\standard\fileSystem\NotExistsException('Требуемого файла ' . $fileName . ' не существует в архиве компоненты.');
+      throw new NotExistsException('Требуемого файла ' . $fileName . ' не существует в архиве компоненты.');
     }
     $this->zip->extractTo(self::$tmpDir->getAddress(), [$fileName]);
     $file = self::$tmpDir->getFile($fileName);
@@ -83,10 +89,10 @@ class ArchiveManager{
 
   /**
    * Метод перемещает все присутствующие в компоненте файлы кроме конфигурационного по указанному адресу.
-   * @param \PPHP\tools\classes\standard\fileSystem\Directory $location Целевой адрес файлов компоненты.
+   * @param Directory $location Целевой адрес файлов компоненты.
    * @param array|null $filesNames Имя извлекаемых файлов компоненты или null - если необходимо извлеч все файлы кроме конфигурационного.
    */
-  public function moveFiles(\PPHP\tools\classes\standard\fileSystem\Directory $location, array $filesNames = null){
+  public function moveFiles(Directory $location, array $filesNames = null){
     $this->zip->extractTo($location->getAddress(), $filesNames);
     if($location->isFileExists('conf.ini')){
       $location->getFile('conf.ini')->delete();
@@ -116,14 +122,14 @@ class ArchiveManager{
   }
 
   /**
-   * @return \PPHP\tools\classes\standard\fileSystem\FileINI
+   * @return FileINI
    */
   public function getConf(){
     return $this->conf;
   }
 
   /**
-   * @return \PPHP\tools\classes\standard\fileSystem\File
+   * @return File
    */
   public function getConfFile(){
     return $this->confFile;

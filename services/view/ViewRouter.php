@@ -1,27 +1,46 @@
 <?php
 namespace PPHP\services\view;
-
+use PPHP\services\cache\CacheAdapter;
+use PPHP\services\cache\CacheSystem;
+use PPHP\services\configuration\Configurator;
+use PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
+use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
+use \PPHP\tools\patterns\singleton as singleton;
 /**
  * Класс отвечает за роутинг экранов.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\services\view
  */
-class ViewRouter implements \PPHP\tools\patterns\singleton\Singleton{
-use \PPHP\tools\patterns\singleton\TSingleton;
+class ViewRouter implements singleton\Singleton{
+  use singleton\TSingleton;
 
+  /**
+   * Адрес хранилища экранов.
+   */
   const SCREENS_DIR = 'PPHP/view/screens';
 
   /**
-   * @var \PPHP\services\configuration\Configurator
+   * Конфигуратор системы.
+   * @var Configurator
    */
   protected $conf;
   /**
-   * @var \PPHP\services\cache\CacheAdapter
+   * Кэш.
+   * @var CacheAdapter
    */
   protected $cache;
-
+  /**
+   * @throws NotFoundDataException Выбрасывается в случае, если не удалось получить доступ к конфигурации системы.
+   */
   private function __construct(){
-    $this->conf = \PPHP\services\configuration\Configurator::getInstance();
-    $this->cache = \PPHP\services\cache\CacheSystem::getInstance();
-    if(\PPHP\services\cache\CacheSystem::hasCache() && !isset($this->cache->ViewRouter_Init)){
+    try{
+      $this->conf = Configurator::getInstance();
+      $this->cache = CacheSystem::getInstance();
+    }
+    catch(NotFoundDataException $e){
+      throw new NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
+    }
+    if(CacheSystem::hasCache() && !isset($this->cache->ViewRouter_Init)){
       $screensNames = $this->getScreensNames();
       foreach($screensNames as $screenName){
         $this->cache->set('ViewRouter_Screens_' . $screenName, $this->conf->get('Screens', $screenName));
@@ -39,7 +58,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    */
   public function getScreen($moduleName, $screenName){
     $screen = null;
-    if(($screen = $this->cache->get('ViewRouter_Screens_' . $moduleName . '_' . $screenName)) === false){
+    if(($screen = $this->cache->get('ViewRouter_Screens_' . $moduleName . '_' . $screenName)) === null){
       if(!$this->conf->isExists('Screens', $moduleName . '_' . $screenName)){
         throw ScreenNotFoundException::getException($moduleName, $screenName);
       }
@@ -56,7 +75,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * @return boolean true - если экран определен, иначе - false.
    */
   public function hasScreen($moduleName, $screenName){
-    if($this->cache->get('ViewRouter_Screens_' . $moduleName . '_' . $screenName) === false){
+    if($this->cache->get('ViewRouter_Screens_' . $moduleName . '_' . $screenName) === null){
       return $this->conf->isExists('Screens', $moduleName . '_' . $screenName);
     }
     return true;
@@ -67,11 +86,11 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * @param string $moduleName Имя модуля.
    * @param string $screenName Имя экрана.
    * @param string $screen Расположение экрана относительно хранилища экранов.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если указанный экран уже установлен.
+   * @throws ScreenDuplicationException Выбрасывается в случае, если указанный экран уже установлен.
    */
   public function addScreen($moduleName, $screenName, $screen){
     if($this->hasScreen($moduleName, $screenName)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('Указанный экран ' . $moduleName . '::' . $screenName . ' уже установлен в системе.');
+      throw ScreenDuplicationException::getException($moduleName, $screenName);
     }
     $this->conf->set('Screens', $moduleName . '_' . $screenName, $screen);
     $this->cache->set('ViewRouter_Screens_' . $moduleName . '_' . $screenName, $screen);
@@ -81,12 +100,12 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * Метод удаляет экран из роутинга.
    * @param string $moduleName Имя модуля.
    * @param string $screenName Имя экрана.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если целевой экран не установлен в системе.
+   * @throws ScreenNotFoundException Выбрасывается в случае, если целевой экран не установлен в системе.
    * @return boolean true - если экран успешно удален из роутинга, иначе - false.
    */
   public function removeScreen($moduleName, $screenName){
     if(!$this->hasScreen($moduleName, $screenName)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('Указанный экран ' . $moduleName . '::' . $screenName . ' не установлен в системе.');
+      throw new ScreenNotFoundException('Указанный экран ' . $moduleName . '::' . $screenName . ' не установлен в системе.');
     }
     $this->cache->remove('ViewRouter_Screens_' . $moduleName . '_' . $screenName);
     return $this->conf->delete('Screens', $moduleName . '_' . $screenName);

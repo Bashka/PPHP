@@ -1,6 +1,14 @@
 <?php
 namespace PPHP\services\modules;
+use PPHP\model\classes\ModuleController;
+use PPHP\services\cache\CacheAdapter;
+use PPHP\services\cache\CacheSystem;
+use PPHP\services\configuration\Configurator;
+use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
+use PPHP\tools\classes\standard\fileSystem\NotExistsException;
+use PPHP\tools\patterns\metadata\reflection\ReflectionModule;
 use \PPHP\tools\patterns\singleton as singleton;
+use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 /**
  * Класс отвечает за регистрацию, удаление и предоставление модулей.
  * @author Artur Sh. Mamedbekov
@@ -16,26 +24,39 @@ use singleton\TSingleton;
 
   /**
    * Конфигуратор системы.
-   * @var \PPHP\services\configuration\Configurator
+   * @var Configurator
    */
   protected $conf;
   /**
-   * @var \PPHP\services\cache\CacheAdapter
+   * Кэш.
+   * @var CacheAdapter
    */
   protected $cache;
 
   /**
    * Множество инициированных отражений модулей.
-   * @var \PPHP\tools\patterns\metadata\reflection\ReflectionModule[]
+   * @var ReflectionModule[]
    */
   protected $reflectionsModules = [];
 
+  /**
+   * @throws NotFoundDataException Выбрасывается в случае, если не удалось получить доступ к конфигурации системы.
+   */
   private function __construct(){
-    $this->conf = \PPHP\services\configuration\Configurator::getInstance();
-    $this->cache = \PPHP\services\cache\CacheSystem::getInstance();
-    if(\PPHP\services\cache\CacheSystem::hasCache() && !isset($this->cache->ModulesRouter_Init)){
+    try{
+      $this->conf = Configurator::getInstance();
+      $this->cache = CacheSystem::getInstance();
+    }
+    catch(NotFoundDataException $e){
+      throw new NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
+    }
+
+    // Заполнение кэша
+    // Выброс исключений не предполагается
+    if(CacheSystem::hasCache() && !isset($this->cache->ModulesRouter_Init)){
       $modulesNames = $this->getModulesNames();
       foreach($modulesNames as $moduleName){
+        // Выброс исключений не предполагается
         $this->cache->set('ModulesRouter_Modules_'.$moduleName, $this->conf->get('Modules', $moduleName));
       }
       $this->cache->ModulesRouter_Init = 1;
@@ -50,7 +71,8 @@ use singleton\TSingleton;
    */
   public function getModule($moduleName){
     $module = null;
-    if(($module = $this->cache->get('ModulesRouter_Modules_'.$moduleName)) === false){
+    // Выброс исключений не предполагается
+    if(($module = $this->cache->get('ModulesRouter_Modules_'.$moduleName)) === null){
       if(!$this->conf->isExists('Modules', $moduleName)){
         throw ModuleNotFoundException::getException($moduleName);
       }
@@ -63,12 +85,22 @@ use singleton\TSingleton;
   /**
    * Метод возвращает отражение указанного модуля.
    * @param string $moduleName Целевой модуль.
-   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionModule Отражение модуля.
+   * @throws NotFoundDataException Выбрасывается в случае, если не удалось получить доступ к файлу состояния модуля.
+   * @return ReflectionModule Отражение модуля.
    */
   public function &getReflectionModule($moduleName){
     if(!isset($this->reflectionsModules[$moduleName])){
       $moduleLocation = $this->getModule($moduleName);
-      $this->reflectionsModules[$moduleName] = new \PPHP\tools\patterns\metadata\reflection\ReflectionModule($moduleName, $moduleLocation, self::MODULES_DIR.'/'.$moduleLocation);
+      try{
+        $this->reflectionsModules[$moduleName] = new ReflectionModule($moduleName, $moduleLocation, self::MODULES_DIR.'/'.$moduleLocation);
+      }
+      catch(NotExistsException $e){
+        throw new NotFoundDataException('Отсутствует доступ к файлу состояния модуля.', 1, $e);
+      }
+      catch(exceptions\RuntimeException $e){
+        throw new NotFoundDataException('Отсутствует доступ к файлу состояния модуля.', 1, $e);
+      }
+
     }
     return $this->reflectionsModules[$moduleName];
   }
@@ -76,11 +108,24 @@ use singleton\TSingleton;
   /**
    * Метод возвращает контроллер конкретного модуля.
    * @param string $moduleName Имя целевого модуля.
-   * @return \PPHP\model\classes\ModuleController Контроллер модуля.
+   * @throws NotFoundDataException Выбрасывается в случае, если не удалось получить доступ к файлу состояния модуля.
+   * @throws exceptions\RuntimeException Выбрасывается в случае, если модуль не является конкретным.
+   * @return ModuleController Контроллер модуля.
    */
   public function getController($moduleName){
-    $reflectionModule = $this->getReflectionModule($moduleName);
-    return $reflectionModule->getController();
+    try{
+      $reflectionModule = $this->getReflectionModule($moduleName);
+    }
+    catch(NotFoundDataException $e){
+      throw $e;
+    }
+
+    try{
+      return $reflectionModule->getController();
+    }
+    catch(exceptions\RuntimeException $e){
+      throw $e;
+    }
   }
 
   /**
@@ -89,7 +134,8 @@ use singleton\TSingleton;
    * @return boolean true - если модуль установлен, иначе - false.
    */
   public function hasModule($moduleName){
-    if($this->cache->get('ModulesRouter_Modules_'.$moduleName) === false){
+    // Выброс исключений не предполагается
+    if($this->cache->get('ModulesRouter_Modules_'.$moduleName) === null){
       return $this->conf->isExists('Modules', $moduleName);
     }
     return true;
@@ -100,13 +146,19 @@ use singleton\TSingleton;
    * @param string $moduleName Имя модуля.
    * @param string $parentModule Имя родительского модуля.
    * @throws ModuleDuplicationException Вырасывается в случае, если добавляемый модуль уже присутствует в системе.
+   * @throws ModuleNotFoundException Выбрасывается в случае отсутствия родительского модуля.
    */
   public function addModule($moduleName, $parentModule = null){
     if($this->hasModule($moduleName)){
       throw ModuleDuplicationException::getException($moduleName);
     }
     if(!is_null($parentModule)){
-      $addressModuleDir = $this->getModule($parentModule) . '/';
+      try{
+        $addressModuleDir = $this->getModule($parentModule) . '/';
+      }
+      catch(ModuleNotFoundException $e){
+        throw $e;
+      }
     }
     else{
       $addressModuleDir = '';
@@ -146,13 +198,24 @@ use singleton\TSingleton;
   /**
    * Метод возвращает имена всех доступных методов контроллера модуля.
    * @param string $module Целевой модуль.
+   * @throws NotFoundDataException Выбрасывается в случае, если не удалось получить доступ к файлу состояния модуля.
+   * @throws exceptions\RuntimeException Выбрасывается в случае, если модуль не является конкретным.
    * @return array|boolean Массив имен методов контроллера модуля или false - если заданного модуля не найдено.
    */
   public function getModuleActions($module){
     if(!$this->hasModule($module)){
       return false;
     }
-    $controller = $this->getController($module)->getReflectionClass();
+    try{
+      $controller = $this->getController($module)->getReflectionClass();
+    }
+    catch(NotFoundDataException $e){
+      throw $e;
+    }
+    catch(exceptions\RuntimeException $e){
+      throw $e;
+    }
+
     $actions = [];
     foreach($controller->getMethods() as $action){
       if($action->isPublic() && $action->getDeclaringClass()->getName() == $controller->getName()){

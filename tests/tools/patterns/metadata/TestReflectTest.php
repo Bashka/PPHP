@@ -129,7 +129,9 @@ class TestReflectTest extends \PHPUnit_Framework_TestCase{
     $this->assertEquals('TestParent', self::$parentClass->getReflectionProperty('a')->getMetadata('Metadata'));
 
     $this->assertEquals('testValue', ParentReflectMock::getReflectionClass()->getMetadata('testMetadata'));
+    $this->assertEquals('', ParentReflectMock::getReflectionClass()->getMetadata('testMarker'));
     $this->assertEquals('testValue', ParentReflectMock::getReflectionMethod('c')->getMetadata('testMetadata'));
+    $this->assertEquals('', ParentReflectMock::getReflectionMethod('c')->getMetadata('testMarker'));
   }
 
   /**
@@ -137,9 +139,11 @@ class TestReflectTest extends \PHPUnit_Framework_TestCase{
    * @covers PPHP\tools\patterns\metadata\reflection\ReflectionProperty::__construct
    */
   public function testIsMetadataExists(){
-    $reflectionProperty = self::$object->getReflectionProperty('a');
-    $this->assertTrue($reflectionProperty->isMetadataExists('Metadata'));
+    $this->assertTrue(self::$object->getReflectionProperty('a')->isMetadataExists('Metadata'));
 
     $this->assertTrue(ParentReflectMock::getReflectionProperty('a')->isMetadataExists('testMetadata'));
+    $this->assertTrue(ParentReflectMock::getReflectionProperty('a')->isMetadataExists('testMarker'));
+
+    $this->assertFalse(ParentReflectMock::getReflectionMethod('d')->isMetadataExists('testMarker'));
   }
 }

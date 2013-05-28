@@ -333,7 +333,7 @@ $str = new String('Hello');</codebox></node><node name="Date" prog_lang="custom-
 Обратитесь к примеру </rich_text><rich_text link="node 69">TOID</rich_text><rich_text>.
 
 </rich_text><rich_text scale="h1">Применение в системе</rich_text><rich_text>
-    Данный интерфейс используется в следующих пакетах: </rich_text><rich_text link="node 64">LongObject</rich_text><rich_text>.</rich_text></node></node><node name="partial implementation" prog_lang="custom-colors" readonly="False" tags="" unique_id="105"><rich_text></rich_text><node name="TOID" prog_lang="custom-colors" readonly="False" tags="" unique_id="69"><rich_text scale="h1">Описание</rich_text><rich_text>
+    Данный интерфейс используется в следующих пакетах: </rich_text><rich_text link="node 64">LongObject</rich_text><rich_text>.</rich_text></node><node name="OIDGenerator" prog_lang="custom-colors" readonly="False" tags="" unique_id="318"><rich_text></rich_text></node></node><node name="partial implementation" prog_lang="custom-colors" readonly="False" tags="" unique_id="105"><rich_text></rich_text><node name="TOID" prog_lang="custom-colors" readonly="False" tags="" unique_id="69"><rich_text scale="h1">Описание</rich_text><rich_text>
     Данный trait полностью реализует логику интерфейса OID не нарушая иерархии наследования классов.
 
 </rich_text><rich_text scale="h1">Возможности</rich_text><rich_text>
@@ -341,7 +341,7 @@ $str = new String('Hello');</codebox></node><node name="Date" prog_lang="custom-
 • Возможность реализации интерфейса без наследования.
 
 </rich_text><rich_text scale="h1">Схема реализации</rich_text><rich_text>
-
+</rich_text><rich_text justification="left"></rich_text><rich_text>
     
 </rich_text><rich_text scale="h1">Пример использования</rich_text><rich_text>
 </rich_text><rich_text justification="left"></rich_text><rich_text>

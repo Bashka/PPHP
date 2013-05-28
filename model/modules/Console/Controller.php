@@ -1,14 +1,28 @@
 <?php
 namespace PPHP\model\modules\Console;
 
+use PPHP\model\classes\ModuleController;
+use PPHP\services\database\ConnectionManager;
+use PPHP\services\database\identification\Autoincrement;
+use PPHP\services\modules\ModulesRouter;
 use PPHP\tools\classes\standard\baseType\exceptions\DuplicationException;
+use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
+use PPHP\tools\classes\standard\baseType\Integer;
+use PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress;
+use PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemName;
+use PPHP\tools\classes\standard\baseType\special\Name;
+use PPHP\tools\classes\standard\fileSystem\ComponentFileSystem;
+use PPHP\tools\classes\standard\fileSystem\loadingFiles\LoadedFile;
+use PPHP\tools\classes\standard\fileSystem\LockException;
+use PPHP\tools\classes\standard\fileSystem\NotExistsException;
+use PPHP\tools\patterns\metadata\reflection\ReflectionModule;
 
 /**
  * Модуль предоставляет текстовый интерфейс доступа к установленным модулям системы.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\model\modules\Console
  */
-class Controller extends \PPHP\model\classes\ModuleController{
+class Controller extends ModuleController{
   /**
    * Метод тестирует механизмы вызова модулей.
    * @param mixed ... Аргументы для тестирования ввода/вывода.
@@ -19,7 +33,7 @@ class Controller extends \PPHP\model\classes\ModuleController{
     $result .= 'The argument is transferred: '.implode(', ', func_get_args()).'.';
     $result .= 'Connection with CSD: ';
     try{
-      \PPHP\services\database\ConnectionManager::getInstance()->getPDO();
+      ConnectionManager::getInstance()->getPDO();
       $result .= 'passed.';
     }
     catch(\Exception $exc){
@@ -34,7 +48,7 @@ class Controller extends \PPHP\model\classes\ModuleController{
    * @return boolean true - если синхронизация успешно завершена.
    */
   public function synchCahce(){
-    \PPHP\services\database\identification\Autoincrement::getInstance()->synch();
+    Autoincrement::getInstance()->synch();
     return true;
   }
 
@@ -45,13 +59,13 @@ class Controller extends \PPHP\model\classes\ModuleController{
   public function uploadFile(){
     $newNameFile = (string)rand(0, 99999);
     try{
-      $file = \PPHP\tools\classes\standard\fileSystem\loadingFiles\LoadedFile::getLoadedFile('Filedata');
+      $file = LoadedFile::getLoadedFile('Filedata');
     }
-    catch(\PPHP\tools\classes\standard\fileSystem\NotExistsException $exc){
+    catch(NotExistsException $exc){
       return 'The file is not found';
     }
     try{
-      $file->move(\PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files'));
+      $file->move(ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files'));
     }
     catch(DuplicationException $exc){
       return 'The file already exists';
@@ -65,7 +79,7 @@ class Controller extends \PPHP\model\classes\ModuleController{
    * @return string Список идентификаторов файлов.
    */
   public function showFilesID(){
-    $dir = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files');
+    $dir = ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files');
     $result = [];
     foreach($dir->getDirectoryIterator() as $v){
       $result[] = $v->getFilename();
@@ -80,12 +94,12 @@ class Controller extends \PPHP\model\classes\ModuleController{
 
   /**
    * Метод возвращает полный физический адрес к файлу по его идентификатору.
-   * @param \PPHP\tools\classes\standard\baseType\Integer $fileID Идентификатор файла.
+   * @param Integer $fileID Идентификатор файла.
    * @return string Полный физический адрес к файлу.
    */
-  public function getAddressFile(\PPHP\tools\classes\standard\baseType\Integer $fileID){
+  public function getAddressFile(Integer $fileID){
     $fileID = $fileID->getVal();
-    $file = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files/'.$fileID);
+    $file = ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files/'.$fileID);
     if(!$file->isExists()){
       return 'The file is not found';
     }
@@ -94,19 +108,19 @@ class Controller extends \PPHP\model\classes\ModuleController{
 
   /**
    * Метод удаляет указанный файл из системы.
-   * @param \PPHP\tools\classes\standard\baseType\Integer $fileID Идентификатор файла.
+   * @param Integer $fileID Идентификатор файла.
    * @return string
    */
-  public function removeFile(\PPHP\tools\classes\standard\baseType\Integer $fileID){
+  public function removeFile(Integer $fileID){
     $fileID = $fileID->getVal();
-    $file = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files/'.$fileID);
+    $file = ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files/'.$fileID);
     if(!$file->isExists()){
       return 'The file is not found';
     }
     try{
       $file->delete();
     }
-    catch(\PPHP\tools\classes\standard\fileSystem\LockException $exc){
+    catch(LockException $exc){
       return 'The file is blocked';
     }
     return 'The file is removed';
@@ -117,20 +131,20 @@ class Controller extends \PPHP\model\classes\ModuleController{
    * @return string
    */
   public function removeAllFiles(){
-    \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files')->clear();
+    ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files')->clear();
     return 'Files are removed';
   }
 
   /**
    * Метод переименовывает указанный файл.
-   * @param \PPHP\tools\classes\standard\baseType\Integer $fileID Идентификатор файла.
-   * @param \PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemName $newName Новое имя файла.
+   * @param Integer $fileID Идентификатор файла.
+   * @param FileSystemName $newName Новое имя файла.
    * @return string
    */
-  public function renameFile(\PPHP\tools\classes\standard\baseType\Integer $fileID, \PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemName $newName){
+  public function renameFile(Integer $fileID, FileSystemName $newName){
     $fileID = $fileID->getVal();
     $newName = $newName->getVal();
-    $file = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files/'.$fileID);
+    $file = ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files/'.$fileID);
     if(!$file->isExists()){
       return 'The file is not found';
     }
@@ -140,18 +154,18 @@ class Controller extends \PPHP\model\classes\ModuleController{
 
   /**
    * Метод перемещает указанный файл.
-   * @param \PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemName $fileName Имя перемещаемого файла относительно хранилища файлов данного модуля.
-   * @param \PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress $newAddress Новый адрес файла относительно корневого каталога сайта.
+   * @param FileSystemName $fileName Имя перемещаемого файла относительно хранилища файлов данного модуля.
+   * @param FileSystemAddress $newAddress Новый адрес файла относительно корневого каталога сайта.
    * @return string
    */
-  public function moveFile(\PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemName $fileName, \PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress $newAddress){
+  public function moveFile(FileSystemName $fileName, FileSystemAddress $newAddress){
     $fileName = $fileName->getVal();
     $newAddress = ($newAddress->isRoot())? $newAddress->getVal(): '/'.$newAddress->getVal();
-    $file = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files/'.$fileName);
+    $file = ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/Console/files/'.$fileName);
     if(!$file->isExists()){
       return 'The file is not found';
     }
-    $file->move(\PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . $newAddress));
+    $file->move(ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . $newAddress));
     return 'The file is moved';
   }
 
@@ -160,10 +174,10 @@ class Controller extends \PPHP\model\classes\ModuleController{
    * @return array Массив имен зарегистрированных в системе конкретных модулей.
    */
   public function getModulesNames(){
-    $modulesRouter = \PPHP\services\modules\ModulesRouter::getInstance();
+    $modulesRouter = ModulesRouter::getInstance();
     $modules = $modulesRouter->getModulesNames();
     foreach($modules as $k => $moduleName){
-      if($modulesRouter->getReflectionModule($moduleName)->getType() != \PPHP\tools\patterns\metadata\reflection\ReflectionModule::SPECIFIC){
+      if($modulesRouter->getReflectionModule($moduleName)->getType() != ReflectionModule::SPECIFIC){
         unset($modules[$k]);
       }
     }
@@ -173,12 +187,12 @@ class Controller extends \PPHP\model\classes\ModuleController{
 
   /**
    * Метод определяет доступные для данного модуля методы контроллера.
-   * @param \PPHP\tools\classes\standard\baseType\special\Name $module Имя целевого модуля.
+   * @param Name $module Имя целевого модуля.
    * @return array Массив доступных методов контроллера данного модуля.
    */
-  public function getModuleActions(\PPHP\tools\classes\standard\baseType\special\Name $module){
+  public function getModuleActions(Name $module){
     $module = $module->getVal();
-    $actions = \PPHP\services\modules\ModulesRouter::getInstance()->getModuleActions($module);
+    $actions = ModulesRouter::getInstance()->getModuleActions($module);
     if(!$actions){
       return [];
     }
@@ -188,22 +202,22 @@ class Controller extends \PPHP\model\classes\ModuleController{
 
   /**
    * Метод возвращает имена аргументов метода контроллера.
-   * @param \PPHP\tools\classes\standard\baseType\special\Name $module Целевой модуль.
-   * @param \PPHP\tools\classes\standard\baseType\special\Name $method Целевой метод.
+   * @param Name $module Целевой модуль.
+   * @param Name $method Целевой метод.
    * @return array Массив имен аргументов метода.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае, если заданного метода не существует.
+   * @throws NotFoundDataException Выбрасывается в случае, если заданного метода не существует.
    */
-  public function getMethodArgs(\PPHP\tools\classes\standard\baseType\special\Name $module, \PPHP\tools\classes\standard\baseType\special\Name $method){
+  public function getMethodArgs(Name $module, Name $method){
     $module = $module->getVal();
     $method = $method->getVal();
-    $controller = \PPHP\services\modules\ModulesRouter::getInstance()->getController($module);
+    $controller = ModulesRouter::getInstance()->getController($module);
     $controller = new \ReflectionClass($controller);
     if(!$controller->hasMethod($method)){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Запрашиваемого метода контроллера не существует.');
+      throw new NotFoundDataException('Запрашиваемого метода контроллера не существует.');
     }
     $action = $controller->getMethod($method);
     if(!$action->isPublic() || $action->getDeclaringClass() != $controller){
-      throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Запрашиваемого метода контроллера не существует.');
+      throw new NotFoundDataException('Запрашиваемого метода контроллера не существует.');
     }
     $params = $action->getParameters();
     $result = [];

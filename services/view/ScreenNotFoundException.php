@@ -3,6 +3,8 @@ namespace PPHP\services\view;
 
 /**
  * Выбрасывается в случае, если требуемого экрана не найдено.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\services\view
  */
 class ScreenNotFoundException extends \PPHP\tools\classes\standard\baseType\exceptions\EnvironmentException{
   /**

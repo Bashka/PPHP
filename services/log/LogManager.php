@@ -1,9 +1,21 @@
 <?php
 namespace PPHP\services\log;
+use PPHP\services\cache\CacheAdapter;
+use PPHP\services\cache\CacheSystem;
+use PPHP\services\configuration\Configurator;
+use PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
+use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
+use PPHP\tools\classes\standard\fileSystem\ComponentFileSystem;
+use PPHP\tools\classes\standard\fileSystem\io\BlockingFileWriter;
+use \PPHP\tools\patterns\singleton as singleton;
 
-class LogManager implements \PPHP\tools\patterns\singleton\Singleton{
-use \PPHP\tools\patterns\singleton\TSingleton;
-
+/**
+ * Класс служит для журналирования сообщений системы.
+ * @author Artur Sh. Mamedbekov
+ * @package PPHP\services\log
+ */
+class LogManager implements singleton\Singleton{
+use singleton\TSingleton;
   /**
    * Журнализация ошибок.
    */
@@ -29,24 +41,48 @@ use \PPHP\tools\patterns\singleton\TSingleton;
 
   /**
    * Поток ввода в журнал.
-   * @var \PPHP\tools\classes\standard\fileSystem\io\BlockingFileWriter
+   * @var BlockingFileWriter
    */
   protected $writer;
 
   /**
-   * @var \PPHP\services\configuration\Configurator
+   * @var Configurator
    */
   protected $conf;
   /**
-   * @var \PPHP\services\cache\CacheAdapter
+   * @var CacheAdapter
    */
   protected $cache;
 
+  /**
+   * @throws NotFoundDataException Выбрасывается в случае невозможности получения данных конфигурации или отсутствия необходимых данных для инициализации службы.
+   */
   private function __construct(){
-    $this->cache = \PPHP\services\cache\CacheSystem::getInstance();
+    try{
+      $this->cache = CacheSystem::getInstance();
+    }
+    catch(NotFoundDataException $e){
+      throw new NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
+    }
+
     if(!isset($this->cache->LogManager_Type)){
-      $this->conf = \PPHP\services\configuration\Configurator::getInstance();
-      $this->type = $this->conf->Log_Type;
+      try{
+        $this->conf = Configurator::getInstance();
+      }
+      catch(NotFoundDataException $e){
+        throw new NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
+      }
+
+      if(!isset($this->conf->Log_Type)){
+        throw new NotFoundDataException('Недостаточно данных для инициализации службы. Отсутствует обязательное свойство [Log::Type].');
+      }
+      try{
+        $this->type = $this->conf->Log_Type;
+      }
+      catch(NotFoundDataException $e){
+        throw new NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
+      }
+
       $this->cache->LogManager_Type = $this->type;
     }
     else{
@@ -60,15 +96,22 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    * Info - ошибки, предупреждения и информационные сообщения;
    * Warning - Ошибки и предупреждения;
    * Error - Ошибки.
+   * @throws InvalidArgumentException Выбрасывается в случае передачи неверного аргумента.
+   * @throws NotFoundDataException Выбрасывается в случае невозможности получения данных конфигурации.
    * @return boolean true - если тип журнализации установлен успешно.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае передачи неверного аргумента.
    */
   public function setType($type){
-    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType($type, 'S');
-    \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyVal($type, 's # '.self::ERROR.'|'.self::WARNING.'|'.self::NOTICE.'|'.self::INFO);
+    InvalidArgumentException::verifyType($type, 'S');
+    InvalidArgumentException::verifyVal($type, 's # '.self::ERROR.'|'.self::WARNING.'|'.self::NOTICE.'|'.self::INFO);
 
     $this->type = $type;
-    $this->conf->Log_Type = $type;
+    try{
+      $this->conf->Log_Type = $type;
+    }
+    catch(NotFoundDataException $e){
+      throw new NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
+    }
+
     $this->cache->LogManager_Type = $type;
     return true;
   }
@@ -82,11 +125,11 @@ use \PPHP\tools\patterns\singleton\TSingleton;
 
   /**
    * Метод возвращает поток ввода в журнал.
-   * @return \PPHP\tools\classes\standard\fileSystem\io\BlockingFileWriter
+   * @return BlockingFileWriter Поток ввода в журнал.
    */
   protected function getLog(){
     if(empty($this->writer)){
-      $this->writer = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/services/log/log.txt');
+      $this->writer = ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/services/log/log.txt');
       $lengthWriter = $this->writer->getSize();
       $this->writer = $this->writer->getWriter();
       $this->writer->setPosition($lengthWriter);
