@@ -1,11 +1,13 @@
 <?php
 namespace PPHP\model\modules\SystemPackages\InstallerModules;
 
+use PPHP\model\modules\SystemPackages as sp;
 use PPHP\model\classes\ModuleController;
 use PPHP\services\modules\ModuleDuplicationException;
 use PPHP\services\modules\ModuleNotFoundException;
 use PPHP\services\modules\ModulesRouter;
 use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
+use PPHP\tools\classes\standard\baseType\exceptions\RuntimeException;
 use PPHP\tools\classes\standard\baseType\exceptions\StructureException;
 use PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress;
 use PPHP\tools\classes\standard\baseType\special\Name;
@@ -18,6 +20,137 @@ use PPHP\tools\classes\standard\fileSystem\NotExistsException;
  * @package PPHP\model\modules\SystemPackages\InstallerModules
  */
 class Controller extends ModuleController{
+  /**
+   * Метод возвращает имена всех зарегистрированных в системе модулей.
+   * @throws NotFoundDataException Выбрасывается в случае, если не удалось получить доступ к конфигурации системы.
+   * @return string[] Массив имен зарегистрированных в системе модулей.
+   */
+  public function getNamesModules(){
+    try{
+      $router = ModulesRouter::getInstance();
+    }
+    catch(NotFoundDataException $e){
+      throw $e;
+    }
+    return $router->getModulesNames();
+  }
+
+  /**
+   * Метод возвращает массив используемых данным модулем модулей.
+   * @throws ModuleNotFoundException Выбрасывается в случае отсутствия модуля, его файла состояния или каталога.
+   * @throws RuntimeException Выбрасывается в случае, если вызываемый модуль не является конкретным.
+   * @return string[]|boolean Массив имен используемых модулей или false, если модуль не имеет зависимостей.
+   */
+  public function getUsed(Name $module){
+    try{
+      $module = new sp\ReflectionModule($module->getVal());
+    }
+    catch(ModuleNotFoundException $e){
+      throw $e;
+    }
+    try{
+      return $module->getUsed();
+    }
+    catch(RuntimeException $e){
+      throw $e;
+    }
+  }
+
+  /**
+   * Метод возвращает имя родительского модуля.
+   * @throws ModuleNotFoundException Выбрасывается в случае отсутствия модуля, его файла состояния или каталога.
+   * @return string Имя родительского модуля или false, если модуль не имеет родителя.
+   */
+  public function getParent(Name $module){
+    try{
+      $module = new sp\ReflectionModule($module->getVal());
+    }
+    catch(ModuleNotFoundException $e){
+      throw $e;
+    }
+    return $module->getParent();
+  }
+
+  /**
+   * Метод возвращает массив имен дочерних модулей.
+   * @throws ModuleNotFoundException Выбрасывается в случае отсутствия модуля, его файла состояния или каталога.
+   * @return string[] Массив имен дочерних модулей.
+   */
+  public function getChild(Name $module){
+    try{
+      $module = new sp\ReflectionModule($module->getVal());
+    }
+    catch(ModuleNotFoundException $e){
+      throw $e;
+    }
+    return $module->getChild();
+  }
+
+  /**
+   * Метод возвращает массив имен модулей, зависимых от данного.
+   * @throws ModuleNotFoundException Выбрасывается в случае отсутствия модуля, его файла состояния или каталога.
+   * @throws RuntimeException Выбрасывается в случае, если вызываемый модуль не является конкретным.
+   * @return string[] Массив имен зависимых модулей.
+   */
+  public function getDestitute(Name $module){
+    try{
+      $module = new sp\ReflectionModule($module->getVal());
+    }
+    catch(ModuleNotFoundException $e){
+      throw $e;
+    }
+    try{
+      return $module->getDestitute();
+    }
+    catch(RuntimeException $e){
+      throw $e;
+    }
+  }
+
+  /**
+   * Метод возвращает тип вызываемого модуля.
+   * @throws StructureException Выбрасывается в случает отсутствия обязательного свойства модуля.
+   * @throws ModuleNotFoundException Выбрасывается в случае отсутствия модуля, его файла состояния или каталога.
+   * @return string Тип модуля.
+   */
+  public function getType(Name $module){
+    try{
+      $module = new sp\ReflectionModule($module->getVal());
+    }
+    catch(ModuleNotFoundException $e){
+      throw $e;
+    }
+
+    try{
+      return $module->getType();
+    }
+    catch(StructureException $e){
+      throw $e;
+    }
+  }
+
+  /**
+   * Метод возвращает версию вызываемого модуля.
+   * @throws StructureException Выбрасывается в случает отсутствия обязательного свойства модуля.
+   * @throws ModuleNotFoundException Выбрасывается в случае отсутствия модуля, его файла состояния или каталога.
+   * @return string Версия модуля.
+   */
+  public function getVersion(Name $module){
+    try{
+      $module = new sp\ReflectionModule($module->getVal());
+    }
+    catch(ModuleNotFoundException $e){
+      throw $e;
+    }
+
+    try{
+      return $module->getVersion();
+    }
+    catch(StructureException $e){
+      throw $e;
+    }
+  }
+
   /**
    * Метод устанавливает указанный локальный модуль.
    * @param FileSystemAddress $archiveAddress Полный адрес архива модуля относительно корневого каталога системы.
@@ -125,15 +258,16 @@ class Controller extends ModuleController{
     catch(ModuleNotFoundException $e){
       throw $e;
     }
+    if(ModulesRouter::getInstance()->hasModule('Access')){
+      $module->removeAccess(); // Выброс исключений не предполагается
+    }
+    $result = $module->uninstall();
     try{
       $module->removeRouter();
     }
     catch(NotFoundDataException $e){
       throw $e;
     }
-    $module->uninstall();
-    if(ModulesRouter::getInstance()->hasModule('Access')){
-      $module->removeAccess(); // Выброс исключений не предполагается
-    }
+    return $result;
   }
 }
