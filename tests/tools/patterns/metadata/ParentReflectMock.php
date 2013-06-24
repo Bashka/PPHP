@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tests\tools\patterns\metadata;
-use \PPHP\tools\patterns\metadata\reflection as reflection;
+
+use PPHP\tools\patterns\metadata\reflection as reflection;
 
 /**
  * @testMetadata testValue
@@ -29,7 +30,6 @@ class ParentReflectMock implements reflection\Reflect{
 }
 
 ParentReflectMock::getReflectionClass()->setMetadata('Metadata', 'TestParent');
-
 ParentReflectMock::getReflectionProperty('a')->setMetadata('Metadata', 'TestParent');
 ParentReflectMock::getReflectionProperty('b')->setMetadata('Metadata', 'TestParent');
 ParentReflectMock::getReflectionMethod('c')->setMetadata('Metadata', 'TestParent');

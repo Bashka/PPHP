@@ -12,10 +12,10 @@ abstract class CacheAdapter{
    * @abstract
    * @param string $key Ключ значения.
    * @param mixed $value Значение.
-   * @param null|integer $time Время кэширования в секундах.
+   * @param null|integer $time [optional] Время кэширования в секундах.
    * @return boolean true - если запись успешна, иначе - false.
    */
-  public abstract function set($key, $value, $time=null);
+  public abstract function set($key, $value, $time = null);
 
   /**
    * Метод возвращает данные из кэша.
@@ -40,7 +40,7 @@ abstract class CacheAdapter{
    * @param null|integer $port Порт для соединения.
    * @return boolean true - если соединение успешно, иначе - false.
    */
-  public abstract function connect($host, $port=null);
+  public abstract function connect($host, $port = null);
 
   function __set($name, $value){
     $this->set($name, $value);

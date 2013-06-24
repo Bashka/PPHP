@@ -1,0 +1,66 @@
+ERROR[13.06.2013 09:16:09]: Class '\\PPHP\model\modules\SystemPackages\Console\Controller' not found - /var/www/PPHP/model/modules/SystemPackages/ReflectionModule.php:87;
+ERROR[13.06.2013 09:16:27]: Class '\\PPHP\model\modules\SystemPackages\Console\Controller' not found - /var/www/PPHP/model/modules/SystemPackages/ReflectionModule.php:87;
+ERROR[13.06.2013 09:17:53]: Uncaught exception 'PPHP\tools\classes\standard\fileSystem\NotExistsException' with message 'Невозможно выполнить действие. В файловой системе компонент не найден (/var/www/PPHP/model/modules/Console).' in /var/www/PPHP/tools/classes/standard/fileSystem/Directory.php:332
+Stack trace:
+#0 /var/www/PPHP/tools/classes/standard/fileSystem/Directory.php(55): PPHP\tools\classes\standard\fileSystem\Directory->isDirExists('files')
+#1 /var/www/PPHP/model/modules/SystemPackages/Console/Controller.php(32): PPHP\tools\classes\standard\fileSystem\Directory->isExists()
+#2 /var/www/PPHP/model/modules/CentralController.php(113): PPHP\model\modules\SystemPackages\Console\Controller->afterRun()
+#3 /var/www/PPHP/model/modules/CentralController.php(125): PPHP\model\modules\CentralController::main()
+#4 {main}
+
+Next exception 'PPHP\tools\classes\standard\fileSystem\NotExistsException' with message 'Невозможно выполнить действие. В файлово - /var/www/PPHP/tools/classes/standard/fileSystem/Directory.php:58;
+ERROR[13.06.2013 09:18:59]: Call to undefined method PPHP\model\modules\SystemPackages\Console\Controller::getMethods() - /var/www/PPHP/services/modules/ModulesRouter.php:174;
+ERROR[13.06.2013 09:21:00]: Call to undefined method PPHP\model\modules\SystemPackages\Console\Controller::getName() - /var/www/PPHP/services/modules/ModulesRouter.php:175;
+ERROR[23.06.2013 11:54:38]: Uncaught exception 'PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException' with message 'Недопустимый тип параметра. Ожидается [non empty string] вместо [boolean].' in /var/www/PPHP/tools/classes/standard/baseType/exceptions/InvalidArgumentException.php:129
+Stack trace:
+#0 /var/www/PPHP/tools/classes/standard/baseType/exceptions/InvalidArgumentException.php(78): PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::getTypeException(Array, 'boolean')
+#1 /var/www/PPHP/model/modules/SystemPackages/ReflectionModule.php(62): PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException::verifyType(false, 'S')
+#2 /var/www/PPHP/model/modules/SystemPackages/InstallerModules/ReflectionArchiveModule.php(86): PPHP\model\modules\SystemPackages\ReflectionModule->__construct(false)
+#3 /var/www/PPHP/model/modules/SystemPackages/InstallerModules/Controller.php(57): PPHP\model\modules\SystemPackages\InstallerModules\ReflectionArchiveModul - /var/www/PPHP/model/modules/SystemPackages/InstallerModules/ReflectionArchiveModule.php:92;
+ERROR[23.06.2013 11:55:06]: Uncaught exception 'PPHP\tools\classes\standard\fileSystem\NotExistsException' with message 'Невозможно выполнить действие. В файловой системе родительский каталог [/var/www/PPHP/model/modules/Configurator] не найден.' in /var/www/PPHP/tools/classes/standard/fileSystem/Directory.php:314
+Stack trace:
+#0 /var/www/PPHP/tools/classes/standard/fileSystem/File.php(113): PPHP\tools\classes\standard\fileSystem\Directory->isFileExists('state.ini')
+#1 /var/www/PPHP/model/modules/SystemPackages/ReflectionModule.php(76): PPHP\tools\classes\standard\fileSystem\File->isExists()
+#2 /var/www/PPHP/model/modules/SystemPackages/Console/Controller.php(196): PPHP\model\modules\SystemPackages\ReflectionModule->__construct('Configurator')
+#3 [internal function]: PPHP\model\modules\SystemPackages\Console\Controller->getModulesNames()
+#4 /var/www/PPHP/model/modules/CentralController.php(110): call_user_func_array(Array, Array)
+#5 /var/www/PPHP/model/modules/Central - /var/www/PPHP/model/modules/SystemPackages/ReflectionModule.php:81;
+ERROR[23.06.2013 11:55:46]: Uncaught exception 'PPHP\tools\classes\standard\fileSystem\NotExistsException' with message 'Невозможно выполнить действие. В файловой системе родительский каталог [/var/www/PPHP/model/modules/Configurator] не найден.' in /var/www/PPHP/tools/classes/standard/fileSystem/Directory.php:314
+Stack trace:
+#0 /var/www/PPHP/tools/classes/standard/fileSystem/File.php(113): PPHP\tools\classes\standard\fileSystem\Directory->isFileExists('state.ini')
+#1 /var/www/PPHP/model/modules/SystemPackages/ReflectionModule.php(76): PPHP\tools\classes\standard\fileSystem\File->isExists()
+#2 /var/www/PPHP/model/modules/SystemPackages/Console/Controller.php(196): PPHP\model\modules\SystemPackages\ReflectionModule->__construct('Configurator')
+#3 [internal function]: PPHP\model\modules\SystemPackages\Console\Controller->getModulesNames()
+#4 /var/www/PPHP/model/modules/CentralController.php(110): call_user_func_array(Array, Array)
+#5 /var/www/PPHP/model/modules/Central - /var/www/PPHP/model/modules/SystemPackages/ReflectionModule.php:81;
+ERROR[23.06.2013 11:55:48]: Uncaught exception 'PPHP\tools\classes\standard\fileSystem\NotExistsException' with message 'Невозможно выполнить действие. В файловой системе родительский каталог [/var/www/PPHP/model/modules/Configurator] не найден.' in /var/www/PPHP/tools/classes/standard/fileSystem/Directory.php:314
+Stack trace:
+#0 /var/www/PPHP/tools/classes/standard/fileSystem/File.php(113): PPHP\tools\classes\standard\fileSystem\Directory->isFileExists('state.ini')
+#1 /var/www/PPHP/model/modules/SystemPackages/ReflectionModule.php(76): PPHP\tools\classes\standard\fileSystem\File->isExists()
+#2 /var/www/PPHP/model/modules/SystemPackages/Console/Controller.php(196): PPHP\model\modules\SystemPackages\ReflectionModule->__construct('Configurator')
+#3 [internal function]: PPHP\model\modules\SystemPackages\Console\Controller->getModulesNames()
+#4 /var/www/PPHP/model/modules/CentralController.php(110): call_user_func_array(Array, Array)
+#5 /var/www/PPHP/model/modules/Central - /var/www/PPHP/model/modules/SystemPackages/ReflectionModule.php:81;
+ERROR[23.06.2013 11:55:49]: Uncaught exception 'PPHP\services\modules\ModuleDuplicationException' with message 'Целевой модуль [Configurator] уже установлен в системе.' in /var/www/PPHP/model/modules/SystemPackages/InstallerModules/Controller.php:42
+Stack trace:
+#0 [internal function]: PPHP\model\modules\SystemPackages\InstallerModules\Controller->installModule(Object(PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress))
+#1 /var/www/PPHP/model/modules/CentralController.php(110): call_user_func_array(Array, Array)
+#2 /var/www/PPHP/model/modules/CentralController.php(121): PPHP\model\modules\CentralController::main()
+#3 {main}
+  thrown - /var/www/PPHP/model/modules/SystemPackages/InstallerModules/Controller.php:42;
+ERROR[23.06.2013 11:55:53]: Uncaught exception 'PPHP\tools\classes\standard\fileSystem\NotExistsException' with message 'Невозможно выполнить действие. В файловой системе родительский каталог [/var/www/PPHP/model/modules/Configurator] не найден.' in /var/www/PPHP/tools/classes/standard/fileSystem/Directory.php:314
+Stack trace:
+#0 /var/www/PPHP/tools/classes/standard/fileSystem/File.php(113): PPHP\tools\classes\standard\fileSystem\Directory->isFileExists('state.ini')
+#1 /var/www/PPHP/model/modules/SystemPackages/ReflectionModule.php(76): PPHP\tools\classes\standard\fileSystem\File->isExists()
+#2 /var/www/PPHP/model/modules/SystemPackages/Console/Controller.php(196): PPHP\model\modules\SystemPackages\ReflectionModule->__construct('Configurator')
+#3 [internal function]: PPHP\model\modules\SystemPackages\Console\Controller->getModulesNames()
+#4 /var/www/PPHP/model/modules/CentralController.php(110): call_user_func_array(Array, Array)
+#5 /var/www/PPHP/model/modules/Central - /var/www/PPHP/model/modules/SystemPackages/ReflectionModule.php:81;
+ERROR[23.06.2013 11:56:28]: Uncaught exception 'PPHP\tools\classes\standard\fileSystem\NotExistsException' with message 'Невозможно выполнить действие. В файловой системе родительский каталог [/var/www/PPHP/model/modules/Configurator] не найден.' in /var/www/PPHP/tools/classes/standard/fileSystem/Directory.php:314
+Stack trace:
+#0 /var/www/PPHP/tools/classes/standard/fileSystem/File.php(113): PPHP\tools\classes\standard\fileSystem\Directory->isFileExists('state.ini')
+#1 /var/www/PPHP/model/modules/SystemPackages/ReflectionModule.php(76): PPHP\tools\classes\standard\fileSystem\File->isExists()
+#2 /var/www/PPHP/model/modules/SystemPackages/Console/Controller.php(196): PPHP\model\modules\SystemPackages\ReflectionModule->__construct('Configurator')
+#3 [internal function]: PPHP\model\modules\SystemPackages\Console\Controller->getModulesNames()
+#4 /var/www/PPHP/model/modules/CentralController.php(110): call_user_func_array(Array, Array)
+#5 /var/www/PPHP/model/modules/Central - /var/www/PPHP/model/modules/SystemPackages/ReflectionModule.php:81;

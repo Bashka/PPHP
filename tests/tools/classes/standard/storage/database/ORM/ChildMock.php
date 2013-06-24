@@ -12,24 +12,27 @@ class ChildMock extends ParentMock{
    * @ORM\ColumnName df
    */
   private $d = 4;
+
   // Свойство проецируется на поле ef таблицы класса
   /**
    * @ORM\ColumnName ef
    */
   protected $e = 5;
+
   // Свойство проецируется на поле ff таблицы класса
   /**
    * @ORM\ColumnName ff
    */
   public $f = 6;
+
   // Свойство представляет множественную ассоциацию с классом ChildMock на основании его свойства h. Ассоциация композитна и загружается сразу
   /**
    * @ORM\Assoc \PPHP\tests\tools\classes\standard\storage\database\ORM\ChildMock
    * @ORM\FK h
    * @ORM\Composition
-   * @ORM\Full
    */
   public $g;
+
   // Свойство проецируется на поле hf таблицы класса
   /**
    * @ORM\ColumnName hf
@@ -42,7 +45,6 @@ class ChildMock extends ParentMock{
 
   protected function setSavedState(array $state){
     parent::setSavedState($state);
-
     foreach($state as $k => $v){
       if(property_exists($this, $k) && $this::getReflectionProperty($k)->getDeclaringClass()->getName() === get_class()){
         $this->$k = $state[$k];

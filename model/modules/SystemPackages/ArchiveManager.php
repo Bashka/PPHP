@@ -8,7 +8,7 @@ use PPHP\tools\classes\standard\fileSystem\FileINI;
 use PPHP\tools\classes\standard\fileSystem\NotExistsException;
 
 /**
- * Класс, обеспечивающий доступ к архивам компонентов слоя домена для установки.
+ * Класс, представляющий заархивированный модуль слоя домена.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\model\modules\SystemPackages
  */
@@ -19,16 +19,19 @@ class ArchiveManager{
    * @var Directory
    */
   protected static $tmpDir;
+
   /**
    * Файл конфигурации компоненты.
    * @var File
    */
   protected $confFile;
+
   /**
    * Конфигурация компоненты.
    * @var FileINI
    */
   protected $conf;
+
   /**
    * Архив компоненты.
    * @var \ZipArchive
@@ -68,6 +71,7 @@ class ArchiveManager{
         return false;
       }
     }
+
     return true;
   }
 
@@ -84,6 +88,7 @@ class ArchiveManager{
     }
     $this->zip->extractTo(self::$tmpDir->getAddress(), [$fileName]);
     $file = self::$tmpDir->getFile($fileName);
+
     return $callback($file);
   }
 
@@ -110,6 +115,7 @@ class ArchiveManager{
         return false;
       }
     }
+
     return true;
   }
 

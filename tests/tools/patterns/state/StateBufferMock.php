@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tests\tools\patterns\state;
-use \PPHP\tools\patterns\state as state;
+
+use PPHP\tools\patterns\state as state;
 
 class StateBufferMock extends state\StateBuffer{
   protected function getFromSource($key, array $arguments = null){

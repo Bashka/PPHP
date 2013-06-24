@@ -1,11 +1,13 @@
 <?php
 namespace PPHP\tests\tools\patterns\metadata;
-use \PPHP\tools\patterns\metadata\TDescribed;
-spl_autoload_register(function($className){
+
+use PPHP\tools\patterns\metadata\TDescribed;
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
-class DescribedTest extends \PHPUnit_Framework_TestCase {
+class DescribedTest extends \PHPUnit_Framework_TestCase{
   /**
    * @var MetadataMock
    */
@@ -14,7 +16,6 @@ class DescribedTest extends \PHPUnit_Framework_TestCase {
   protected function setUp(){
     $this->object = new MetadataMock;
   }
-
 
   /**
    * @covers TDescribed::setMetadata

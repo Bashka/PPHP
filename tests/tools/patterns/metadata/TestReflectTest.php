@@ -1,7 +1,9 @@
 <?php
 namespace PPHP\tests\tools\patterns\metadata;
+
 use PPHP\tools\patterns\metadata\reflection as reflection;
-spl_autoload_register(function($className){
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
@@ -10,6 +12,7 @@ class TestReflectTest extends \PHPUnit_Framework_TestCase{
    * @var TestReflect
    */
   static protected $object;
+
   /**
    * @var ParentReflectMock
    */
@@ -29,11 +32,9 @@ class TestReflectTest extends \PHPUnit_Framework_TestCase{
     $reflectionProperty = self::$object->getReflectionProperty('a');
     $reflectionMethod = self::$object->getReflectionMethod('c');
     $reflectionClass = self::$object->getReflectionClass();
-
     $this->assertEquals($reflectionProperty, self::$object->getReflectionProperty('a'));
     $this->assertEquals($reflectionMethod, self::$object->getReflectionMethod('c'));
     $this->assertEquals($reflectionClass, self::$object->getReflectionClass());
-
     $this->assertTrue($reflectionProperty === self::$parentClass->getReflectionProperty('a'));
     $this->assertTrue($reflectionMethod === self::$parentClass->getReflectionMethod('c'));
     $this->assertFalse($reflectionClass === self::$parentClass->getReflectionClass());
@@ -46,15 +47,12 @@ class TestReflectTest extends \PHPUnit_Framework_TestCase{
     $reflectionProperty = self::$object->getReflectionProperty('e');
     $this->assertInstanceOf('\PPHP\tools\patterns\metadata\reflection\ReflectionProperty', $reflectionProperty);
     $this->assertInstanceOf('\PPHP\tools\patterns\metadata\Described', $reflectionProperty);
-
     $reflectionStaticProperty = self::$object->getReflectionProperty('g');
     $this->assertInstanceOf('\PPHP\tools\patterns\metadata\reflection\ReflectionProperty', $reflectionStaticProperty);
     $this->assertInstanceOf('\PPHP\tools\patterns\metadata\Described', $reflectionStaticProperty);
-
     $reflectionProperty = self::$object->getReflectionProperty('a');
     $this->assertInstanceOf('\PPHP\tools\patterns\metadata\reflection\ReflectionProperty', $reflectionProperty);
     $this->assertEquals('PPHP\tests\tools\patterns\metadata\ParentReflectMock', $reflectionProperty->getDeclaringClass()->getName());
-
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\ComponentClassException');
     $this->assertNull(self::$object->getReflectionProperty('k'));
   }
@@ -66,15 +64,12 @@ class TestReflectTest extends \PHPUnit_Framework_TestCase{
     $reflectionMethod = self::$object->getReflectionMethod('h');
     $this->assertInstanceOf('\PPHP\tools\patterns\metadata\reflection\ReflectionMethod', $reflectionMethod);
     $this->assertInstanceOf('\PPHP\tools\patterns\metadata\Described', $reflectionMethod);
-
     $reflectionStaticMethod = self::$object->getReflectionMethod('j');
     $this->assertInstanceOf('\PPHP\tools\patterns\metadata\reflection\ReflectionMethod', $reflectionStaticMethod);
     $this->assertInstanceOf('\PPHP\tools\patterns\metadata\Described', $reflectionStaticMethod);
-
     $reflectionMethod = self::$object->getReflectionMethod('c');
     $this->assertInstanceOf('\PPHP\tools\patterns\metadata\reflection\ReflectionMethod', $reflectionMethod);
     $this->assertEquals('PPHP\tests\tools\patterns\metadata\ParentReflectMock', $reflectionMethod->getDeclaringClass()->getName());
-
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\ComponentClassException');
     $this->assertNull(self::$object->getReflectionMethod('k'));
   }
@@ -115,7 +110,7 @@ class TestReflectTest extends \PHPUnit_Framework_TestCase{
    */
   public function testGetAllMetadata(){
     $reflectionProperty = self::$object->getReflectionProperty('a');
-    $this->assertEquals(2, count($reflectionProperty->getAllMetadata()));
+    $this->assertEquals(3, count($reflectionProperty->getAllMetadata()));
   }
 
   /**
@@ -127,7 +122,6 @@ class TestReflectTest extends \PHPUnit_Framework_TestCase{
   public function testGetMetadata(){
     $this->assertEquals('Test', self::$object->getReflectionProperty('e')->getMetadata('Metadata'));
     $this->assertEquals('TestParent', self::$parentClass->getReflectionProperty('a')->getMetadata('Metadata'));
-
     $this->assertEquals('testValue', ParentReflectMock::getReflectionClass()->getMetadata('testMetadata'));
     $this->assertEquals('', ParentReflectMock::getReflectionClass()->getMetadata('testMarker'));
     $this->assertEquals('testValue', ParentReflectMock::getReflectionMethod('c')->getMetadata('testMetadata'));
@@ -140,10 +134,8 @@ class TestReflectTest extends \PHPUnit_Framework_TestCase{
    */
   public function testIsMetadataExists(){
     $this->assertTrue(self::$object->getReflectionProperty('a')->isMetadataExists('Metadata'));
-
     $this->assertTrue(ParentReflectMock::getReflectionProperty('a')->isMetadataExists('testMetadata'));
     $this->assertTrue(ParentReflectMock::getReflectionProperty('a')->isMetadataExists('testMarker'));
-
     $this->assertFalse(ParentReflectMock::getReflectionMethod('d')->isMetadataExists('testMarker'));
   }
 }

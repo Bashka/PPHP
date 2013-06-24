@@ -1,10 +1,10 @@
 <?php
 namespace PPHP\tools\classes\standard\storage\database\ORM;
 
-use \PPHP\tools\patterns\database\LongObject;
-use \PPHP\tools\patterns\database\query as query;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use \PPHP\tools\patterns\interpreter\Metamorphosis;
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\patterns\database\LongObject;
+use PPHP\tools\patterns\database\query as query;
+use PPHP\tools\patterns\interpreter\Metamorphosis;
 
 /**
  * Класс восстанавливает SQL инструкцию удаления состояния персистентного объекта на основании его Proxy или другого условия отбора.
@@ -18,10 +18,8 @@ class Delete implements Metamorphosis{
    * В запрос включаются только те свойства, которые анотированы как ORM\ColumnName.
    * Класс объекта должен сопровождаться анотацией ORM\Table, хранящей имя таблицы данного класса.
    * Класс объекта должен сопровождаться анотацией ORM\PK, хранящей имя primary key поля таблицы.
-   *
    * @param LongObject $object Исходный объект.
    * @param query\Where $driver [optional] Если данный параметр передан, он используется как условие отбора в инструкции.
-   *
    * @throws exceptions\NotFoundDataException Выбрасывается в случае отсутствия требуемых для восстановления данных.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return query\Delete[] Транзакция запросов.
@@ -33,7 +31,6 @@ class Delete implements Metamorphosis{
     if(!$object->isOID()){
       throw new exceptions\NotFoundDataException('Исходный объект не идентифицирован.');
     }
-
     $deletes = [];
     $reflectionClass = $object->getReflectionClass();
     do{

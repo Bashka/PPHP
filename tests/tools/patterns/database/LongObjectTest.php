@@ -1,13 +1,14 @@
 <?php
 namespace PPHP\tests\tools\patterns\database;
+
 use PPHP\tests\tools\classes\standard\storage\database\ORM\ParentMock;
 use PPHP\tools\patterns\database\LongObject;
 
-spl_autoload_register(function($className){
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
-class LongObjectTest extends \PHPUnit_Framework_TestCase {
+class LongObjectTest extends \PHPUnit_Framework_TestCase{
   /**
    * @covers LongObject::interpretation
    */
@@ -30,7 +31,6 @@ class LongObjectTest extends \PHPUnit_Framework_TestCase {
     $this->assertTrue(LongObject::isReestablish('$/PPHP/tests/tools/classes/standard/storage/database/ORM/ParentMock:1'));
     $this->assertTrue(LongObject::isReestablish('$ParentMock:1'));
     $this->assertTrue(LongObject::isReestablish('$/PPHP/tests/tools/classes/standard/storage/database/ORM/ParentMock:15'));
-
     $this->assertFalse(LongObject::isReestablish('/PPHP/tests/tools/classes/standard/storage/database/ORM/ParentMock:1'));
     $this->assertFalse(LongObject::isReestablish('$/PPHP/tests/tools/classes/standard/storage/database/ORM/ParentMock:1as'));
     $this->assertFalse(LongObject::isReestablish('$/PPHP/tests/tools/classes/standard/storage/database/ORM/ParentMock1'));

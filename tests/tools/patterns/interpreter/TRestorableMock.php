@@ -12,21 +12,19 @@ class TRestorableMock extends TRestorebleParentMock{
   protected $vars = [];
 
   public static function getMasks(){
-    return ['('.self::getPatterns()['varName'].'):('.self::getPatterns()['varVal'].')'];
+    return ['(' . self::getPatterns()['varName'] . '):(' . self::getPatterns()['varVal'] . ')'];
   }
 
   public static function getPatterns(){
-    return ['varName' => '[A-Za-z_][A-Za-z0-9_]*',
-      'varVal' => '[1-9][0-9]*'
-    ];
+    return ['varName' => '[A-Za-z_][A-Za-z0-9_]*', 'varVal' => '[1-9][0-9]*'];
   }
 
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     $m = parent::reestablish($string, $driver);
-
     $o = new static;
     $o->addVar($m[1], $m[2]);
+
     return $o;
   }
 

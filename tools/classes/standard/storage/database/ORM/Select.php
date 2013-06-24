@@ -1,11 +1,11 @@
 <?php
 namespace PPHP\tools\classes\standard\storage\database\ORM;
 
-use \PPHP\tools\patterns\database\LongObject;
-use \PPHP\tools\patterns\database\query as query;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use \PPHP\tools\patterns\interpreter\Metamorphosis;
-use \PPHP\tools\patterns\metadata\reflection\ReflectionClass;
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\patterns\database\LongObject;
+use PPHP\tools\patterns\database\query as query;
+use PPHP\tools\patterns\interpreter\Metamorphosis;
+use PPHP\tools\patterns\metadata\reflection\ReflectionClass;
 
 /**
  * Класс восстанавливает SQL инструкцию запроса состояния персистентного объекта на основании его Proxy.
@@ -15,15 +15,12 @@ use \PPHP\tools\patterns\metadata\reflection\ReflectionClass;
 class Select extends query\Select implements Metamorphosis{
   /**
    * Метод возвращает SQL инструкцию запроса состояний объектов определенного класса без условия отбора.
-   *
    * @param ReflectionClass $mainClass Класс-основание.
-   *
    * @throws exceptions\NotFoundDataException Выбрасывается в случае отсутствия требуемых для восстановления данных.
    * @return query\Select Результирующая SQL инструкция.
    */
   protected static function getSelectTemplate(ReflectionClass $mainClass){
     $select = new query\Select;
-
     // Определение основной таблицы
     try{
       $mainTable = Table::metamorphose($mainClass);
@@ -32,14 +29,12 @@ class Select extends query\Select implements Metamorphosis{
       throw $e;
     }
     $select->addTable($mainTable);
-
     // Формирование списка доступных для редактирования полей
     $mainClassName = $mainClass->getName();
     $fields = $mainClassName::getAllReflectionProperties();
     if(count($fields) == 0){
       throw new exceptions\NotFoundDataException('Объект-основание не имеет ни одного связанного поля в таблице.');
     }
-
     // Формирование полей запроса
     $classes = [];
     foreach($fields as $fieldName => $fieldReflection){
@@ -54,11 +49,9 @@ class Select extends query\Select implements Metamorphosis{
         $classes[] = $declaringClassName;
       }
     }
-
     // Добавление идентификационного поля
     $OIDField = new query\Field($mainClass->getMetadata(Join::ORM_PK));
     $select->addAliasField(new query\FieldAlias($OIDField->setTable($mainTable), 'OID'));
-
     // Формирование списка объединений
     $classes = array_unique($classes);
     foreach($classes as $class){
@@ -73,10 +66,8 @@ class Select extends query\Select implements Metamorphosis{
    * В запрос включаются только те свойства, которые анотированы как ORM\ColumnName.
    * Класс объекта должен сопровождаться анотацией ORM\Table, хранящей имя таблицы данного класса.
    * Класс объекта должен сопровождаться анотацией ORM\PK, хранящей имя primary key поля таблицы.
-   *
    * @param LongObject $object Исходный объект.
    * @param mixed $driver [optional] Данный аргумент не используется.
-   *
    * @throws exceptions\NotFoundDataException Выбрасывается в случае отсутствия требуемых для восстановления данных.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return query\Select Результирующий объект.
@@ -88,7 +79,6 @@ class Select extends query\Select implements Metamorphosis{
     if(!$object->isOID()){
       throw new exceptions\NotFoundDataException('Исходный объект не идентифицирован.');
     }
-
     $objectClassReflection = $object::getReflectionClass();
     try{
       $select = self::getSelectTemplate($objectClassReflection);
@@ -96,7 +86,6 @@ class Select extends query\Select implements Metamorphosis{
     catch(exceptions\NotFoundDataException $e){
       throw $e;
     }
-
     // Формирование условия отбора
     $pkField = Join::getPKField($objectClassReflection);
     $pkField->setTable(Table::metamorphose($objectClassReflection)); // Выброс исключений не предполагается
@@ -110,10 +99,8 @@ class Select extends query\Select implements Metamorphosis{
    * В запрос включаются только те свойства, которые анотированы как ORM\ColumnName.
    * Класс должен сопровождаться анотацией ORM\Table, хранящей имя таблицы данного класса.
    * Класс должен сопровождаться анотацией ORM\PK, хранящей имя primary key поля таблицы.
-   *
    * @param ReflectionClass $assocClass Класс основание.
    * @param array $conditions [optional] Массив условий отбора, имеющий следующую структуру: [[имяСвойства, операцияСравнения, значение], ...]. В случае отсутствия данного параметра в результирующем объекте отсутствует условие отбора.
-   *
    * @throws exceptions\NotFoundDataException Выбрасывается в случае отсутствия требуемых для восстановления данных.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return query\Select Результирующий объект.
@@ -125,7 +112,6 @@ class Select extends query\Select implements Metamorphosis{
     catch(exceptions\NotFoundDataException $e){
       throw $e;
     }
-
     if(!is_null($conditions)){
       $assocClassName = $assocClass->getName();
       $fields = $assocClassName::getAllReflectionProperties();

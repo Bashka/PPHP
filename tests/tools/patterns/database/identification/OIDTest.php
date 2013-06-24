@@ -1,8 +1,10 @@
 <?php
 namespace PPHP\tests\tools\patterns\database\identification;
+
 use PPHP\tests\tools\classes\standard\storage\database\ORM\ParentMock;
-use \PPHP\tools\patterns\database\identification\TOID;
-spl_autoload_register(function($className){
+use PPHP\tools\patterns\database\identification\TOID;
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';

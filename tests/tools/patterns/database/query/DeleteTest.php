@@ -1,12 +1,14 @@
 <?php
 namespace PPHP\tests\tools\patterns\database\query;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use \PPHP\tools\patterns\database\query as query;
-spl_autoload_register(function($className){
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\patterns\database\query as query;
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
-class DeleteTest extends \PHPUnit_Framework_TestCase {
+class DeleteTest extends \PHPUnit_Framework_TestCase{
   /**
    * @covers query\Delete::__construct
    */
@@ -43,7 +45,6 @@ class DeleteTest extends \PHPUnit_Framework_TestCase {
     $this->assertTrue(query\Delete::isReestablish('DELETE FROM `table`'));
     $this->assertTrue(query\Delete::isReestablish('DELETE FROM `table`
                                                    WHERE (`field` >= "1")'));
-
     $this->assertFalse(query\Delete::isReestablish('DELETE `table` WHERE (`field` >= "1")'));
     $this->assertFalse(query\Delete::isReestablish('FROM `table` WHERE (`field` >= "1")'));
     $this->assertFalse(query\Delete::isReestablish('DELETE FROM `table` (`field` >= "1")'));

@@ -22,25 +22,8 @@ class ModulesRouterTest extends \PHPUnit_Framework_TestCase{
    * @covers ModulesRouter::getModule
    */
   public function testGetModule(){
-    $this->assertEquals('Console', $this->object->getModule('Console'));
+    $this->assertEquals('SystemPackages/Console', $this->object->getModule('Console'));
     $this->assertEquals('SystemPackages/InstallerModules', $this->object->getModule('InstallerModules'));
-  }
-
-  /**
-   * @covers ModulesRouter::getReflectionModule
-   */
-  public function testGetReflectionModule(){
-    $rm = $this->object->getReflectionModule('Console');
-    $this->assertInstanceOf('PPHP\tools\patterns\metadata\reflection\ReflectionModule', $rm);
-  }
-
-  /**
-   * @covers ModulesRouter::getController
-   */
-  public function testGetController(){
-    $c = $this->object->getReflectionModule('Console')->getController();
-    $this->assertInstanceOf('\PPHP\model\classes\ModuleController', $c);
-    $this->assertEquals('test', $c->getReflectionMethod('test')->getName());
   }
 
   /**
@@ -60,7 +43,6 @@ class ModulesRouterTest extends \PHPUnit_Framework_TestCase{
     $this->assertTrue($this->object->hasModule('X'));
     $this->object->removeModule('X', 'SystemPackages');
     $this->assertFalse($this->object->hasModule('X'));
-
     $this->setExpectedException('\PPHP\services\modules\ModuleDuplicationException');
     $this->object->addModule('Console');
   }

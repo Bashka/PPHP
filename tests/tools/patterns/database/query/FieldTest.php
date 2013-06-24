@@ -1,13 +1,15 @@
 <?php
 namespace PPHP\tests\tools\patterns\database\query;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 use PPHP\tools\patterns\database\query\Field as Field;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use \PPHP\tools\patterns\database\query\Table as Table;
-spl_autoload_register(function($className){
+use PPHP\tools\patterns\database\query\Table as Table;
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
-class FieldTest extends \PHPUnit_Framework_TestCase {
+class FieldTest extends \PHPUnit_Framework_TestCase{
   /**
    * @covers Field::__construct
    */
@@ -36,7 +38,6 @@ class FieldTest extends \PHPUnit_Framework_TestCase {
   public function testReestablish(){
     $f = Field::reestablish('`test`');
     $this->assertEquals('test', $f->getName());
-
     $f = Field::reestablish('table.field');
     $this->assertEquals('field', $f->getName());
     $this->assertEquals('table', $f->getTable()->getTableName());
@@ -50,7 +51,6 @@ class FieldTest extends \PHPUnit_Framework_TestCase {
     $this->assertTrue(Field::isReestablish('table.field'));
     $this->assertTrue(Field::isReestablish('`field5_`'));
     $this->assertTrue(Field::isReestablish('`_field`'));
-
     $this->assertFalse(Field::isReestablish('1field'));
     $this->assertFalse(Field::isReestablish('field+'));
     $this->assertFalse(Field::isReestablish('tableA.tableB.field'));

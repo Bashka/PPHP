@@ -1,11 +1,12 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\fileSystem;
+
 use PPHP\tools\classes\standard\fileSystem as fileSystem;
 
-spl_autoload_register(function($className){
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
-
+$_SERVER['DOCUMENT_ROOT'] = '/var/www';
 class FileTest extends \PHPUnit_Framework_TestCase{
   /**
    * @var fileSystem\File
@@ -127,7 +128,7 @@ class FileTest extends \PHPUnit_Framework_TestCase{
     $this->assertTrue($this->object->move($assDir));
     $this->assertTrue((!file_exists(self::testFileName) || !is_file(self::testFileName)));
     $this->assertTrue((file_exists(self::assistanceDir . '/' . self::testFileName) && is_file(self::assistanceDir . '/' . self::testFileName)));
-    $this->assertEquals($_SERVER['DOCUMENT_ROOT'].'/PPHP/tests/tools/classes/standard/fileSystem/' . self::assistanceDir.'/'.self::testFileName, $this->object->getAddress());
+    $this->assertEquals($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::assistanceDir . '/' . self::testFileName, $this->object->getAddress());
   }
 
   /**

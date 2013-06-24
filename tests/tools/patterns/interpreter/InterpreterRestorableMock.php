@@ -1,8 +1,9 @@
 <?php
 namespace PPHP\tests\tools\patterns\interpreter;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 use PPHP\tools\patterns\interpreter\Interpreter;
 use PPHP\tools\patterns\interpreter\Restorable;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 class InterpreterRestorableMock implements Interpreter, Restorable{
   protected $var = 1;
@@ -17,13 +18,11 @@ class InterpreterRestorableMock implements Interpreter, Restorable{
 
   /**
    * Метод возвращает строку, полученную при интерпретации объекта.
-   *
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   *
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){
-    return 'InterpreterRestorableMock:'.$this->var;
+    return 'InterpreterRestorableMock:' . $this->var;
   }
 
   /**
@@ -39,10 +38,8 @@ class InterpreterRestorableMock implements Interpreter, Restorable{
 
   /**
    * Метод восстанавливает объект из строки.
-   *
    * @param string $string Исходная строка.
-   * @param mixed  $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   *
+   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
    * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты строки.
    * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
@@ -55,6 +52,7 @@ class InterpreterRestorableMock implements Interpreter, Restorable{
     }
     $object = new self;
     $object->setVar($components[1]);
+
     return $object;
   }
 }

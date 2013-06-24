@@ -1,19 +1,20 @@
 <?php
 namespace PPHP\tests\tools\patterns\database\query;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use \PPHP\tools\patterns\database\query as query;
-spl_autoload_register(function($className){
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\patterns\database\query as query;
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
-class LimitTest extends \PHPUnit_Framework_TestCase {
+class LimitTest extends \PHPUnit_Framework_TestCase{
   /**
    * @covers query\Limit::__construct
    */
   public function testConstruct(){
     $l = new query\Limit(5);
     $this->assertEquals(5, $l->getCountRow());
-
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
     new query\Limit(0);
     new query\Limit('5');
@@ -38,13 +39,10 @@ class LimitTest extends \PHPUnit_Framework_TestCase {
   public function testReestablish(){
     $l = query\Limit::reestablish('LIMIT 10');
     $this->assertEquals(10, $l->getCountRow());
-
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\StructureException');
     query\Limit::reestablish('10');
-
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
     query\OrderBy::reestablish('LIMIT 0');
-
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
     query\OrderBy::reestablish('LIMIT ');
   }

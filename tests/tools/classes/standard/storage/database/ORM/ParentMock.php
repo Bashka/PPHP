@@ -1,8 +1,9 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\storage\database\ORM;
-use PPHP\tools\patterns\database\LongObject;
 
 // Сущности класса записываются в таблицу ParentTable и проецируют свойство OID на поле OID
+use PPHP\tools\patterns\database\LongObject;
+
 /**
  * @ORM\Table ParentTable
  * @ORM\PK OID
@@ -14,7 +15,9 @@ class ParentMock extends LongObject{
    * @ORM\Full
    */
   private $a = 1;
+
   protected $b = 2;
+
   public $c = 3;
 
   protected function getSavedState(){

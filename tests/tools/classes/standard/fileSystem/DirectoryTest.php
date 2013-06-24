@@ -1,12 +1,13 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\fileSystem;
+
 use PPHP\tools\classes\standard\fileSystem\ComponentFileSystem;
 use PPHP\tools\classes\standard\fileSystem as fileSystem;
 
-spl_autoload_register(function($className){
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
-
+$_SERVER['DOCUMENT_ROOT'] = '/var/www';
 class DirectoryTest extends \PHPUnit_Framework_TestCase{
   /**
    * @var fileSystem\Directory
@@ -108,7 +109,7 @@ class DirectoryTest extends \PHPUnit_Framework_TestCase{
     $assDir = ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::assistanceDir);
     $this->assertTrue($this->object->move($assDir));
     $this->assertTrue((!file_exists(self::testDirName) || !is_dir(self::testDirName)));
-    $this->assertEquals($_SERVER['DOCUMENT_ROOT'].'/PPHP/tests/tools/classes/standard/fileSystem/' . self::assistanceDir.'/'.self::testDirName, $this->object->getAddress());
+    $this->assertEquals($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::assistanceDir . '/' . self::testDirName, $this->object->getAddress());
     $newAddress = self::assistanceDir . '/' . self::testDirName;
     $this->assertTrue((file_exists($newAddress) && is_dir($newAddress)));
     $isMultiMove = (file_exists($newAddress . '/testFile.txt') && file_exists($newAddress . '/testDir') && file_exists($newAddress . '/testDir/testFile.txt'));

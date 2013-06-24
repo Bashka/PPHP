@@ -11,6 +11,7 @@ use PPHP\tools\patterns\singleton\TSingleton;
  */
 abstract class Installer implements Singleton{
   use TSingleton;
+
   /**
    * Метод настраивает систему для устанавливаемого модуля.
    * @abstract

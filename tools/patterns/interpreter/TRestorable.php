@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\interpreter;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Реализация интерфейса Restorable по средствам шаблонов и их сочетаний.
@@ -37,11 +38,13 @@ trait TRestorable{
     static::updateString($string);
     foreach(static::getMasks($driver) as $key => $mask){
       $matches = [];
-      if(preg_match('/^'.$mask.'$/u', $string, $matches)){
+      if(preg_match('/^' . $mask . '$/u', $string, $matches)){
         $matches['key'] = $key;
+
         return $matches;
       }
     }
+
     return '';
   }
 
@@ -57,6 +60,7 @@ trait TRestorable{
     if(static::searchMask($string, $driver) === ''){
       return false;
     }
+
     return true;
   }
 
@@ -74,8 +78,9 @@ trait TRestorable{
     exceptions\InvalidArgumentException::verifyType($string, 'S');
     $mask = static::searchMask($string, $driver);
     if($mask === ''){
-      throw new exceptions\StructureException('Недопустимая структура для объекта '.get_called_class().' ['.$string.'].');
+      throw new exceptions\StructureException('Недопустимая структура для объекта ' . get_called_class() . ' [' . $string . '].');
     }
+
     return $mask;
   }
 
@@ -85,5 +90,6 @@ trait TRestorable{
    * Данный метод вызывается от имени используемого класса.
    * @param string $string Исходная строка.
    */
-  public static function updateString(&$string){}
+  public static function updateString(&$string){
+  }
 }

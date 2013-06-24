@@ -23,7 +23,6 @@ class Arr extends Wrapper implements \ArrayAccess, \Iterator{
     else{
       $this->valid = true;
     }
-
     if(next($this->val) === false){
       $this->valid = false;
     }
@@ -41,12 +40,12 @@ class Arr extends Wrapper implements \ArrayAccess, \Iterator{
    */
   public static function reestablish($string, $driver = null){
     exceptions\InvalidArgumentException::verifyType($string, 's');
+
     return new self([$string]);
   }
 
   /**
    * @param mixed $val Оборачиваемое значение.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($val){
@@ -192,6 +191,7 @@ class Arr extends Wrapper implements \ArrayAccess, \Iterator{
   public function shift(){
     $val = array_shift($this->val);
     $this->mod();
+
     return $val;
   }
 
@@ -213,6 +213,7 @@ class Arr extends Wrapper implements \ArrayAccess, \Iterator{
   public function pop(){
     $val = array_pop($this->val);
     $this->mod();
+
     return $val;
   }
 
@@ -227,9 +228,7 @@ class Arr extends Wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод проверяет, присутствует ли указанный ключ в массиве.
-   *
    * @param mixed $key Искомый ключ.
-   *
    * @return boolean true - в случае успеха, иначе - false.
    */
   public function hasKey($key){
@@ -240,12 +239,12 @@ class Arr extends Wrapper implements \ArrayAccess, \Iterator{
    * Метод выполняет поиск указанного значения в массиве и возвращает массив ключей, в которых содержиться данное значение.
    * @param mixed $val Искомое значение.
    * @param boolean $strict [optional] В случае указания true - поиск производится в соответствии со строгим равенством (===).
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return static Массив ключей, значения которых соответствуют искомому значению или пустой массив в случае отсутствия значения.
    */
   public function searchVal($val, $strict = false){
     exceptions\InvalidArgumentException::verifyType($strict, 'b');
+
     return new static(array_keys($this->val, $val, $strict));
   }
 
@@ -253,7 +252,6 @@ class Arr extends Wrapper implements \ArrayAccess, \Iterator{
    * Метод возвращает срез массива с сохранением ключей.
    * @param integer $offset Индекс отступа начального указателя. Если значение положительное, отсчет производится с начала массива, иначе с конца.
    * @param integer $length [optional] Число отбираемых элементов. Если значение не задано, отбираются все элементы до конца массива.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return static Срез массива.
    */
@@ -267,17 +265,14 @@ class Arr extends Wrapper implements \ArrayAccess, \Iterator{
   /**
    * Метод вырезает указанный интервал элементов из массива.
    * Следует помнить, что числовые ключи массива сбрасываются.
-   *
    * @param integer $offset Индекс отступа начального указателя. Если значение положительное, отсчет производится с начала массива, иначе с конца.
    * @param integer $length [optional] Число вырезаемых элементов. Если значение не задано, вырезаются все элементы до конца массива.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return static Массив удаленных элементов.
    */
   public function splice($offset, $length = null){
     exceptions\InvalidArgumentException::verifyType($offset, 'i');
     exceptions\InvalidArgumentException::verifyType($length, 'in');
-
     // Данное условие необходимо в связи с особым поведением функции array_splice. Данная функция при получении в качестве третьего параметра null или 0 не отбирает массив до конца, а отбирает 0 элементов возвращая всегда пустой массив
     if(is_null($length)){
       $val = new static(array_splice($this->val, $offset));
@@ -286,12 +281,12 @@ class Arr extends Wrapper implements \ArrayAccess, \Iterator{
       $val = new static(array_splice($this->val, $offset, $length));
     }
     $this->mod();
+
     return $val;
   }
 
   /**
    * Метод выполняет верификацию числа в соответствии с маской.
-   *
    * @param string $mask Маска верификации
    * Аргумент имеет структуру: <типВалидации> <ключи валидации>.
    * Возможные значения аргумента:
@@ -303,17 +298,14 @@ class Arr extends Wrapper implements \ArrayAccess, \Iterator{
    * - <= <целоеЧисло> - не более чем указанное число элементов;
    * - [] <целоеЧисло> <целоеЧисло> - от указанного до указанного числа элементов включительно;
    * - () <целоеЧисло> <целоеЧисло> - от указанного до указанного числа элементов.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получение недопустимого значения второго аргумента.
    * @return boolean true - если верификация пройдена, иначе - false.
    */
   public function verify($mask){
     exceptions\InvalidArgumentException::verifyType($mask, 'S');
-
     $options = explode(' ', $mask);
     $typeVerify = array_shift($options);
     $count = $this->count();
-
     switch($typeVerify){
       case '==':
         if($count != $options[0]){

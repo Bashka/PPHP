@@ -13,6 +13,6 @@ class ModuleDuplicationException extends \PPHP\tools\classes\standard\baseType\e
    * @return static Объект данного класса с предустановленным сообщением.
    */
   public static function getException($moduleName){
-    return new static('Требуемый модуль ['.$moduleName.'] уже присутствует в системе.');
+    return new static('Требуемый модуль [' . $moduleName . '] уже присутствует в системе.');
   }
 }

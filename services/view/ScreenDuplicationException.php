@@ -14,6 +14,6 @@ class ScreenDuplicationException extends \PPHP\tools\classes\standard\baseType\e
    * @return static Объект данного класса с предустановленным сообщением.
    */
   public static function getException($moduleName, $screenName){
-    return new static('Требуемый экран ['.$moduleName.'::'.$screenName.'] уже присутствует в системе.');
+    return new static('Требуемый экран [' . $moduleName . '::' . $screenName . '] уже присутствует в системе.');
   }
 }

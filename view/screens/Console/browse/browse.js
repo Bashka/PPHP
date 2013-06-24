@@ -62,7 +62,7 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @function
          * @param {Command} command Добавляемая команда.
          */
-        push:function(command){
+        push: function(command){
           historyCommands.push(command);
           lkHistory = historyCommands.length;
         },
@@ -72,7 +72,7 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @public
          * @function
          */
-        after:function(){
+        after: function(){
           var command = historyCommands[--lkHistory];
           if(command == undefined){
             lkHistory = -1;
@@ -88,7 +88,7 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @public
          * @function
          */
-        before:function(){
+        before: function(){
           var command = historyCommands[++lkHistory];
           if(command == undefined){
             lkHistory = historyCommands.length;
@@ -143,10 +143,10 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @public
          * @type {Object}
          */
-        colors:{
-          COMMAND:'white',
-          ANSWER:'silver',
-          ERROR:'red'
+        colors: {
+          COMMAND: 'white',
+          ANSWER: 'silver',
+          ERROR: 'red'
         },
 
         /**
@@ -156,7 +156,7 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @param {Command} command Добавляемая команда.
          * @param {String} [color=COMMAND] Цвет сообщения.
          */
-        addCommand:function(command, color){
+        addCommand: function(command, color){
           if(color === undefined){
             color = this.colors.COMMAND;
           }
@@ -173,7 +173,7 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @param {String} message Добавляемое сообщение.
          * @param {String} [color=ANSWER] Цвет сообщения.
          */
-        addMessage:function(message, color){
+        addMessage: function(message, color){
           if(color === undefined){
             color = this.colors.ANSWER;
           }
@@ -185,7 +185,7 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @public
          * @function
          */
-        clear:function(){
+        clear: function(){
           rootNode.empty();
         }
       }
@@ -243,8 +243,17 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @function
          * @param {String} data Устанавливаемые данные.
          */
-        setModule:function(data){
+        setModule: function(data){
           moduleInputNode.getDOMNode().value = data;
+        },
+
+        /**
+         * Метод устанавливает фокус на поле ввода целевого модуля.
+         * @public
+         * @function
+         */
+        focusModule: function(){
+          moduleInputNode.focus();
         },
 
         /**
@@ -253,8 +262,43 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @function
          * @param {String} data Устанавливаемые данные.
          */
-        setAction:function(data){
+        setAction: function(data){
           actionInputNode.getDOMNode().value = data;
+        },
+
+        /**
+         * Метод устанавливает фокус на поле ввода метода контроллера модуля.
+         * @public
+         * @function
+         */
+        focusAction: function(){
+          actionInputNode.focus();
+        },
+
+        /**
+         * Метод определяет и устанавливает список аргуметов для текущей команды.
+         * @public
+         * @function
+         */
+        reloadArgs: function(){
+          var module = moduleInputNode.getDOMNode().value,
+            action = actionInputNode.getDOMNode().value;
+
+          if(module != '' && action != ''){
+            inPanel.setArgs();
+            PJS.core.query('Console', 'getMethodArgs', {
+              data: [module, action],
+              callback: function(answer){
+                if(answer.length > 0){
+                  inPanel.setArgs(answer);
+                  inPanel.getArgNode(0).focus();
+                }
+                else{
+                  inPanel.focusAction();
+                }
+              }
+            });
+          }
         },
 
         /**
@@ -263,7 +307,7 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @function
          * @param {String[]|String} [args] Устанавливаемые данные в виде массива строк или одной строки (в случае определения одного аргумента). Если в метод не передается данный параметр, то массив аргументов обнуляется.
          */
-        setArgs:function(args){
+        setArgs: function(args){
           argsContainer.all('.Console_browse_argInput').remove();
           if(typeof args == 'String'){
             args = [args];
@@ -283,7 +327,7 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @param {String} [data] Данные, устанавливаемые в качестве значения добавляемого аргумента. Если этот параметр не задан, аргумент получет в качестве значения пустую строку.
          * @return {Node} Ссылка на YIU фассад добавленного узла input.
          */
-        addArg:function(data){
+        addArg: function(data){
           if(data === undefined){
             data = '';
           }
@@ -299,7 +343,7 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @param {Integer} i Порядковый индекс узла.
          * @return {Node|null} Запрашиваемый узел или null - если указанного поля не существует.
          */
-        getArgNode:function(i){
+        getArgNode: function(i){
           return arg.DOM.received.argsContainer.all('.Console_browse_argInput').item(i);
         },
 
@@ -309,7 +353,7 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @function
          * @param {Command} command Команда-основание.
          */
-        setCommand:function(command){
+        setCommand: function(command){
           this.setModule(command.module);
           this.setAction(command.action);
           this.setArgs(command.args);
@@ -320,7 +364,7 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @public
          * @function
          */
-        clear:function(){
+        clear: function(){
           this.setModule('');
           this.setAction('');
           this.setArgs();
@@ -332,7 +376,7 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @function
          * @return {Command} Текущая команда на панели ввода.
          */
-        getCommand:function(){
+        getCommand: function(){
           return new Command(moduleInputNode.getDOMNode().value, actionInputNode.getDOMNode().value, getArgs());
         },
 
@@ -342,7 +386,7 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @function
          * @return {Boolean} true - в случае успешной передачи запроса и false - в случае неудачи.
          */
-        send:function(){
+        send: function(){
           var command = this.getCommand();
           if(command.module == '' || command.action == '' || typeof command.args != 'object'){
             return false;
@@ -353,9 +397,9 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
 
           PJS.core.query(command.module, command.action,
             {
-              data:command.args,
-              timeout:arg.DOM.received.timeoutQueryInput.getDOMNode().value*1000, // Приведение микросекунд к секундам
-              callback:function(answer){
+              data: command.args,
+              timeout: arg.DOM.received.timeoutQueryInput.getDOMNode().value * 1000, // Приведение микросекунд к секундам
+              callback: function(answer){
                 if(typeof answer == 'object'){
                   var objInfo = '{';
                   for(var i in answer){
@@ -366,10 +410,10 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
                 }
                 outPanel.addMessage(answer);
               },
-              error:function(exc){
+              error: function(exc){
                 outPanel.addMessage(exc.message, outPanel.colors.ERROR);
               },
-              context:this
+              context: this
             });
           return true;
         }
@@ -389,6 +433,18 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
        */
       var rootNode = arg.DOM.received.commandsContainer;
 
+      // Обработчик установки модуля щелчком мыши
+      rootNode.delegate('click', function(e){
+        inPanel.setModule(this.getContent());
+        inPanel.focusAction();
+      }, '.Console_browse_modules');
+
+      // Обработчик установки метода щелчком мыши
+      rootNode.delegate('click', function(e){
+        inPanel.setAction(this.getContent());
+        inPanel.reloadArgs();
+      }, '.Console_browse_command');
+
       return {
         /**
          * Метод добавляет переданный массив команд на панель.
@@ -396,10 +452,11 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
          * @function
          * @param {String[]} data Добавляемый массив команд.
          */
-        setData: function(data){
+        setData: function(data, type){
+          type = (type == 'module')? 'Console_browse_modules' : 'Console_browse_command';
           rootNode.empty();
           for(var i in data){
-            rootNode.append('<div class="Console_browse_command Console_browse_modules">'+data[i]+'</div>');
+            rootNode.append('<div class="' + type + '">' + data[i] + '</div>');
           }
         }
       }
@@ -410,11 +467,11 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
        * @function
        * @public
        */
-      init:function(){
+      init: function(){
 
       },
 
-      inPanelListener:function(node){
+      inPanelListener: function(node){
         node.delegate('keypress', function(e){
           if(e.ctrlKey){
             // Обработка передачи команды серверу при нажатии Enter
@@ -433,50 +490,50 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
         }, 'input[type=text]');
       },
 
-      addArgListener:function(node){
+      addArgListener: function(node){
         // Обработка события добавления аргумента на панель ввода
         node.on('click', function(){
           inPanel.addArg().focus();
         });
       },
 
-      moduleInputLoader:function(node){
+      moduleInputLoader: function(node){
         // Добавление механизма автозавершения для поля ввода модуля
         node.plug(Y.Plugin.AutoComplete, {
-          resultFilters:'startsWith'
+          resultFilters: 'startsWith'
         });
       },
 
-      actionInputLoader:function(node){
+      actionInputLoader: function(node){
         // Добавление механизма автозавершения для поля ввода метода модуля
         node.plug(Y.Plugin.AutoComplete, {
-          resultFilters:'startsWith'
+          resultFilters: 'startsWith'
         });
       },
 
-      moduleInputListener:function(node){
+      moduleInputListener: function(node){
         // Добавление механизма запроса доступных модулей
         node.on('focus', function(){
           PJS.core.query('Console', 'getModulesNames',
             {
-              callback:function(answer){
-                commandsList.setData(answer);
+              callback: function(answer){
+                commandsList.setData(answer, 'module');
                 arg.DOM.received.moduleInput.ac.set('source', answer);
               }
             });
         });
       },
 
-      actionInputListener:function(node){
+      actionInputListener: function(node){
         // Добавление механизма запроса доступных методов модулей
         node.on('focus', function(){
           var module = arg.DOM.received.moduleInput.getDOMNode().value;
           if(module != ''){
             PJS.core.query('Console', 'getModuleActions',
               {
-                data:[module],
-                callback:function(answer){
-                  commandsList.setData(answer);
+                data: [module],
+                callback: function(answer){
+                  commandsList.setData(answer, 'action');
                   arg.DOM.received.actionInput.ac.set('source', answer);
                 }
               });
@@ -485,25 +542,12 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
 
         // Обработка выбора метода модуля с целью добавления используемых им аргументов
         node.ac.on('select', function(data){
-          var module = arg.DOM.received.moduleInput.getDOMNode().value,
-            action = data.result.text;
-
-          if(module != '' && action != ''){
-            inPanel.setArgs();
-            PJS.core.query('Console', 'getMethodArgs', {
-                data: [module, action],
-                callback: function(answer){
-                  if(answer.length > 0){
-                    inPanel.setArgs(answer);
-                    inPanel.getArgNode(0).focus();
-                  }
-                }
-              });
-          }
+          inPanel.setAction(data.result.text);
+          inPanel.reloadArgs();
         });
       },
 
-      outPanelListener:function(node){
+      outPanelListener: function(node){
         // Добавление механизма копирования и исполнения команд по щелчку на панели вывода
         node.delegate('click', function(e){
           inPanel.setCommand(this.command);
@@ -513,25 +557,25 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
         }, '.Console_browse_command');
       },
 
-      menuLoader:function(node){
-        var tabview = new Y.TabView({srcNode:node});
+      menuLoader: function(node){
+        var tabview = new Y.TabView({srcNode: node});
         tabview.render();
       },
 
-      uploaderLoader:function(node){
+      uploaderLoader: function(node){
         var slcB = Y.Node.one('#selectFiles'),
           uplC = Y.Node.one('#uploadFilesContainer'),
           upload = false;
 
-        var uploader = new Y.UploaderHTML5({width:"300px",
-          height:"30px",
-          multipleFiles:false});
+        var uploader = new Y.UploaderHTML5({width: "300px",
+          height: "30px",
+          multipleFiles: false});
         uploader.render('#selectFiles');
 
         uplC.hide();
         Y.Node.one('#uploadFilesButton').on('click', function(){
           if(uploader.get("fileList").length > 0 && !upload){
-            uploader.upload(uploader.get("fileList")[0], "/PPHP/model/modules/CentralController.php", {module:"Console", active:"uploadFile"});
+            uploader.upload(uploader.get("fileList")[0], "/PPHP/model/modules/CentralController.php", {module: "Console", active: "uploadFile"});
             upload = true;
           }
         });
@@ -552,12 +596,12 @@ YUI().use('node', 'event', 'tabview', 'uploader', 'json-parse', 'autocomplete', 
 
   Y.on('domready', function(){
     var arg = {
-      DOM:{
-        root:Y.Node.one('body'),
-        received:{}
+      DOM: {
+        root: Y.Node.one('body'),
+        received: {}
       },
-      environment:{
-        params:''
+      environment: {
+        params: ''
       }
     };
     Y.Node.all('[dGet]').each(function(){

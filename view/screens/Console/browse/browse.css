@@ -9,27 +9,27 @@ body {
 }
 
 /* inPanel */
-#Console_browse_inPanel input[type=text]{
+#Console_browse_inPanel input[type=text] {
     border: none;
     border-bottom: 1px solid white;
     background: none;
     color: white;
 }
 
-#Console_browse_inPanel .Console_browse_argInput{
+#Console_browse_inPanel .Console_browse_argInput {
     width: 100px;
     margin-right: 5px;
 }
 
 /* outPanel */
-#Console_browse_outPanel{
+#Console_browse_outPanel {
     height: 300px;
     overflow: auto;
-    font-family: "Courier New",monospace;
+    font-family: "Courier New", monospace;
 }
 
-#Console_browse_outPanel .Console_browse_command{
-  cursor: pointer;
+#Console_browse_outPanel .Console_browse_command {
+    cursor: pointer;
 }
 
 /* menu */
@@ -65,14 +65,20 @@ body {
 .yui3-tab-label {
     color: white;
 }
+
 /* auto complete */
-.yui3-aclist-content{
+.yui3-aclist-content {
     background: white;
     color: #000000;
     width: 200px;
     padding: 5px;
 }
 
-.yui3-aclist-item-active{
+.yui3-aclist-item-active {
     border: 1px dotted black;
+}
+
+/*Commands*/
+.Console_browse_modules, .Console_browse_command {
+    cursor: pointer;
 }

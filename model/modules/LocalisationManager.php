@@ -1,10 +1,12 @@
 <?php
 namespace PPHP\model\modules;
 
+use PPHP\model\modules\SystemPackages\ReflectionModule;
+use PPHP\services\formatting\localisation as localisation;
 use PPHP\services\modules\ModulesRouter;
-use PPHP\tools\patterns\singleton\Singleton;
-use \PPHP\services\formatting\localisation as localisation;
 use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
+use PPHP\tools\classes\standard\fileSystem\NotExistsException;
+use PPHP\tools\patterns\singleton\Singleton;
 
 /**
  * Класс-фабрика, предоставляющий доступ к идентифицированному менеджеру локализации.
@@ -21,7 +23,7 @@ class LocalisationManager implements Singleton{
   /**
    * Метод возвращает экземпляр менеджера локализации с устновленной текущей локалью пользователя по средствам модуля Localisation.
    * @static
-   * @throws NotFoundDataException Выбрасывается в случае, если не удалось получить доступ к конфигурации системы или файлу состояния модуля.
+   * @throws NotExistsException Выбрасывается в случае, если не удалось получить доступ к конфигурации системы или к модулю.
    * @return localisation\LocalisationManager
    */
   static public function getInstance(){
@@ -35,9 +37,9 @@ class LocalisationManager implements Singleton{
       }
       if($modulesRouter->hasModule('Localisation')){
         try{
-          $localisationController = $modulesRouter->getController('Localisation');
+          $localisationController = (new ReflectionModule('Localisation'))->getController();
         }
-        catch(NotFoundDataException $e){
+        catch(NotExistsException $e){
           throw $e;
         }
         self::$instance->setLocalise($localisationController->getLanguage());
@@ -51,6 +53,7 @@ class LocalisationManager implements Singleton{
         }
       }
     }
+
     return self::$instance;
   }
 }

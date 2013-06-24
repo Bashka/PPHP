@@ -1,11 +1,12 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\fileSystem\io;
+
 use PPHP\tools\classes\standard\fileSystem\io as io;
 
-spl_autoload_register(function($className){
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
-
+$_SERVER['DOCUMENT_ROOT'] = '/var/www';
 class FileReaderTest extends \PHPUnit_Framework_TestCase{
   /**
    * @var io\FileReader
@@ -16,6 +17,7 @@ class FileReaderTest extends \PHPUnit_Framework_TestCase{
    * Имя тестируемого файла в текущем каталоге.
    */
   const testFileName = 'testFile.txt';
+
   /**
    * Дескриптор тестируемого файла.
    * @var resource
@@ -25,7 +27,7 @@ class FileReaderTest extends \PHPUnit_Framework_TestCase{
   public static function setUpBeforeClass(){
     fclose(fopen(self::testFileName, 'a+'));
     self::$descriptor = fopen(self::testFileName, 'r+');
-    fwrite(self::$descriptor, 'First test line'.PHP_EOL.'Second test line'.PHP_EOL);
+    fwrite(self::$descriptor, 'First test line' . PHP_EOL . 'Second test line' . PHP_EOL);
   }
 
   public static function tearDownAfterClass(){
@@ -92,7 +94,7 @@ class FileReaderTest extends \PHPUnit_Framework_TestCase{
    */
   public function testReadAll(){
     $this->object->read();
-    $this->assertEquals('irst test line'.PHP_EOL.'Second test line'.PHP_EOL, $this->object->readAll());
+    $this->assertEquals('irst test line' . PHP_EOL . 'Second test line' . PHP_EOL, $this->object->readAll());
   }
 
   /**

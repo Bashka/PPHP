@@ -1,17 +1,18 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\baseType;
-use \PPHP\tools\classes\standard\baseType\Date;
-spl_autoload_register(function($className){
+
+use PPHP\tools\classes\standard\baseType\Date;
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
-class DateTest extends \PHPUnit_Framework_TestCase {
+class DateTest extends \PHPUnit_Framework_TestCase{
   /**
    * @covers Date::__construct
    */
   public function test__construct(){
     new Date(new \DateTime());
-
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
     new Date(1);
   }
@@ -29,7 +30,6 @@ class DateTest extends \PHPUnit_Framework_TestCase {
    */
   public function testisReestablish(){
     $this->assertTrue(Date::isReestablish('1.1.1970'));
-
     $this->assertFalse(Date::isReestablish(''));
     $this->assertFalse(Date::isReestablish('t'));
     $this->assertFalse(Date::isReestablish('1'));

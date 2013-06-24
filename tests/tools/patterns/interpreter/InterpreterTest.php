@@ -1,11 +1,13 @@
 <?php
 namespace PPHP\tests\tools\patterns\interpreter;
-use \PPHP\tests\tools\patterns\interpreter\InterpreterRestorableMock;
-spl_autoload_register(function($className){
+
+use PPHP\tests\tools\patterns\interpreter\InterpreterRestorableMock;
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
-class InterpreterTest extends \PHPUnit_Framework_TestCase {
+class InterpreterTest extends \PHPUnit_Framework_TestCase{
   /**
    * @var InterpreterRestorableMock
    */

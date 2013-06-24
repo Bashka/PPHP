@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType;
+
 use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 use PPHP\tools\patterns\interpreter as interpreter;
 
@@ -10,6 +11,7 @@ use PPHP\tools\patterns\interpreter as interpreter;
  */
 abstract class Wrapper implements interpreter\Restorable{
   use interpreter\TRestorable;
+
   /**
    * Оборачиваемое значение.
    * @var mixed
@@ -27,7 +29,6 @@ abstract class Wrapper implements interpreter\Restorable{
   /**
    * Конструктор должен быть переопределен в дочерних классах с целью осуществления контроля типа передаваемого параметра.
    * @param mixed $val Оборачиваемое значение.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($val){

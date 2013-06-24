@@ -1,13 +1,15 @@
 <?php
 namespace PPHP\model\modules\SystemPackages\InstallerModules;
 
+use PPHP\model\modules\SystemPackages\ReflectionModule;
+
 /**
  * Модуль обеспечивает механизмы добавления и удаления модулей.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\model\modules\SystemPackages\InstallerModules
  */
 class InstallationManager implements \PPHP\tools\patterns\singleton\Singleton{
-use \PPHP\tools\patterns\singleton\TSingleton;
+  use \PPHP\tools\patterns\singleton\TSingleton;
 
   /**
    * Служба маршрутизации модулей.
@@ -27,10 +29,10 @@ use \PPHP\tools\patterns\singleton\TSingleton;
   protected function notifyParent(\PPHP\tools\patterns\metadata\reflection\ReflectionModule $reflectionModule, $isInstall = true){
     if(!is_null($parent = $reflectionModule->getParent())){
       if($isInstall){
-        $this->moduleRouter->getReflectionModule($parent)->addChild($reflectionModule->getName());
+        (new ReflectionModule($parent))->addChild($reflectionModule->getName());
       }
       else{
-        $this->moduleRouter->getReflectionModule($parent)->removeChild($reflectionModule->getName());
+        (new ReflectionModule($parent))->removeChild($reflectionModule->getName());
       }
     }
   }
@@ -44,10 +46,10 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     if(!is_null($usedModules = $reflectionModule->getUsed())){
       foreach($usedModules as $usedModule){
         if($isInstall){
-          $this->moduleRouter->getReflectionModule($usedModule)->addDestitute($reflectionModule->getName());
+          (new ReflectionModule($usedModule))->addDestitute($reflectionModule->getName());
         }
         else{
-          $this->moduleRouter->getReflectionModule($usedModule)->removeDestitute($reflectionModule->getName());
+          (new ReflectionModule($usedModule))->removeDestitute($reflectionModule->getName());
         }
       }
     }
@@ -85,7 +87,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     if($this->moduleRouter->hasModule('Access')){
       $access = $reflectionModule->getAccess();
       if(count($access) > 0){
-        $accessController = $this->moduleRouter->getController('Access');
+        $accessController = (new ReflectionModule('Access'))->getController();
         foreach($access as $method => $roles){
           foreach($roles as $role){
             // Определения наличия указанной роли.
@@ -113,7 +115,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
    */
   protected function removeAccess(\PPHP\tools\patterns\metadata\reflection\ReflectionModule $reflectionModule){
     if($this->moduleRouter->hasModule('Access')){
-      $accessController = $this->moduleRouter->getController('Access');
+      $accessController = (new ReflectionModule('Access'))->getController();
       $controllerModule = $reflectionModule->getController();
       $reflectControllerModule = $controllerModule::getReflectionClass();
       foreach($controllerModule::getAllReflectionMethods() as $method){
@@ -148,18 +150,15 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     $data = [];
     $archiveManager = new \PPHP\model\modules\SystemPackages\ArchiveManager();
     $archiveManager->open($archiveAddress);
-
     if(!$archiveManager->isDataExists([['Module', 'name'], ['Module', 'type'], ['Module', 'version']])){
       $archiveManager->close();
       throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Нарушена структура конфигурационного файла модуля.');
     }
-
     // Получение свойств модуля.
     $confModule = $archiveManager->getConf();
     $data['name'] = $confModule->get('name', 'Module');
     $data['type'] = $confModule->get('type', 'Module');
     $data['version'] = $confModule->get('version', 'Module');
-
     // Определение родительского модуля.
     if($archiveManager->isDataExists([['Depending', 'parent']])){
       $data['parent'] = $confModule->get('parent', 'Depending');
@@ -167,20 +166,17 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     else{
       $data['parent'] = null;
     }
-
     // Проверка на дублирование модуля.
     if($this->moduleRouter->hasModule($data['name'])){
       $archiveManager->close();
       throw new \PPHP\tools\classes\standard\baseType\exceptions\DuplicationException('Модуль с заданным именем уже установлен.');
     }
-
-    if($data['type'] == \PPHP\tools\patterns\metadata\reflection\ReflectionModule::SPECIFIC){
+    if($data['type'] == ReflectionModule::SPECIFIC){
       // Проверка наличия контроллера конкретного модуля.
       if(!$archiveManager->isFilesExists(['Controller.php'])){
         $archiveManager->close();
         throw new \PPHP\tools\classes\standard\fileSystem\NotExistsException('Нарушена структура модуля. Конкретный модуль должен иметь контроллер.');
       }
-
       // Проверка наличия используемых модулей.
       $data['used'] = $confModule->get('used', 'Depending');
       $data['used'] = trim((string) $data['used']);
@@ -200,7 +196,6 @@ use \PPHP\tools\patterns\singleton\TSingleton;
         throw new \PPHP\tools\classes\standard\fileSystem\NotExistsException('Нарушена структура модуля. Виртуальный модуль не может иметь контроллера.');
       }
     }
-
     // Определение физического адреса модуля.
     if($data['parent']){
       if(!$this->moduleRouter->hasModule($data['parent'])){
@@ -212,16 +207,13 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     else{
       $data['dir'] = $data['name'];
     }
-
     // Определение инсталятора.
     $data['installer'] = ($archiveManager->isFilesExists(['Installer.php']) !== false);
-
     // Определение прав доступа
     $data['access'] = $confModule->getSection('Access');
     if(!$data['access']){
       $data['access'] = [];
     }
-
     $data['manager'] = $archiveManager;
 
     return $data;
@@ -250,14 +242,11 @@ use \PPHP\tools\patterns\singleton\TSingleton;
   public function installModule($archiveAddress){
     $installData = $this->getDataModule($archiveAddress);
     $moduleDirAddress = $_SERVER['DOCUMENT_ROOT'] . '/' . \PPHP\services\modules\ModulesRouter::MODULES_DIR . '/' . $installData['dir'];
-
     // Формирование каталога модуля.
     $dirModule = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($moduleDirAddress);
     $dirModule->create();
-
     // Распаковка модуля.
     $installData['manager']->moveFiles($dirModule);
-
     // Формирование файла состояния модуля.
     $stateFile = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($moduleDirAddress . '/state.ini');
     if($stateFile->isExists()){
@@ -271,7 +260,7 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     $stateFile->set('version', $installData['version'], 'Module');
     $stateFile->set('parent', $installData['parent'], 'Depending');
     $stateFile->set('children', '', 'Depending');
-    if($installData['type'] == \PPHP\tools\patterns\metadata\reflection\ReflectionModule::SPECIFIC){
+    if($installData['type'] == ReflectionModule::SPECIFIC){
       $stateFile->set('used', (!is_null($installData['used']) && count($installData['used']) > 0)? implode(',', $installData['used']) : '', 'Depending');
       $stateFile->set('destitute', '', 'Depending');
       foreach($installData['access'] as $method => $roles){
@@ -279,12 +268,9 @@ use \PPHP\tools\patterns\singleton\TSingleton;
       }
     }
     $stateFile->rewrite();
-
     // Регистрация модуля в роутере.
     $this->moduleRouter->addModule($installData['name'], (($installData['parent'])? $installData['parent'] : null));
-
-    $reflectionModule = $this->moduleRouter->getReflectionModule($installData['name']);
-
+    $reflectionModule = new ReflectionModule($installData['name']);
     // Выполнение внутреннего инсталлятора
     $installResult = '';
     if($installData['installer']){
@@ -298,18 +284,14 @@ use \PPHP\tools\patterns\singleton\TSingleton;
         throw $exc;
       }
     }
-
     // Оповещение родительского модуля.
     $this->notifyParent($reflectionModule, true);
-
-    if($installData['type'] == \PPHP\tools\patterns\metadata\reflection\ReflectionModule::SPECIFIC){
+    if($installData['type'] == ReflectionModule::SPECIFIC){
       // Оповещение используемых модулей.
       $this->notifyUsed($reflectionModule, true);
-
       // Управление доступом
       $this->addAccess($reflectionModule);
     }
-
     // Удаление архива
     $installData['manager']->close();
     $archiveFile = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructFileFromAddress($archiveAddress);
@@ -357,32 +339,24 @@ use \PPHP\tools\patterns\singleton\TSingleton;
     if(!$this->moduleRouter->hasModule($moduleName)){
       throw new \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException('Целевой модуль (' . $moduleName . ') не найден.');
     }
-    $reflectionModule = $this->moduleRouter->getReflectionModule($moduleName);
-
+    $reflectionModule = new ReflectionModule($moduleName);
     // Удаление дочерних модулей.
     $this->uninstallChildren($reflectionModule);
-
     // Деинсталяция модуля.
     $uninstallInfo = '';
     if(!is_null($installer = $reflectionModule->getInstaller())){
       $uninstallInfo = $installer->uninstall();
     }
-
     // Удаление зависимых модулей.
     $this->uninstallDestitute($reflectionModule);
-
     // Управление доступом
     $this->removeAccess($reflectionModule);
-
     // Оповещение родительского модуля.
     $this->notifyParent($reflectionModule, false);
-
     // Оповещение используемых модулей.
     $this->notifyUsed($reflectionModule, false);
-
     // Удаление информации о модуле из роутера.
     $this->moduleRouter->removeModule($moduleName);
-
     // Удаление каталога модуля.
     $dirModule = \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/' . $reflectionModule->getAddress());
     if($dirModule->isExists()){

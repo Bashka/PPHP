@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tests\tools\patterns\state;
-use \PPHP\tools\patterns\state as state;
+
+use PPHP\tools\patterns\state as state;
 
 class ContextMock implements state\StatesContext, ContextInterfaceMock{
   use state\TStatesContext;

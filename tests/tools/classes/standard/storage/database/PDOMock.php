@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\storage\database;
+
 use PPHP\tools\classes\standard\storage\database\PDO;
 
 class PDOMock extends PDO{
@@ -7,9 +8,7 @@ class PDOMock extends PDO{
 
   public $queries = [];
 
-  public $restore;
-
-  public $rowCount = 0;
+  public $restore = [];
 
   public function __construct($dsn, $username, $passwd, $options){
   }
@@ -20,7 +19,8 @@ class PDOMock extends PDO{
 
   public function query($statement){
     $this->queries[] = $statement;
-    return $this->restore;
+
+    return array_shift($this->restore);
   }
 
   public function multiQuery($script, $delimiter = null){

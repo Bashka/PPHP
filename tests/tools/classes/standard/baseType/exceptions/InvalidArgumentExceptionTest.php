@@ -1,11 +1,13 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\baseType\exceptions;
-use \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
-spl_autoload_register(function($className){
+
+use PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
-class InvalidArgumentExceptionTest extends \PHPUnit_Framework_TestCase {
+class InvalidArgumentExceptionTest extends \PHPUnit_Framework_TestCase{
   /**
    * @covers InvalidArgumentException::verifyType
    */
@@ -45,7 +47,7 @@ class InvalidArgumentExceptionTest extends \PHPUnit_Framework_TestCase {
   public function testVerifyVal(){
     InvalidArgumentException::verifyVal(5, 'i == 5');
     InvalidArgumentException::verifyVal('test', 's eq test');
-    InvalidArgumentException::verifyVal([1,2,3], 'a > 2');
+    InvalidArgumentException::verifyVal([1, 2, 3], 'a > 2');
   }
 
   /**

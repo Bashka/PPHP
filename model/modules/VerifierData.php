@@ -17,7 +17,6 @@ class VerifierData{
    * @static
    * @param ReflectionMethod $method Целевой метод.
    * @param string[] $args Передаваемые параметры.
-   *
    */
   public static function verifyArgs(ReflectionMethod $method, array &$args){
     $i = 0;
@@ -38,7 +37,7 @@ class VerifierData{
           $argVal = $verifyClass::reestablish($argVal);
         }
         catch(StructureException $e){
-          throw new InvalidArgumentException('Недопустимое значение параметра. Ожидается ['.$verifyClass.'] вместо ['.$argVal.'].', 1, $e);
+          throw new InvalidArgumentException('Недопустимое значение параметра. Ожидается [' . $verifyClass . '] вместо [' . $argVal . '].', 1, $e);
         }
       }
     }

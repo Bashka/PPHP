@@ -1,18 +1,20 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\baseType;
-use \PPHP\tools\classes\standard\baseType\Arr;
-spl_autoload_register(function($className){
+
+use PPHP\tools\classes\standard\baseType\Arr;
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
-class ArrTest extends \PHPUnit_Framework_TestCase {
+class ArrTest extends \PHPUnit_Framework_TestCase{
   /**
    * @var Arr
    */
   protected $object;
 
   protected function setUp(){
-    $this->object = new Arr([false,2,3]);
+    $this->object = new Arr([false, 2, 3]);
   }
 
   /**
@@ -20,8 +22,7 @@ class ArrTest extends \PHPUnit_Framework_TestCase {
    */
   public function test__construct(){
     new Arr([]);
-    new Arr([1,2,3]);
-
+    new Arr([1, 2, 3]);
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
     new Arr('true');
   }
@@ -67,7 +68,6 @@ class ArrTest extends \PHPUnit_Framework_TestCase {
    * @covers Arr::key
    * @covers Arr::valid
    * @covers Arr::rewind
-   *
    */
   public function testIterator(){
     $i = 0;
@@ -79,7 +79,6 @@ class ArrTest extends \PHPUnit_Framework_TestCase {
       $val .= (string) $v;
       $i++;
     }
-
     $this->assertEquals('012', $key);
     $this->assertEquals('23', $val);
     $this->assertEquals(3, $i);
@@ -139,31 +138,29 @@ class ArrTest extends \PHPUnit_Framework_TestCase {
    */
   public function testSearchVal(){
     $this->assertEquals([1], $this->object->searchVal(2)->getVal());
-    $this->assertEquals([0,1], (new Arr([1,1,2]))->searchVal(1)->getVal());
+    $this->assertEquals([0, 1], (new Arr([1, 1, 2]))->searchVal(1)->getVal());
   }
 
   /**
    * @covers Arr:slice
    */
   public function testSlice(){
-    $this->assertEquals([false,2], $this->object->slice(0,2)->getVal());
-    $this->assertEquals([false,2,3], $this->object->slice(0)->getVal());
-    $this->assertEquals([1=>2,2=>3], $this->object->slice(-2)->getVal());
+    $this->assertEquals([false, 2], $this->object->slice(0, 2)->getVal());
+    $this->assertEquals([false, 2, 3], $this->object->slice(0)->getVal());
+    $this->assertEquals([1 => 2, 2 => 3], $this->object->slice(-2)->getVal());
   }
 
   /**
    * @covers Arr:splice
    */
   public function testSplice(){
-    $this->assertEquals([false,2], $this->object->splice(0,2)->getVal());
+    $this->assertEquals([false, 2], $this->object->splice(0, 2)->getVal());
     $this->assertEquals(1, $this->object->count());
-
-    $this->object = new Arr([false,2,3]);
-    $this->assertEquals([false,2,3], $this->object->splice(0)->getVal());
+    $this->object = new Arr([false, 2, 3]);
+    $this->assertEquals([false, 2, 3], $this->object->splice(0)->getVal());
     $this->assertEquals(0, $this->object->count());
-
-    $this->object = new Arr([false,2,3]);
-    $this->assertEquals([2,3], $this->object->splice(-2)->getVal());
+    $this->object = new Arr([false, 2, 3]);
+    $this->assertEquals([2, 3], $this->object->splice(-2)->getVal());
     $this->assertEquals(1, $this->object->count());
   }
 
@@ -179,7 +176,6 @@ class ArrTest extends \PHPUnit_Framework_TestCase {
     $this->assertTrue($this->object->verify('<= 3'));
     $this->assertTrue($this->object->verify('[] 0 3'));
     $this->assertTrue($this->object->verify('() 0 4'));
-
     $this->assertFalse($this->object->verify('== 2'));
     $this->assertFalse($this->object->verify('!= 3'));
     $this->assertFalse($this->object->verify('> 3'));

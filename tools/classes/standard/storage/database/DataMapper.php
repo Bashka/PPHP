@@ -1,9 +1,10 @@
 <?php
 namespace PPHP\tools\classes\standard\storage\database;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\classes\standard\storage\database\ORM as ORM;
 use PPHP\tools\patterns\database\associations\LongAssociation;
-use \PPHP\tools\patterns\database\LongObject;
-use \PPHP\tools\classes\standard\storage\database\ORM as ORM;
+use PPHP\tools\patterns\database\LongObject;
 use PPHP\tools\patterns\memento\Memento;
 use PPHP\tools\patterns\metadata\reflection\ReflectionClass;
 
@@ -29,7 +30,7 @@ class DataMapper{
   const ORM_COMPOSITION = 'ORM\Composition';
 
   /**
-   * Маркерная аннотация, определяющая ассоциативное свойство, которое выполняет полную инициализацию связанных объектов.
+   * Маркерная аннотация, определяющая ассоциативное свойство, которое выполняет полную инициализацию связанных объектов (тип связи - один к одному).
    */
   const ORM_FULL = 'ORM\Full';
 
@@ -51,7 +52,6 @@ class DataMapper{
     if(!$object->isOID()){
       $object->setOID($data['OID']);
     }
-
     // Преобразование объектных ссылок в Proxy
     foreach($data as $name => &$value){
       if(is_string($value) && LongObject::isReestablish($value)){
@@ -62,7 +62,6 @@ class DataMapper{
         }
       }
     }
-
     // Восстановление множественных ассоциаций
     $reflectionProperties = $object->getAllReflectionProperties();
     foreach($reflectionProperties as $property){
@@ -83,7 +82,6 @@ class DataMapper{
         }
       }
     }
-
     // Выброс исключений не предполагается
     $object->restoreFromMemento(new Memento($object, $data));
   }
@@ -114,7 +112,6 @@ class DataMapper{
     catch(exceptions\InvalidArgumentException $e){
       throw $e;
     }
-
     try{
       $this->PDO->multiQuery($inserts);
     }
@@ -122,7 +119,6 @@ class DataMapper{
       throw $e;
     }
     // Выброс исключения exceptions\InvalidArgumentException не предполагается
-
     // Выброс исключений не предполагается
     $object->setOID($newOID);
   }
@@ -141,7 +137,6 @@ class DataMapper{
       throw new exceptions\StructureException('Недопустимый персистентный объект.', 1, $e);
     }
     // Выброс исключения exceptions\InvalidArgumentException не предполагается
-
     try{
       $this->PDO->multiQuery($updates);
     }
@@ -167,7 +162,6 @@ class DataMapper{
       throw new exceptions\StructureException('Недопустимый персистентный объект.', 1, $e);
     }
     // Выброс исключения exceptions\InvalidArgumentException не предполагается
-
     // Удаление композита
     $reflectionProperties = $object->getAllReflectionProperties();
     foreach($reflectionProperties as $property){
@@ -181,7 +175,6 @@ class DataMapper{
         }
       }
     }
-
     // Удаление сущности
     try{
       $this->PDO->multiQuery($updates);
@@ -207,20 +200,16 @@ class DataMapper{
       throw new exceptions\StructureException('Недопустимый персистентный объект.', 1, $e);
     }
     //Дальнейший выброс исключений не предполагается
-
     try{
       $queryResult = $this->PDO->query($select->interpretation());
     }
     catch(exceptions\PDOException $e){
       throw $e;
     }
-
     if($queryResult->rowCount() != 1){
-      throw new UncertaintyException('Запрашиваемое состояние объекта ['.get_class($object).':'.$object->getOID().'] не найдено в базе данных или результат неоднозначен. Восстановление невозможно.');
+      throw new UncertaintyException('Запрашиваемое состояние объекта [' . get_class($object) . ':' . $object->getOID() . '] не найдено в базе данных или результат неоднозначен. Восстановление невозможно.');
     }
-
     $queryResult = $queryResult->fetch(\PDO::FETCH_ASSOC);
-
     // Восстановление объекта
     $this->setStateObject($object, $queryResult);
   }
@@ -241,20 +230,16 @@ class DataMapper{
       throw new exceptions\StructureException('Недопустимый персистентный объект.', 1, $e);
     }
     //Дальнейший выброс исключений не предполагается
-
     try{
       $queryResult = $this->PDO->query($select->interpretation());
     }
     catch(exceptions\PDOException $e){
       throw $e;
     }
-
     if($queryResult->rowCount() != 1){
-      throw new UncertaintyException('Запрашиваемое состояние объекта ['.get_class($object).':'.$object->getOID().'] не найдено в базе данных или результат неоднозначен. Восстановление невозможно.');
+      throw new UncertaintyException('Запрашиваемое состояние объекта [' . get_class($object) . ':' . $object->getOID() . '] не найдено в базе данных или результат неоднозначен. Восстановление невозможно.');
     }
-
     $queryResult = $queryResult->fetch(\PDO::FETCH_ASSOC);
-
     // Восстановление объекта
     $this->setStateObject($object, $queryResult);
   }
@@ -275,14 +260,12 @@ class DataMapper{
       throw new exceptions\StructureException('Недопустимый персистентный объект.', 1, $e);
     }
     //Дальнейший выброс исключений не предполагается
-
     try{
       $queryResult = $this->PDO->query($select->interpretation());
     }
     catch(exceptions\PDOException $e){
       throw $e;
     }
-
     // Формирование массива объектов
     $result = [];
     $className = $reflectionClass->getName();
@@ -307,7 +290,6 @@ class DataMapper{
     catch(exceptions\PDOException $e){
       throw $e;
     }
-
     // Восстановление ассоциации
     $assoc->removeAll($assoc);
     $className = $assoc->getAssocClass()->getName();

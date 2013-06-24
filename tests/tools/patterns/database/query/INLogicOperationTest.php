@@ -1,12 +1,14 @@
 <?php
 namespace PPHP\tests\tools\patterns\database\query;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use \PPHP\tools\patterns\database\query as query;
-spl_autoload_register(function($className){
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\patterns\database\query as query;
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
-class INLogicOperationTest extends \PHPUnit_Framework_TestCase {
+class INLogicOperationTest extends \PHPUnit_Framework_TestCase{
   /**
    * @covers query\INLogicOperation::__construct
    */
@@ -27,9 +29,8 @@ class INLogicOperationTest extends \PHPUnit_Framework_TestCase {
     $i->addValue(1.1);
     $this->assertEquals('test', $i->getField()->getName());
     $this->assertEquals(5, $i->getValues()[0]);
-
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
-    $i->addValue([1,2,3]);
+    $i->addValue([1, 2, 3]);
   }
 
   /**
@@ -52,7 +53,6 @@ class INLogicOperationTest extends \PHPUnit_Framework_TestCase {
     $i->addValue(true);
     $i->addValue(1.1);
     $this->assertEquals('(`test` IN ("5","a","true","1.1"))', $i->interpretation());
-
     $i = new query\INLogicOperation(new query\Field('test'));
     $s = new query\Select();
     $s->addAllField();
@@ -80,7 +80,6 @@ class INLogicOperationTest extends \PHPUnit_Framework_TestCase {
                                                               ("a",
                                                               "b",
                                                               "1"))'));
-
     $this->assertFalse(query\INLogicOperation::isReestablish('`field` IN ("a")'));
     $this->assertFalse(query\INLogicOperation::isReestablish('(`field` ("a"))'));
     $this->assertFalse(query\INLogicOperation::isReestablish('(`field` IN "a")'));

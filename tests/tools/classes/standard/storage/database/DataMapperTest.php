@@ -1,16 +1,15 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\storage\database;
-use \PPHP\tools\classes\standard\storage\database\DataMapper;
-use \PPHP\tests\tools\classes\standard\storage\database\ORM\ParentMock;
-use \PPHP\tests\tools\classes\standard\storage\database\ORM\ChildMock;
-use PPHP\tools\patterns\database\associations\LongAssociation;
 
-spl_autoload_register(function($className){
+use PPHP\tests\tools\classes\standard\storage\database\ORM\ChildMock;
+use PPHP\tests\tools\classes\standard\storage\database\ORM\ParentMock;
+use PPHP\tools\classes\standard\storage\database\DataMapper;
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
 class DataMapperTest extends \PHPUnit_Framework_TestCase{
-
   /**
    * @var PDOMock
    */
@@ -35,7 +34,6 @@ class DataMapperTest extends \PHPUnit_Framework_TestCase{
     $this->object->insert($o, 5);
     $this->assertEquals('INSERT INTO `ParentTable` (`OID`,ParentTable.af) VALUES ("5","1")', $this->PDO->queries[0]);
     $this->assertEquals(5, $o->getOID());
-
     $o = new ChildMock;
     $this->object->insert($o, 5);
     $this->assertEquals('INSERT INTO `ParentTable` (`OID`,ParentTable.af) VALUES ("5","1")', $this->PDO->queries[0]);
@@ -51,7 +49,6 @@ class DataMapperTest extends \PHPUnit_Framework_TestCase{
     $o->setOID(5);
     $this->object->update($o);
     $this->assertEquals('UPDATE `ParentTable` SET ParentTable.af = "1" WHERE (`OID` = "5")', $this->PDO->queries[0]);
-
     $o = new ChildMock;
     $o->setOID(5);
     $this->object->update($o, 5);
@@ -67,15 +64,14 @@ class DataMapperTest extends \PHPUnit_Framework_TestCase{
     $o->setOID(5);
     $this->object->delete($o);
     $this->assertEquals('DELETE FROM `ParentTable` WHERE (`OID` = "5")', $this->PDO->queries[0]);
-
     $this->setUp();
-    $o = new ChildMock;
-    $o->setOID(1);
-    $r = new RowPDOMock;
-    $r->rowCount = 2;
-    $r->data = [['a' => 10, 'OID' => 2], ['a' => 10, 'OID' => 3]];
-    $this->PDO->restore = $r;
-    $this->object->delete($o, 5);
+    $o = ChildMock::getProxy(1);
+    $this->PDO->restore[] = new RowPDOMock([['a' => 10, 'h' => '$/PPHP/tests/tools/classes/standard/storage/database/ORM/ChildMock:1', 'OID' => 2], ['a' => 10, 'h' => '$/PPHP/tests/tools/classes/standard/storage/database/ORM/ChildMock:1', 'OID' => 3]]);
+    $this->PDO->restore[] = new RowPDOMock([]); // Восстановление ассоциации g композитов объекта 2
+    $this->PDO->restore[] = new RowPDOMock([]); // Delete объекта 2
+    $this->PDO->restore[] = new RowPDOMock([]); // Delete объекта 2
+    $this->PDO->restore[] = new RowPDOMock([]); // Восстановление ассоциации g композитов объекта 3
+    $this->object->delete($o);
     $this->assertEquals('SELECT ChildTable.df as d,ChildTable.ef as e,ChildTable.ff as f,ChildTable.hf as h,ParentTable.af as a,ChildTable.OID as OID FROM `ChildTable` INNER JOIN `ParentTable` ON (ChildTable.OID = ParentTable.OID) WHERE (ChildTable.hf = "$/PPHP/tests/tools/classes/standard/storage/database/ORM/ChildMock:1")', $this->PDO->queries[0]);
     $this->assertEquals('SELECT ChildTable.df as d,ChildTable.ef as e,ChildTable.ff as f,ChildTable.hf as h,ParentTable.af as a,ChildTable.OID as OID FROM `ChildTable` INNER JOIN `ParentTable` ON (ChildTable.OID = ParentTable.OID) WHERE (ChildTable.hf = "$/PPHP/tests/tools/classes/standard/storage/database/ORM/ChildMock:2")', $this->PDO->queries[1]);
     $this->assertEquals('DELETE FROM `ChildTable` WHERE (`OID` = "2")', $this->PDO->queries[2]);
@@ -85,7 +81,6 @@ class DataMapperTest extends \PHPUnit_Framework_TestCase{
     $this->assertEquals('DELETE FROM `ParentTable` WHERE (`OID` = "3")', $this->PDO->queries[6]);
     $this->assertEquals('DELETE FROM `ChildTable` WHERE (`OID` = "1")', $this->PDO->queries[7]);
     $this->assertEquals('DELETE FROM `ParentTable` WHERE (`OID` = "1")', $this->PDO->queries[8]);
-
   }
 
   /**
@@ -93,44 +88,31 @@ class DataMapperTest extends \PHPUnit_Framework_TestCase{
    * @covers DataMapper::setStateObject
    */
   public function testRecover(){
-    $o = new ParentMock;
-    $o->setOID(5);
-    $r = new RowPDOMock;
-    $r->rowCount = 1;
-    $r->data = [['a' => 10, 'OID' => 1]];
-    $this->PDO->restore = $r;
+    $o = ParentMock::getProxy(5);
+    $this->PDO->restore[] = new RowPDOMock([['a' => 10, 'OID' => 5]]);
     $this->object->recover($o);
     $this->assertEquals('SELECT ParentTable.af as a,ParentTable.OID as OID FROM `ParentTable`  WHERE (ParentTable.OID = "5")', $this->PDO->queries[0]);
     $this->assertEquals(10, $o->getA());
     $this->assertEquals(5, $o->getOID());
-
     $this->setUp();
-    $o = new ParentMock;
-    $o->setOID(5);
-    $r = new RowPDOMock;
-    $r->rowCount = 1;
-    $r->data = [['a' => '$/PPHP/tests/tools/classes/standard/storage/database/ORM/ParentMock:1', 'OID' => 5], ['a' => 10, 'OID' => 2]];
-    $this->PDO->restore = $r;
+    $o = ParentMock::getProxy(5);
+    $this->PDO->restore[] = new RowPDOMock([['a' => '$/PPHP/tests/tools/classes/standard/storage/database/ORM/ParentMock:1', 'OID' => 5]]);
+    $this->PDO->restore[] = new RowPDOMock([['a' => 10, 'OID' => 5]]);
     $this->object->recover($o);
     $this->assertEquals('SELECT ParentTable.af as a,ParentTable.OID as OID FROM `ParentTable`  WHERE (ParentTable.OID = "5")', $this->PDO->queries[0]);
     $this->assertEquals('SELECT ParentTable.af as a,ParentTable.OID as OID FROM `ParentTable`  WHERE (ParentTable.OID = "1")', $this->PDO->queries[1]);
     $this->assertInstanceOf('\PPHP\tests\tools\classes\standard\storage\database\ORM\ParentMock', $o->getA());
     $this->assertEquals(1, $o->getA()->getOID());
     $this->assertEquals(10, $o->getA()->getA());
-
     $this->setUp();
-    $o = new ChildMock;
-    $o->setOID(5);
-    $o2 = new ChildMock;
-    $o2->setOID(2);
-    $r = new RowPDOMock;
-    $r->rowCount = 1;
-    $r->data = [['a' => 10, 'd' => $o2, 'e' => 12, 'f' => 13, 'h' => '', 'OID' => 1]];
-    $this->PDO->restore = $r;
+    $o = ChildMock::getProxy(5);
+    $this->PDO->restore[] = new RowPDOMock([['a' => '$/PPHP/tests/tools/classes/standard/storage/database/ORM/ChildMock:1', 'd' => ChildMock::getProxy(2)->interpretation(), 'e' => 12, 'f' => 13, 'h' => '', 'OID' => 5]]);
+    $this->PDO->restore[] = new RowPDOMock([['a' => 10, 'd' => ChildMock::getProxy(2), 'e' => 12, 'f' => 13, 'h' => '', 'OID' => 1]]);
     $this->object->recover($o);
     $this->assertEquals('SELECT ChildTable.df as d,ChildTable.ef as e,ChildTable.ff as f,ChildTable.hf as h,ParentTable.af as a,ChildTable.OID as OID FROM `ChildTable` INNER JOIN `ParentTable` ON (ChildTable.OID = ParentTable.OID) WHERE (ChildTable.OID = "5")', $this->PDO->queries[0]);
-    $this->assertEquals('SELECT ChildTable.df as d,ChildTable.ef as e,ChildTable.ff as f,ChildTable.hf as h,ParentTable.af as a,ChildTable.OID as OID FROM `ChildTable` INNER JOIN `ParentTable` ON (ChildTable.OID = ParentTable.OID) WHERE (ChildTable.hf = "$/PPHP/tests/tools/classes/standard/storage/database/ORM/ChildMock:5")', $this->PDO->queries[1]);
-    $this->assertEquals(10, $o->getA());
+    $this->assertEquals('SELECT ChildTable.df as d,ChildTable.ef as e,ChildTable.ff as f,ChildTable.hf as h,ParentTable.af as a,ChildTable.OID as OID FROM `ChildTable` INNER JOIN `ParentTable` ON (ChildTable.OID = ParentTable.OID) WHERE (ChildTable.OID = "1")', $this->PDO->queries[1]);
+    $this->assertEquals(1, $o->getA()->getOID());
+    $this->assertEquals(10, $o->getA()->getA());
     $this->assertEquals(2, $o->getD()->getOID());
     $this->assertEquals(12, $o->getE());
     $this->assertEquals(13, $o->f);
@@ -144,25 +126,21 @@ class DataMapperTest extends \PHPUnit_Framework_TestCase{
    */
   public function testRecoverFinding(){
     $o = new ParentMock;
-    $r = new RowPDOMock;
-    $r->rowCount = 1;
-    $r->data = [['a' => 10, 'OID' => 1]];
-    $this->PDO->restore = $r;
+    $this->PDO->restore[] = new RowPDOMock([['a' => 10, 'OID' => 1]]);
     $this->object->recoverFinding($o, [['a', '=', '10']]);
     $this->assertEquals('SELECT ParentTable.af as a,ParentTable.OID as OID FROM `ParentTable`  WHERE (ParentTable.af = "10")', $this->PDO->queries[0]);
     $this->assertEquals(10, $o->getA());
     $this->assertEquals(1, $o->getOID());
-
     $this->setUp();
     $o = new ParentMock;
-    $r = new RowPDOMock;
-    $r->rowCount = 1;
-    $r->data = [['a' => '$/PPHP/tests/tools/classes/standard/storage/database/ORM/ParentMock:1', 'OID' => 2]];
-    $this->PDO->restore = $r;
+    $this->PDO->restore[] = new RowPDOMock([['a' => '$/PPHP/tests/tools/classes/standard/storage/database/ORM/ParentMock:1', 'OID' => 2]]);
+    $this->PDO->restore[] = new RowPDOMock([['OID' => 1, 'a' => 10]]);
     $this->object->recoverFinding($o, [['a', '=', ParentMock::getProxy(1)]]);
     $this->assertEquals('SELECT ParentTable.af as a,ParentTable.OID as OID FROM `ParentTable`  WHERE (ParentTable.af = "$/PPHP/tests/tools/classes/standard/storage/database/ORM/ParentMock:1")', $this->PDO->queries[0]);
+    $this->assertEquals('SELECT ParentTable.af as a,ParentTable.OID as OID FROM `ParentTable`  WHERE (ParentTable.OID = "1")', $this->PDO->queries[1]);
     $this->assertInstanceOf('\PPHP\tests\tools\classes\standard\storage\database\ORM\ParentMock', $o->getA());
     $this->assertEquals(1, $o->getA()->getOID());
+    $this->assertEquals(10, $o->getA()->getA());
     $this->assertEquals(2, $o->getOID());
   }
 
@@ -170,12 +148,8 @@ class DataMapperTest extends \PHPUnit_Framework_TestCase{
    * @covers DataMapper::recoverGroupFinding
    */
   public function testRecoverGroupFinding(){
-    $r = new RowPDOMock;
-    $r->rowCount = 2;
-    $r->data = [['a' => 10, 'OID' => 1], ['a' => 10, 'OID' => 2]];
-    $this->PDO->restore = $r;
+    $this->PDO->restore[] = new RowPDOMock([['a' => 10, 'OID' => 1], ['a' => 10, 'OID' => 2]]);
     $group = $this->object->recoverGroupFinding(ParentMock::getReflectionClass(), [['a', '=', 10]]);
-
     $this->assertEquals(1, $group[1]->getOID());
     $this->assertEquals(2, $group[2]->getOID());
     $this->assertInstanceOf('\PPHP\tests\tools\classes\standard\storage\database\ORM\ParentMock', $group[1]);
@@ -188,26 +162,25 @@ class DataMapperTest extends \PHPUnit_Framework_TestCase{
    * @covers DataMapper::recoverAssoc
    */
   public function testRecoverAssoc(){
-    $o = new ChildMock;
-    $o->setOID(1);
-    $r = new RowPDOMock;
-    $r->rowCount = 1;
-    $r->data = [['a' => 10, 'd' => 11, 'e' => 12, 'f' => 13, 'h' => '', 'OID' => 1]];
-    $this->PDO->restore = $r;
+    $o = ChildMock::getProxy(1);
+    $this->PDO->restore[] = new RowPDOMock([['a' => 10, 'd' => 11, 'e' => 12, 'f' => 13, 'h' => '', 'OID' => 1]]);
     $this->object->recover($o);
+    $this->assertEquals('SELECT ChildTable.df as d,ChildTable.ef as e,ChildTable.ff as f,ChildTable.hf as h,ParentTable.af as a,ChildTable.OID as OID FROM `ChildTable` INNER JOIN `ParentTable` ON (ChildTable.OID = ParentTable.OID) WHERE (ChildTable.OID = "1")', $this->PDO->queries[0]);
     $this->assertInstanceOf('\PPHP\tools\patterns\database\associations\LongAssociation', $o->g);
     $this->assertEquals(0, $o->g->count());
-
-    $r = new RowPDOMock;
-    $r->rowCount = 2;
-    $r->data = [['a' => 10, 'd' => 11, 'e' => 12, 'f' => 13, 'h' => '', 'OID' => 2], ['a' => 10, 'd' => 11, 'e' => 12, 'f' => 13, 'h' => '', 'OID' => 3]];
-    $this->PDO->restore = $r;
+    $this->PDO->restore[] = new RowPDOMock([['a' => 10, 'd' => 11, 'e' => 12, 'f' => 13, 'h' => '$/PPHP/tests/tools/classes/standard/storage/database/ORM/ChildMock:1', 'OID' => 2], ['a' => 10, 'd' => 11, 'e' => 12, 'f' => 13, 'h' => '$/PPHP/tests/tools/classes/standard/storage/database/ORM/ChildMock:1', 'OID' => 3]]);
     $this->object->recoverAssoc($o->g);
+    $this->assertEquals('SELECT ChildTable.df as d,ChildTable.ef as e,ChildTable.ff as f,ChildTable.hf as h,ParentTable.af as a,ChildTable.OID as OID FROM `ChildTable` INNER JOIN `ParentTable` ON (ChildTable.OID = ParentTable.OID) WHERE (ChildTable.hf = "$/PPHP/tests/tools/classes/standard/storage/database/ORM/ChildMock:1")', $this->PDO->queries[1]);
     $this->assertEquals(2, $o->g->count());
     $o->g->rewind();
     $object = $o->g->current();
     $this->assertInstanceOf('\PPHP\tests\tools\classes\standard\storage\database\ORM\ParentMock', $object);
     $this->assertEquals(2, $object->getOID());
+    $this->assertEquals(10, $object->getA());
+    $o->g->next();
+    $object = $o->g->current();
+    $this->assertInstanceOf('\PPHP\tests\tools\classes\standard\storage\database\ORM\ParentMock', $object);
+    $this->assertEquals(3, $object->getOID());
     $this->assertEquals(10, $object->getA());
   }
 }

@@ -1,20 +1,23 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\fileSystem\io;
+
 use PPHP\tools\classes\standard\fileSystem\io as io;
 
-spl_autoload_register(function($className){
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
-
+$_SERVER['DOCUMENT_ROOT'] = '/var/www';
 class FileWriterTest extends \PHPUnit_Framework_TestCase{
   /**
    * @var io\FileWriter
    */
   protected $object;
+
   /**
    * Имя тестируемого файла в текущем каталоге.
    */
   const testFileName = 'testFile.txt';
+
   /**
    * Дескриптор тестируемого файла.
    * @var resource

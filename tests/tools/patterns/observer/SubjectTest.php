@@ -1,11 +1,13 @@
 <?php
 namespace PPHP\tests\tools\patterns\observer;
-use \PPHP\tools\patterns\observer\TSubject;
-spl_autoload_register(function($className){
+
+use PPHP\tools\patterns\observer\TSubject;
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
-class SubjectTest extends \PHPUnit_Framework_TestCase {
+class SubjectTest extends \PHPUnit_Framework_TestCase{
   /**
    * @var SubjectMock
    */
@@ -40,7 +42,6 @@ class SubjectTest extends \PHPUnit_Framework_TestCase {
     $this->subject->attach(new ObserverMock);
     $this->subject->attach(new ObserverMock);
     $this->subject->notify();
-
     $this->assertEquals(2, ObserverMock::$state);
   }
 }

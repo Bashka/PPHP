@@ -1,11 +1,13 @@
 <?php
 namespace PPHP\tests\services\configuration;
-use \PPHP\services\configuration\Configurator;
-spl_autoload_register(function($className){
+
+use PPHP\services\configuration\Configurator;
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
-class ConfiguratorTest extends \PHPUnit_Framework_TestCase {
+class ConfiguratorTest extends \PHPUnit_Framework_TestCase{
   /**
    * @var Configurator
    */
@@ -21,7 +23,6 @@ class ConfiguratorTest extends \PHPUnit_Framework_TestCase {
     parent::tearDown();
     $this->object->delete('System', 'Test');
   }
-
 
   /**
    * @covers Configurator::__construct
@@ -68,7 +69,6 @@ class ConfiguratorTest extends \PHPUnit_Framework_TestCase {
     $this->object->delete('System', 'Test');
     $this->assertFalse($this->object->isExists('System', 'Test'));
     $this->object->set('System', 'Test', 'Test');
-
     unset($this->object->System_Test);
     $this->assertFalse($this->object->isExists('System', 'Test'));
     $this->object->set('System', 'Test', 'Test');

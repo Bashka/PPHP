@@ -6,7 +6,7 @@ namespace PPHP\tools\patterns\database\identification;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\database\identification
  */
-interface OIDGenerator {
+interface OIDGenerator{
   /**
    * Метод генерирует новый идентификатор и возвращает его.
    * @throws OIDException Выбрасывается в случае невозможности генерации нового идентификатора.

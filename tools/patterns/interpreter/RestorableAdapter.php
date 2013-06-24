@@ -7,5 +7,5 @@ namespace PPHP\tools\patterns\interpreter;
  * @package PPHP\tools\patterns\interpreter
  */
 abstract class RestorableAdapter implements Restorable{
-use TRestorable;
+  use TRestorable;
 }

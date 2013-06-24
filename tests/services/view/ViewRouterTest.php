@@ -7,7 +7,7 @@ spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
-class ViewRouterTest extends \PHPUnit_Framework_TestCase {
+class ViewRouterTest extends \PHPUnit_Framework_TestCase{
   /**
    * @var ViewRouter
    */
@@ -43,7 +43,6 @@ class ViewRouterTest extends \PHPUnit_Framework_TestCase {
     $this->assertTrue($this->object->hasScreen('Console', 'x'));
     $this->object->removeScreen('Console', 'x');
     $this->assertFalse($this->object->hasScreen('Console', 'x'));
-
     $this->setExpectedException('\PPHP\services\view\ScreenDuplicationException');
     $this->object->addScreen('Console', 'browse', 'Console/browse');
   }

@@ -1,13 +1,13 @@
 <?php
 namespace PPHP\model\modules;
-use PPHP\model\classes\ModuleController;
-use PPHP\services\modules\ModuleNotFoundException;
-use PPHP\services\modules\ModulesRouter;
-use PPHP\services\view\ViewProvider;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
 
-spl_autoload_register(function($className){
+use PPHP\model\classes\ModuleController;
+use PPHP\model\modules\SystemPackages\ReflectionModule;
+use PPHP\services\modules\ModuleNotFoundException;
+use PPHP\services\view\ViewProvider;
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 ob_start();
@@ -22,7 +22,6 @@ register_shutdown_function(function (){
     // Фатальные ошибки
     if($error['type'] == E_CORE_ERROR || $error['type'] == E_ERROR || $error['type'] == E_PARSE || $error['type'] == E_USER_ERROR){
       $log->setMessage(\PPHP\services\log\Message::createError($error['message'] . ' - ' . $error['file'] . ':' . $error['line']));
-
       // Обработка исключений
       $send = new \stdClass();
       $send->exception = new \stdClass();
@@ -39,7 +38,6 @@ register_shutdown_function(function (){
       $send->exception->file = $error['file'];
       $send->exception->line = $error['line'];
       $send->exception->buffer = $buffer;
-
       $viewProvider = ViewProvider::getInstance();
       $viewProvider->sendMessage($send);
     }
@@ -48,15 +46,14 @@ register_shutdown_function(function (){
     ob_end_flush();
   }
 });
-set_error_handler(function($code, $message, $file, $line){
+set_error_handler(function ($code, $message, $file, $line){
   $log = \PPHP\services\log\LogManager::getInstance();
   $log->setMessage(\PPHP\services\log\Message::createWarning($message . ' - ' . $file . ':' . $line));
-}, E_COMPILE_WARNING|E_WARNING|E_USER_WARNING|E_DEPRECATED|E_USER_DEPRECATED|E_CORE_WARNING);
-set_error_handler(function($code, $message, $file, $line){
+}, E_COMPILE_WARNING | E_WARNING | E_USER_WARNING | E_DEPRECATED | E_USER_DEPRECATED | E_CORE_WARNING);
+set_error_handler(function ($code, $message, $file, $line){
   $log = \PPHP\services\log\LogManager::getInstance();
   $log->setMessage(\PPHP\services\log\Message::createNotice($message . ' - ' . $file . ':' . $line));
-}, E_NOTICE|E_USER_NOTICE|E_STRICT);
-
+}, E_NOTICE | E_USER_NOTICE | E_STRICT);
 /**
  * Класс является единой точной входа системы и отвечает за вызов и передачу модулю сообщений от слоя view, а так же за возврат ему ответа модуля.
  * @author Artur Sh. Mamedbekov
@@ -68,14 +65,14 @@ class CentralController{
    * @static
    * @param string $moduleName Имя зарпашиваемого модуля.
    * @throws ModuleNotFoundException Выбрасывается в случае, если требуемого модуля не существует в системе.
-   * @throws NotFoundDataException Выбрасывается в случае, если не удалось получить доступ к конфигурации системы.
+   * @throws NotExistsException Выбрасывается в случае, если не удалось получить доступ к модулю.
    * @return ModuleController Контроллер целевого модуля.
    */
   public static function getControllerModule($moduleName){
     try{
-      return ModulesRouter::getInstance()->getController($moduleName);
+      return (new ReflectionModule($moduleName))->getController();
     }
-    catch(NotFoundDataException $e){
+    catch(NotExistsException $e){
       throw $e;
     }
   }
@@ -92,10 +89,9 @@ class CentralController{
     $module = $viewMessage['module'];
     $method = $viewMessage['active'];
     $controller = self::getControllerModule($module);
-
     $send = new \stdClass();
-    if(!method_exists($controller, $method)){
-      $send->exception = new exceptions\ComponentClassException('Запрашиваемый метод ['.$method.'] модуля ['.$module.'] отсутствует.');
+    if(!method_exists($controller, $method) || $method == 'afterRun' || $method == 'beforeRun'){
+      $send->exception = new exceptions\ComponentClassException('Запрашиваемый метод [' . $method . '] модуля [' . $module . '] отсутствует.');
     }
     else{
       // Проверка прав доступа к методу модуля
@@ -108,8 +104,9 @@ class CentralController{
         else{
           $viewMessage['message'] = [];
         }
-
+        $controller->afterRun();
         $send->answer = call_user_func_array([$controller, $method], $viewMessage['message']);
+        $controller->beforeRun();
       }
       else{
         throw new AccessException('Доступ запрещен.');
