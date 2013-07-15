@@ -50,7 +50,6 @@ class Controller extends ModuleController{
     catch(\Exception $exc){
       $result .= 'failed.';
     }
-
     return $result;
   }
 

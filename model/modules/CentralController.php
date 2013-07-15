@@ -91,7 +91,7 @@ class CentralController{
     $controller = self::getControllerModule($module);
     $send = new \stdClass();
     if(!method_exists($controller, $method) || $method == 'afterRun' || $method == 'beforeRun'){
-      $send->exception = new exceptions\ComponentClassException('Запрашиваемый метод [' . $method . '] модуля [' . $module . '] отсутствует.');
+      throw new exceptions\ComponentClassException('Запрашиваемый метод [' . $method . '] модуля [' . $module . '] отсутствует.');
     }
     else{
       // Проверка прав доступа к методу модуля

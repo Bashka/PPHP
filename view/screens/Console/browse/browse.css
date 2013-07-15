@@ -1,84 +1,41 @@
-/* Main */
-html {
-    background: #222;
-}
-
-body {
+html{
     padding: 10px;
-    color: white;
 }
 
-/* inPanel */
-#Console_browse_inPanel input[type=text] {
-    border: none;
-    border-bottom: 1px solid white;
-    background: none;
-    color: white;
-}
-
-#Console_browse_inPanel .Console_browse_argInput {
-    width: 100px;
-    margin-right: 5px;
-}
-
-/* outPanel */
-#Console_browse_outPanel {
+/* ConsoleOut */
+.yui3-consoleout {
     height: 300px;
     overflow: auto;
     font-family: "Courier New", monospace;
+    font-size: 12pt;
 }
 
-#Console_browse_outPanel .Console_browse_command {
+.yui3-consoleout .pjs-screens-console-browse-request{
     cursor: pointer;
+}
+
+.yui3-consoleout .pjs-screens-console-browse-answer{
+    color: silver
+}
+
+
+/* ConsoleIn */
+.yui3-consolein input[type=text] {
+    border: none;
+    border-bottom: 1px solid black;
+    background: none;
+    color: black;
 }
 
 /* menu */
 /* tab view */
-.yui3-tab {
-    border: 1px solid white;
-    border-radius: 5px 5px 0 0;
-    height: 1.5em;
-}
-
-.yui3-tab:hover {
-    background: #858585;
-    height: 2em;
-}
-
-.yui3-tabview-panel {
-    border-top: 1px solid white;
-    border-radius: 0 10px 0 0;
+.yui3-tabview-panel{
     padding: 10px;
     height: 200px;
     overflow: auto;
 }
 
-.yui3-tabview-content {
-    margin-top: 20px;
-}
-
-.yui3-tab-selected {
-    background: #858585;
-    height: 2em;
-}
-
-.yui3-tab-label {
-    color: white;
-}
-
-/* auto complete */
-.yui3-aclist-content {
-    background: white;
-    color: #000000;
-    width: 200px;
-    padding: 5px;
-}
-
-.yui3-aclist-item-active {
-    border: 1px dotted black;
-}
-
-/*Commands*/
-.Console_browse_modules, .Console_browse_command {
+/*CommandBar*/
+.yui3-commandbar div{
     cursor: pointer;
 }
