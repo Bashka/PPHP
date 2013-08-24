@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tests\tools\patterns\io;
-use \PPHP\tools\patterns\io as io;
+
+use PPHP\tools\patterns\io as io;
 
 class InStreamMock extends io\InStream{
   private $descriptor;

@@ -3,7 +3,7 @@ namespace PPHP\tests\services\database;
 
 use PPHP\services\database\ConnectionManager;
 
-spl_autoload_register(function($className){
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
@@ -52,7 +52,6 @@ class ConnectionManagerTest extends \PHPUnit_Framework_TestCase{
     $connectManager->setAttribute('User', 'Test');
     $this->assertEquals('Test', $this->object->getAttribute('User'));
     $connectManager->setAttribute('User', $rewriteAttributeValue);
-
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
     $connectManager->setAttribute('X', 'Test');
   }

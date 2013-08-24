@@ -7,5 +7,4 @@ namespace PPHP\tools\classes\standard\fileSystem;
  * @package PPHP\tools\classes\standard\fileSystem
  */
 class AccessException extends \PPHP\tools\classes\standard\baseType\exceptions\EnvironmentException{
-
 }

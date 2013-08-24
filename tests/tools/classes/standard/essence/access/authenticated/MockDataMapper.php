@@ -3,6 +3,7 @@ namespace PPHP\tests\tools\classes\standard\essence\access\authenticated;
 
 class MockDataMapper extends \PPHP\tools\classes\standard\storage\database\DataMapper{
   protected $OID = 1;
+
   protected $pass = 'pass';
 
   public function recoverFinding(\PPHP\tools\patterns\database\LongObject $object, array $conditions){
@@ -12,6 +13,7 @@ class MockDataMapper extends \PPHP\tools\classes\standard\storage\database\DataM
       throw new \PPHP\tools\classes\standard\storage\database\UncertaintyException;
     }
     $object->restoreFromMemento(new \PPHP\tools\patterns\memento\Memento($object, ['OID' => $this->OID, 'password' => $this->pass]));
+
     return true;
   }
 

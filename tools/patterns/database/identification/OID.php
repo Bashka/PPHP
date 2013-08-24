@@ -1,7 +1,9 @@
 <?php
 namespace PPHP\tools\patterns\database\identification;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+// @todo: Пересмотреть документацию класса для приведения к стандарту.
 /**
  * Данный интерфейс реализуется классами, экземпляры которых имеют ключевой идентификатор.
  * Реализация данного интерфейса классом свидетельствует о том, что экземпляры этого класса могут быть однозначно идентифицированны по целочисленному значению идентификатора.
@@ -16,9 +18,7 @@ interface OID{
    * Такого рода объект может быть использован как объектная ссылка на свое состояние для последующего восстановления.
    * @static
    * @abstract
-   *
    * @param integer $OID Идентификатор объекта.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа или недопустимого значения.
    * @return static Фиктивный (proxy) объект.
    */
@@ -34,9 +34,7 @@ interface OID{
   /**
    * Метод устанавливает идентификатор для не идентифицированного объекта.
    * @abstract
-   *
    * @param integer $OID Идентификатор объекта.
-   *
    * @throws OIDException Выбрасывается при передаче в качестве параметра уже идентифицированного объекта.
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа или недопустимого значения.
    */

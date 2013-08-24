@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\fileSystem\io;
+
 use \PPHP\tools\patterns\io as io;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
@@ -9,14 +10,12 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  * @package PPHP\tools\classes\standard\fileSystem\io
  */
 class FileWriter extends io\OutStream implements io\SeekIO, io\Closed{
-use FileClosed, FileSeekIO;
+  use FileClosed, FileSeekIO;
 
   /**
    * Метод записывает байт или строку в поток.
    * @abstract
-   *
    * @param string $data Записываемая строка.
-   *
    * @throws io\IOException Выбрасывается в случае возникновения ошибки при записи в поток.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return integer Число реально записанных байт.
@@ -27,6 +26,7 @@ use FileClosed, FileSeekIO;
     if($result === false){
       throw new io\IOException('Ошибка использования потока вывода.');
     }
+
     return $result;
   }
 
@@ -39,6 +39,7 @@ use FileClosed, FileSeekIO;
       return false;
     }
     $this->setPosition(0);
+
     return true;
   }
 }

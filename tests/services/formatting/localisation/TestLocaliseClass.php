@@ -5,7 +5,7 @@ use PPHP\tools\patterns\metadata\reflection\Reflect;
 use PPHP\tools\patterns\metadata\reflection\TReflect;
 
 class TestLocaliseClass implements Reflect{
-use TReflect;
+  use TReflect;
 
   public $message;
 }

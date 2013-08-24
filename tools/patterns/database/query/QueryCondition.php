@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет логическое выражение.
@@ -20,7 +21,7 @@ abstract class QueryCondition extends Condition{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return ['\('.Condition::getPatterns()['condition'].' '.static::getPatterns()['moreCondition'].'(?: '.static::getPatterns()['moreCondition'].')*\)'];
+    return ['\(' . Condition::getPatterns()['condition'] . ' ' . static::getPatterns()['moreCondition'] . '(?: ' . static::getPatterns()['moreCondition'] . ')*\)'];
   }
 
   /**
@@ -29,7 +30,7 @@ abstract class QueryCondition extends Condition{
    * @return string[]
    */
   public static function getPatterns($driver = null){
-    return ['moreCondition' => static::getOperator().' '.Condition::getPatterns()['condition']];
+    return ['moreCondition' => static::getOperator() . ' ' . Condition::getPatterns()['condition']];
   }
 
   /**
@@ -43,12 +44,15 @@ abstract class QueryCondition extends Condition{
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     parent::reestablish($string);
-
+    /**
+     * @var QueryCondition $o
+     */
     $o = new static();
     $conditions = explode(static::getOperator(), substr($string, 1, -1));
     foreach($conditions as $condition){
       $o->addCondition(Condition::reestablishCondition(trim($condition)));
     }
+
     return $o;
   }
 
@@ -72,24 +76,22 @@ abstract class QueryCondition extends Condition{
    */
   public function addCondition(Condition $condition){
     $this->conditions[] = $condition;
+
     return $this;
   }
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   *
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   *
    * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return string Результат интерпретации.
    */
-  public function interpretation($driver=null){
+  public function interpretation($driver = null){
     exceptions\InvalidArgumentException::verifyType($driver, 'Sn');
     if(count($this->conditions) < 2){
       throw new exceptions\NotFoundDataException('Недостаточное число условий в выражении.');
     }
-
     $operator = static::getOperator();
     $conditions = [];
     foreach($this->conditions as $condition){
@@ -103,7 +105,8 @@ abstract class QueryCondition extends Condition{
         throw $e;
       }
     }
-    return '('.implode(' '.$operator.' ', $conditions).')';
+
+    return '(' . implode(' ' . $operator . ' ', $conditions) . ')';
   }
 
   /**

@@ -41,6 +41,7 @@ class Structure{
     foreach($this->fields as $field){
       $sumSize += $field->getSizeData();
     }
+
     return $sumSize;
   }
 
@@ -60,6 +61,7 @@ class Structure{
       }
       $serializeData .= $field->serializeData($dataElm);
     }
+
     return $serializeData;
   }
 
@@ -81,6 +83,7 @@ class Structure{
       $result[$field->getName()] = $field->unserializeData($dataField);
       $startPoint += $sizeData;
     }
+
     return $result;
   }
 

@@ -10,16 +10,19 @@
     <link rel="stylesheet" href="/PPHP/view/tools/YUI/cssreset/cssreset-min.css"/>
     <link rel="stylesheet" href="/PPHP/view/tools/YUI/cssbase/cssbase-min.css"/>
     <link rel="stylesheet" href="/PPHP/view/tools/YUI/cssfonts/cssfonts-min.css"/>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.11.0/build/cssbutton/cssbutton.css">
 </head>
 <body class="yui3-skin-sam">
-<div dWidget="PJS.widgets.LoadingIndicator"></div>
-<div dWidget="PJS.widgets.Screen" dWidgetProperties="module: Console; screen: browse; hasHTML: false; hasCSS: true" style="visibility: hidden">
-    <div dWidget="PJS.widgets.HotKey" dHandling="init: hotKeyInit"></div>
+<div dWidget="PJS-widgets-LoadingIndicator"></div>
+<div id="PJS-widgets-Screen-rootScreen" dWidget="PJS-widgets-Screen" dWidgetProperties="module: Console; screen: browse; hasHTML: false; hasCSS: true" style="visibility: hidden">
+    <div dWidget="PJS-widgets-HotKey" dHandling="init: hotKeyInit"></div>
+
+    <!--<div dWidget="PJS-widgets-Screen" dWidgetProperties="module: MainMenu; screen: browse; navigate: horizontal; hasAdminPanel: true" dHandling="listen: menuListen"></div>-->
 
     <!-- Console -->
     <div>
-        <div dWidget="PJS.screens.Console.browse.ConsoleOut" dHandling="filling: consoleOut; init: consoleOutInit; listen: consoleOutListen"></div>
-        <div dWidget="PJS.screens.Console.browse.ConsoleIn" dHandling="filling: consoleIn; listen: consoleInListen"></div>
+        <div dWidget="PJS-screens-Console-browse-ConsoleOut" dHandling="filling: consoleOut; init: consoleOutInit; listen: consoleOutListen"></div>
+        <div dWidget="PJS-screens-Console-browse-ConsoleIn" dHandling="filling: consoleIn; listen: consoleInListen"></div>
     </div>
 
     <!-- Menu -->
@@ -30,7 +33,7 @@
             <li><a href="#setting">Setting</a></li>
         </ul>
         <div>
-            <div dWidget="PJS.screens.Console.browse.CommandBar" dHandling="filling: commandBar; listen: commandBarListen"></div>
+            <div dWidget="PJS-screens-Console-browse-CommandBar" dHandling="filling: commandBar; listen: commandBarListen"></div>
             <div dWidget="UploaderHTML" dWidgetProperties="module: Console; action: uploadFile" dHandling="listen: uploaderListen"></div>
             <div>
                 <label>

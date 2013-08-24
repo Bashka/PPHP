@@ -1,14 +1,14 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use PPHP\tools\patterns\interpreter\Restorable;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет таблицу в запросе.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\database\query
  */
-class Table extends  ComponentQuery{
+class Table extends ComponentQuery{
   /**
    * Имя таблицы.
    * @var string
@@ -21,9 +21,7 @@ class Table extends  ComponentQuery{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      self::getPatterns()['tableName']
-    ];
+    return [self::getPatterns()['tableName']];
   }
 
   /**
@@ -32,9 +30,7 @@ class Table extends  ComponentQuery{
    * @return string[]
    */
   public static function getPatterns($driver = null){
-    return [
-      'tableName' => '[A-Za-z_][A-Za-z0-9_]*'
-    ];
+    return ['tableName' => '[A-Za-z_][A-Za-z0-9_]*'];
   }
 
   /**
@@ -43,7 +39,7 @@ class Table extends  ComponentQuery{
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
    * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return static Результирующий объект.
+   * @return Table Результирующий объект.
    */
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
@@ -63,12 +59,10 @@ class Table extends  ComponentQuery{
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   *
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   *
    * @return string Результат интерпретации.
    */
-  public function interpretation($driver=null){
+  public function interpretation($driver = null){
     return $this->tableName;
   }
 

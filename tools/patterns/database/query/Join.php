@@ -1,7 +1,8 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 use PPHP\tools\classes\standard\baseType\String;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Операция объединения записей.
@@ -10,20 +11,27 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 class Join extends ComponentQuery{
   const CROSS = 'CROSS';
+
   const INNER = 'INNER';
+
   const LEFT = 'LEFT';
+
   const RIGHT = 'RIGHT';
+
   const FULL = 'FULL';
+
   /**
    * Тип связи.
    * @var string
    */
   protected $type;
+
   /**
    * Связываемая таблица.
    * @var Table
    */
   protected $table;
+
   /**
    * Условие связывания.
    * @var Condition
@@ -37,7 +45,7 @@ class Join extends ComponentQuery{
    */
   public static function getMasks($driver = null){
     // Условие объединения ограничено одним логическим выражением.
-    return [self::getPatterns()['types'].' JOIN `(?:'.Table::getMasks()[0].')` ON (?:(?:'.LogicOperation::getMasks()[0].')|(?:'.LogicOperation::getMasks()[1].'))'];
+    return [self::getPatterns()['types'] . ' JOIN `(?:' . Table::getMasks()[0] . ')` ON (?:(?:' . LogicOperation::getMasks()[0] . ')|(?:' . LogicOperation::getMasks()[1] . '))'];
   }
 
   /**
@@ -46,7 +54,7 @@ class Join extends ComponentQuery{
    * @return string[]
    */
   public static function getPatterns($driver = null){
-    return ['types' => '(?:(?:'.self::CROSS.')|(?:'.self::INNER.')|(?:'.self::LEFT.')|(?:'.self::RIGHT.')|(?:'.self::FULL.'))'];
+    return ['types' => '(?:(?:' . self::CROSS . ')|(?:' . self::INNER . ')|(?:' . self::LEFT . ')|(?:' . self::RIGHT . ')|(?:' . self::FULL . '))'];
   }
 
   /**
@@ -55,17 +63,17 @@ class Join extends ComponentQuery{
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
    * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return static Результирующий объект.
+   * @return Join Результирующий объект.
    */
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     parent::reestablish($string);
-
     $s = new String($string);
     $type = $s->nextComponent(' ')->getVal();
-    $s->setPoint($s->getPoint()+5);
+    $s->setPoint($s->getPoint() + 5);
     $table = substr($s->nextComponent(' ON ')->getVal(), 1, -1);
     $condition = $s->sub()->getVal();
+
     return new static($type, Table::reestablish($table), Condition::reestablishCondition($condition));
   }
 
@@ -73,7 +81,6 @@ class Join extends ComponentQuery{
    * @param string $type Тип соединения. CROSS, INNER, LEFT, RIGHT или FULL.
    * @param Table $table Связываемая таблица.
    * @param Condition $condition Условие связывания.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($type, Table $table, Condition $condition){
@@ -87,14 +94,12 @@ class Join extends ComponentQuery{
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   *
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   *
    * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return string Результат интерпретации.
    */
-  public function interpretation($driver=null){
+  public function interpretation($driver = null){
     exceptions\InvalidArgumentException::verifyType($driver, 'Sn');
     try{
       return $this->type . ' JOIN `' . $this->table->interpretation($driver) . '` ON ' . $this->condition->interpretation($driver);

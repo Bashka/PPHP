@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\fileSystem;
+
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
@@ -23,10 +24,8 @@ abstract class ComponentFileSystem{
   /**
    * Метод создает и возвращает компонент ФС по его полному адресу от корня системы.
    * @static
-   *
    * @param string $address        Полный адрес компонента.
    * @param string $componentClass Имя класса компонента.
-   *
    * @return mixed
    */
   private static final function constructFromAddress($address, $componentClass){
@@ -44,6 +43,7 @@ abstract class ComponentFileSystem{
       foreach($components as $component){
         $dir = new Directory($component, $dir);
       }
+
       return new $componentClass($resultComponent, $dir);
     }
   }
@@ -51,9 +51,7 @@ abstract class ComponentFileSystem{
   /**
    * Метод копирует компонента в данный каталог.
    * @abstract
-   *
    * @param Directory $location Целевой каталог.
-   *
    * @throws exceptions\DuplicationException Выбрасывается в случае, если целевой каталог уже содержит копируемый компонент.
    * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
    * @return boolean true - в случае успешного завершения операции, иначе - false.
@@ -64,7 +62,6 @@ abstract class ComponentFileSystem{
    * Метод удаляет текущий компонент из файловой системы.
    * @abstract
    * @throws NotExistsException Выбрасывается в случае, если удаляемого компонента не существует.
-   *
    * @return boolean true - в случае успешного завершения операции, иначе - false.
    */
   abstract public function delete();
@@ -87,11 +84,8 @@ abstract class ComponentFileSystem{
 
   /**
    * Метод создает и возвращает объект класса File по его полному адресу от корня системы.
-   *
    * @static
-   *
    * @param string $address Полный адрес компонента.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа..
    * @return File
    */
@@ -103,11 +97,8 @@ abstract class ComponentFileSystem{
 
   /**
    * Метод создает и возвращает объект класса Directory по его полному адресу от корня системы.
-   *
    * @static
-   *
    * @param string $address Полный адрес компонента.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return Directory
    */
@@ -119,9 +110,7 @@ abstract class ComponentFileSystem{
 
   /**
    * Метод изменяет имя компонента на заданное, если это возможно.
-   *
    * @param string $newName Новое имя компонента.
-   *
    * @throws exceptions\DuplicationException Выбрасывается в случае, если переименование компонента приведет к дублированию.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
@@ -136,20 +125,18 @@ abstract class ComponentFileSystem{
       throw new NotExistsException('Используемый компонент [' . $this->getAddress() . '] не найден в файловой системе.');
     }
     // Проверка на дублирование выполняется в конкретных классах
-
     $newAddress = $this->getLocationAddress() . '/' . $newName;
     $result = rename($this->getAddress(), $newAddress);
     if($result){
       $this->name = $newName;
     }
+
     return $result;
   }
 
   /**
    * Метод перемещает компонент в данный каталог.
-   *
    * @param Directory $location Целевой каталог.
-   *
    * @throws exceptions\DuplicationException Выбрасывается в случае, если целевой каталог уже содержит компонент с тем же именем, что и перемещаемый.
    * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
    * @throws exceptions\RuntimeException Выбрасывается в случае нарушения логики работы файловой системы путем перемещения компонента в себя.
@@ -161,11 +148,11 @@ abstract class ComponentFileSystem{
     }
     // Проверка на дублирование выполняется в конкретных классах
     // Проверка на рекурсию выполняется в конкретных классах
-
     $result = rename($this->getAddress(), $location->getAddress() . '/' . $this->getName());
     if($result){
       $this->location = $location;
     }
+
     return $result;
   }
 
@@ -202,7 +189,7 @@ abstract class ComponentFileSystem{
   }
 
   /**
-   * @param string    $name     Имя компонента.
+   * @param string $name     Имя компонента.
    * @param Directory $location Расположение компонента.
    */
   public function __construct($name, Directory $location){

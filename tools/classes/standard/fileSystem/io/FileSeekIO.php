@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\fileSystem\io;
+
 use \PPHP\tools\patterns\io as io;
 
 /**
@@ -28,6 +29,7 @@ trait FileSeekIO{
     if($result === false){
       throw new io\IOException('Ошибка использования потока ввода.');
     }
+
     return $result;
   }
 }

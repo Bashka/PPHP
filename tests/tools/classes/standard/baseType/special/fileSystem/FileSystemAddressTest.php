@@ -1,7 +1,9 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\baseType\special\fileSystem;
+
 use PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemAddress;
-spl_autoload_register(function($className){
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
@@ -38,7 +40,6 @@ class FileSystemAddressTest extends \PHPUnit_Framework_TestCase{
     $o = FileSystemAddress::reestablish('a/b/c/');
     $this->assertEquals('a/b/c/', $o->getVal());
     $this->assertEquals(false, $o->isRoot());
-
     $o = FileSystemAddress::reestablish('/a/b/c');
     $this->assertEquals(true, $o->isRoot());
   }

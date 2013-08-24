@@ -1,16 +1,18 @@
 <?php
 namespace PPHP\services\database;
+
 use PPHP\tools\classes\standard\baseType\exceptions\PDOException;
 use PPHP\tools\classes\standard\storage\database\DataMapper;
 use PPHP\tools\classes\standard\storage\database\PDO;
-use \PPHP\tools\patterns\singleton as singleton;
+use PPHP\tools\patterns\singleton as singleton;
+
 /**
  * Класс позволяет соединиться с БД через кольцо объектно-реляционного преобразования.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\services\database
  */
 class DataMapperManager implements singleton\Singleton{
-use singleton\TSingleton;
+  use singleton\TSingleton;
 
   /**
    * Соединение с БД.
@@ -43,6 +45,7 @@ use singleton\TSingleton;
   public function getNewDataMapper(){
     $dataMapper = new DataMapper;
     $dataMapper->setPDO($this->PDO);
+
     return $dataMapper;
   }
 
@@ -54,6 +57,7 @@ use singleton\TSingleton;
     if(empty($this->dataMapper)){
       $this->dataMapper = $this->getNewDataMapper();
     }
+
     return $this->dataMapper;
   }
 }

@@ -1,7 +1,8 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 use PPHP\tools\classes\standard\baseType\String;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Логический оператор сравнения.
@@ -14,11 +15,13 @@ class LogicOperation extends Condition{
    * @var Field
    */
   private $field;
+
   /**
    * Оператор сравнения. Одно из следующих значений: =, !=, >=, <=, >, <.
    * @var string
    */
   private $operator;
+
   /**
    * Правый операнд.
    * @var string|number|boolean|Field
@@ -31,8 +34,7 @@ class LogicOperation extends Condition{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return ['\((?:(?:'.Field::getMasks()[0].')|(?:'.Field::getMasks()[1].')) ' . self::getPatterns()['operator'] . ' ' . self::getPatterns()['stringValue'] . '\)',
-      '\((?:(?:'.Field::getMasks()[0].')|(?:'.Field::getMasks()[1].')) ' . self::getPatterns()['operator'] . ' (?:(?:'.Field::getMasks()[0].')|(?:'.Field::getMasks()[1].'))\)'];
+    return ['\((?:(?:' . Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1] . ')) ' . self::getPatterns()['operator'] . ' ' . self::getPatterns()['stringValue'] . '\)', '\((?:(?:' . Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1] . ')) ' . self::getPatterns()['operator'] . ' (?:(?:' . Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1] . '))\)'];
   }
 
   /**
@@ -55,16 +57,13 @@ class LogicOperation extends Condition{
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     $mask = parent::reestablish($string);
-
     $string = trim(substr($string, 1, -1)); // Исключение обрамляющих круглых скобок
     $string = new String($string);
     $lField = $string->nextComponent(' ')->getVal();
     $operator = trim($string->nextComponent(' ')->getVal());
     $value = trim($string->sub()->getVal());
-
     // Выброс исключений невозможен
     $lField = Field::reestablish($lField);
-
     if($mask['key'] == 1){
       // Выброс исключений невозможен
       $value = Field::reestablish($value);
@@ -92,7 +91,6 @@ class LogicOperation extends Condition{
       }
     }
     exceptions\InvalidArgumentException::verifyVal($operator, 's # =|>=|<=|!=|>|<');
-
     $this->field = $field;
     $this->operator = $operator;
     $this->value = $value;
@@ -104,7 +102,13 @@ class LogicOperation extends Condition{
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){
-    return '(' . $this->field->interpretation($driver) . ' ' . $this->operator . ' ' . (($this->value instanceof Field)? $this->value->interpretation($driver) : '"' . $this->value . '"') . ')';
+    if($this->value instanceof Field){
+      $value = $this->value->interpretation($driver);
+    }
+    else{
+      $value = '"'.(string) $this->value.'"';
+    }
+    return '(' . $this->field->interpretation($driver) . ' ' . $this->operator . ' ' . $value . ')';
   }
 
   /**

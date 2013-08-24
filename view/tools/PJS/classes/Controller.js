@@ -38,8 +38,7 @@ YUI.add('PJS.classes.Controller', function(Y){
      * @type {Node[]}
      */
     filling: {
-      value: [],
-      writeOnce: 'initOnly'
+      writeOnce: true
     },
     /**
      * Логическая переменная, определяющая завершение инициализации контроллера.
@@ -66,9 +65,13 @@ YUI.add('PJS.classes.Controller', function(Y){
       }
     },
 
-    query: function(options){
+    query: function(mehtod, options){
       var screen = this.get('screen');
-      Y.PJS.services.Query.query(screen.get('module'), screen.get('screen'), options);
+      Y.PJS.services.Query.query(screen.get('module'), mehtod, options);
+    },
+
+    fireScreen: function(type, data){
+      this.get('screen').fire(type, data);
     }
   });
 

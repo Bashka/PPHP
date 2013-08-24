@@ -11,12 +11,12 @@ YUI.add('PJS.services.Transformer', function(Y){
   Y.augment(Y.namespace('PJS.services').Transformer = (function(){
     /**
      * Метод получает и преобразует атрибут dWidgetProperties в объект конфигурации виджета.
-     * @private
+     * @public
      * @function
      * @param {Node} widget Визуализируемый виджет.
      * @return {Object} Объект конфигурации виджета.
      */
-    function _transformWidgetProperties(widget){
+    function transformWidgetProperties(widget){
       var properties = widget.getAttribute('dWidgetProperties');
       if(properties !== ''){
         var result = {};
@@ -57,7 +57,7 @@ YUI.add('PJS.services.Transformer', function(Y){
      */
     function _renderConsole(widget){
       Y.use('console', 'dd-plugin', function(){
-        var console = new Y.Console(_transformWidgetProperties(widget)).render();
+        var console = new Y.Console(transformWidgetProperties(widget)).render();
         widget.widget = console;
         console.plug(Y.Plugin.Drag);
         console.dd.addHandle('.yui3-console-hd');
@@ -73,7 +73,7 @@ YUI.add('PJS.services.Transformer', function(Y){
      */
     function _renderCalendar(widget){
       Y.use('calendar', function(){
-        var properties = _transformWidgetProperties(widget);
+        var properties = transformWidgetProperties(widget);
         // Обработка "особых" свойств
         if(properties.date !== undefined){
           properties.date = properties.date.split('.');
@@ -94,7 +94,7 @@ YUI.add('PJS.services.Transformer', function(Y){
      */
     function _renderTabView(widget){
       Y.use('tabview', function(){
-        var properties = _transformWidgetProperties(widget);
+        var properties = transformWidgetProperties(widget);
         properties.srcNode = widget;
         widget.widget = new Y.TabView(properties).render();
         Y.PJS.services.Transformer.fire('PJS.services.Transformer:widgetRender', widget);
@@ -109,7 +109,7 @@ YUI.add('PJS.services.Transformer', function(Y){
      */
     function _renderAutoComplete(widget){
       Y.use('autocomplete', function(){
-        var properties = _transformWidgetProperties(widget);
+        var properties = transformWidgetProperties(widget);
         if(properties.source !== undefined){
           properties.source = properties.source.split(',');
         }
@@ -136,7 +136,7 @@ YUI.add('PJS.services.Transformer', function(Y){
      */
     function _renderDataTable(widget){
       Y.use('datatable', function(){
-        var properties = _transformWidgetProperties(widget);
+        var properties = transformWidgetProperties(widget);
         properties.boundingBox = widget;
 
         // Формирование колонок
@@ -154,7 +154,7 @@ YUI.add('PJS.services.Transformer', function(Y){
 
         // Формирование обычных колонок
         widget.get('children').item(0).all('div').each(function(column){
-          var col = _transformWidgetProperties(column);
+          var col = transformWidgetProperties(column);
           col.key = column.getHTML();
           properties.columns.push(col);
         });
@@ -176,13 +176,11 @@ YUI.add('PJS.services.Transformer', function(Y){
      * @private
      * @function
      * @param {Node} widget Визуализируемый виджет.
-     * @param {Node} transformNode Обрабатываемый трансформером узел. Данное свойство необходимо для синхронизации виджета с его контроллером.
      */
-    function _renderScreen(widget, transformNode){
+    function _renderScreen(widget){
       Y.use('PJS.widgets.Screen', function(){
-        var properties = _transformWidgetProperties(widget);
+        var properties = transformWidgetProperties(widget);
         properties.boundingBox = widget;
-        properties.transformNode = transformNode;
 
         widget.widget = new Y.PJS.widgets.Screen(properties);
         widget.widget.render();
@@ -201,7 +199,7 @@ YUI.add('PJS.services.Transformer', function(Y){
      */
     function _renderUploaderHTML(widget){
       Y.use('PJS.widgets.UploaderHTML', function(){
-        var properties = _transformWidgetProperties(widget);
+        var properties = transformWidgetProperties(widget);
         properties.boundingBox = widget;
 
         widget.widget = new Y.PJS.widgets.UploaderHTML(properties);
@@ -218,7 +216,7 @@ YUI.add('PJS.services.Transformer', function(Y){
      */
     function _renderMenuNav(widget){
       Y.use('node-menunav', function(){
-        var properties = _transformWidgetProperties(widget);
+        var properties = transformWidgetProperties(widget);
 
         widget.addClass('yui3-menu');
         if(properties.orientation === undefined || properties.orientation == 'horizontal'){
@@ -235,7 +233,7 @@ YUI.add('PJS.services.Transformer', function(Y){
 
     function _renderContextMenu(widget){
       Y.use('gallery-contextmenu-view', function(){
-        var properties = _transformWidgetProperties(widget);
+        var properties = transformWidgetProperties(widget);
         properties.trigger = {
           node:   widget
         };
@@ -261,6 +259,7 @@ YUI.add('PJS.services.Transformer', function(Y){
      */
     function _renderDefault(widget){
       var widgetName = widget.getAttribute('dWidget');
+      widgetName = widgetName.split('-').join('.');
 
       // Определение локальных виджетов
       if(Y.config.groups.PJS_widgets.modules[widgetName] === undefined){
@@ -271,7 +270,7 @@ YUI.add('PJS.services.Transformer', function(Y){
       }
 
       Y.use(widgetName, function(){
-        var properties = _transformWidgetProperties(widget);
+        var properties = transformWidgetProperties(widget);
         if(widget.get('children').size() == 0){
           properties.boundingBox = widget;
         }
@@ -292,12 +291,11 @@ YUI.add('PJS.services.Transformer', function(Y){
      * @private
      * @function
      * @param {NodeList} widgetNodes Визуализируемые виджеты.
-     * @param {Node} parentNode Обрабатываемый трансформером узел.
      */
-    function _renderWidgets(widgetNodes, parentNode){
+    function _renderWidgets(widgetNodes){
       widgetNodes.each(function(widget){
         switch(widget.getAttribute('dWidget')){
-          case 'PJS.widgets.LoadingIndicator':
+          case 'PJS-widgets-LoadingIndicator':
             _renderLoadingIndicator(widget);
             break;
           case 'Console':
@@ -315,8 +313,8 @@ YUI.add('PJS.services.Transformer', function(Y){
           case 'DataTable':
             _renderDataTable(widget);
             break;
-          case 'PJS.widgets.Screen':
-            _renderScreen(widget, parentNode);
+          case 'PJS-widgets-Screen':
+            _renderScreen(widget);
             break;
           case 'UploaderHTML':
             _renderUploaderHTML(widget);
@@ -330,30 +328,49 @@ YUI.add('PJS.services.Transformer', function(Y){
           default:
             _renderDefault(widget);
         }
+        widget.fire('PJS.services.Transformer:widgetRender');
       });
     }
 
     return {
+      getWidgetProperties: transformWidgetProperties,
+
       /**
-       * Метод преобразовывает представление в переданном узле.
+       * Метод преобразовывает представление в переданных узлах.
        * Метод вызывает следующие события на объекте:
-       * - PJS.services.Transformer:widgetRender - рендеринг одного виджета завершен;
-       * - PJS.services.Transformer:renderComplete - рендеринг всех виджетов завершен.
+       * - PJS.services.Transformer:widgetRender - рендеринг виджета завершен.
        * @public
        * @function
-       * @param {Node} parentNode Визуализируемый узел.
+       * @param {Node|NodeList} widgets Визуализируемый виджет или список виджетов.
+       * @param {function} callback [optional] Функция, вызываемая после рендеринга всех переданных виджетов.
+       * @param {object} context [optional] Объект, от имени которого вызывается функция обратнго вызова callback.
        */
-      transform: function(parentNode){
-        var widgets = parentNode.all('[dWidget]'),
-          widgetsCount = widgets.size(),
-          renderWidget = 0;
-        this.on('PJS.services.Transformer:widgetRender', function(){
-          renderWidget++;
-          if(renderWidget == widgetsCount){
-            this.fire('PJS.services.Transformer:renderComplete', parentNode);
+      transform: function(widgets, callback, context){
+        context = context || window;
+
+        if(widgets instanceof Y.Node){
+          widgets = new Y.NodeList(widgets);
+        }
+
+        if((typeof callback) == 'function'){
+          var widgetsCount = widgets.size(),
+            completeWidgets = 0;
+          if(widgetsCount == 0){
+            callback.apply(context);
           }
-        });
-        _renderWidgets(widgets, parentNode);
+          else{
+            widgets.each(function(node){
+              node.once('PJS.services.Transformer:widgetRender', function(){
+                completeWidgets++;
+                if(completeWidgets == widgetsCount){
+                  callback.apply(context);
+                }
+              });
+            });
+          }
+        }
+
+        _renderWidgets(widgets);
       }
     }
   })(), Y.EventTarget);

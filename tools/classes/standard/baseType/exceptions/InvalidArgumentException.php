@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\exceptions;
+
 use \PPHP\tools\classes\standard\baseType as baseType;
 
 /**
@@ -27,7 +28,6 @@ class InvalidArgumentException extends SemanticException{
   public static function verifyType($actualData, $assertType){
     $assertType = new baseType\String($assertType);
     $errs = [];
-
     foreach($assertType as $o){
       switch($o){
         case 'n':
@@ -73,7 +73,6 @@ class InvalidArgumentException extends SemanticException{
         default:
           throw self::getValidException('n|s|S|i|f|b|a|o', $o);
       }
-
       if(count($errs) === $assertType->count()){
         throw self::getTypeException($errs, gettype($actualData));
       }
@@ -90,14 +89,12 @@ class InvalidArgumentException extends SemanticException{
    * - s - строковая валидациия в соответствии с валидатором baseType/String::verify;
    * - i - числовая валидация в соответствии с валидаторами baseType/Integer::verify или baseType/Float::verify;
    * - a - валидация массива в соответствии с валидатором baseType/Array::verify.
-   * @throws static Выбрасывается в случае несоответствия проверяемого значения маске или при получении недопустимого значения второго аргумента.
+   * @throws InvalidArgumentException Выбрасывается в случае несоответствия проверяемого значения маске или при получении недопустимого значения второго аргумента.
    */
   public static function verifyVal($param, $mask){
     self::verifyType($mask, 'S');
-
     $typeVerify = substr($mask, 0, 1);
     $mask = substr($mask, 2);
-
     if($typeVerify == 's'){
       $param = new baseType\String($param);
     }
@@ -108,11 +105,10 @@ class InvalidArgumentException extends SemanticException{
       $param = new baseType\Arr($param);
     }
     else{
-      throw self::getValidException('s|i|a', $mask);
+      throw InvalidArgumentException::getValidException('s|i|a', $mask);
     }
-
     if(!$param->verify($mask)){
-      throw self::getValidException($mask, $param->getVal());
+      throw InvalidArgumentException::getValidException($mask, $param->getVal());
     }
   }
 
@@ -122,11 +118,12 @@ class InvalidArgumentException extends SemanticException{
    * @param string $actualType Реальный тип параметра.
    * @param integer $code [optional] Код ошибки.
    * @param \Exception $previous [optional] Причина.
-   * @return static Объект данного типа с предустановленным сообщением.
+   * @return InvalidArgumentException Объект данного типа с предустановленным сообщением.
    */
   public static function getTypeException($assertType, $actualType, $code = 0, \Exception $previous = null){
     $assertType = (is_string($assertType))? $assertType : implode('|', $assertType);
-    return new static('Недопустимый тип параметра. Ожидается [' . $assertType . '] вместо [' . $actualType . '].', $code, $previous);
+
+    return new InvalidArgumentException('Недопустимый тип параметра. Ожидается [' . $assertType . '] вместо [' . $actualType . '].', $code, $previous);
   }
 
   /**
@@ -135,9 +132,9 @@ class InvalidArgumentException extends SemanticException{
    * @param mixed $actualData Реальное значение параметра.
    * @param integer $code [optional] Код ошибки.
    * @param \Exception $previous [optional] Причина.
-   * @return static Объект данного типа с предустановленным сообщением.
+   * @return InvalidArgumentException Объект данного типа с предустановленным сообщением.
    */
   public static function getValidException($mask, $actualData, $code = 0, \Exception $previous = null){
-    return new static('Недопустимое значение параметра. Ожидается соответствие маске [' . $mask . '] вместо [' . $actualData . '].', $code, $previous);
+    return new InvalidArgumentException('Недопустимое значение параметра. Ожидается соответствие маске [' . $mask . '] вместо [' . $actualData . '].', $code, $previous);
   }
 }

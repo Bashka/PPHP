@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\network\protocols\applied\http;
+
 use \PPHP\tools\patterns\interpreter as interpreter;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
@@ -14,6 +15,7 @@ abstract class Message extends interpreter\RestorableAdapter implements interpre
    * @var Header
    */
   protected $header;
+
   /**
    * Тело.
    * @var string
@@ -24,7 +26,7 @@ abstract class Message extends interpreter\RestorableAdapter implements interpre
    * @param Header $header [optional] Заголовок запроса.
    * @param string|array $body [optional] Тело запроса в виде строки или ассоциативного массива параметров, передаваемых в запросе. В случае передачи массива тело формируется следующим образом: <ключ элемента>:<значение элемента>&
    */
-  function __construct($header=null, $body=null){
+  function __construct($header = null, $body = null){
     $this->header = ($header !== null)? $header : new Header();
     $this->header->addParameterStr('Cache-Control', 'no-cache');
     $this->header->addParameterStr('Connection', 'close');
@@ -33,7 +35,7 @@ abstract class Message extends interpreter\RestorableAdapter implements interpre
         if(count($body) > 0){
           $strBody = [];
           foreach($body as $name => $value){
-            $strBody[] = urlencode($name).'='.urlencode($value);
+            $strBody[] = urlencode($name) . '=' . urlencode($value);
           }
           $body = implode('&', $strBody);
         }
@@ -72,20 +74,16 @@ abstract class Message extends interpreter\RestorableAdapter implements interpre
 
   /**
    * Метод устанвливает тело запроса.
-   *
    * Данный метод позволяет так же задать тип и кодировку передаваемых данных в том случае, если они не были заданы заранее.
    * Выполнение метода сопровождается установкой параметров заголовка Content-Length и Content-MD5.
-   *
    * @param string|integer|float $body Тело запроса.
    * @param string $type [optional] Тип данных тела.
    * @param string $charset [optional] Кодировка данных тела.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения пустого тела запроса.
    */
   public function setBody($body, $type = 'application/x-www-form-urlencoded', $charset = 'utf-8'){
     exceptions\InvalidArgumentException::verifyType($body, 'sif');
     $body = (string) $body;
-
     $this->body = $body;
     if(!$this->header->hasParameter('Content-Type')){
       $this->header->addParameterStr('Content-Type', $type . ';charset=' . $charset);

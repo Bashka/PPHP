@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс позволяет добавить псевдоним полю.
@@ -26,15 +27,12 @@ class FieldAlias extends Alias{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      '(?:(?:'.Field::getMasks()[0].')|(?:'.Field::getMasks()[1].')) as '.Alias::getPatterns()['aliasValue']
-    ];
+    return ['(?:(?:' . Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1] . ')) as ' . Alias::getPatterns()['aliasValue']];
   }
 
   /**
-   * @param $component Поле, к которому добавляется псевдоним. Ожидается объект класса Field.
+   * @param Field $component Поле, к которому добавляется псевдоним. Ожидается объект класса Field.
    * @param string $alias Псевдоним поля.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($component, $alias){

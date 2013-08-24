@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\metadata\reflection;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс, реализующий данный интерфейс, способен возвращать отображения своих членов.
@@ -14,9 +15,7 @@ interface Reflect{
    * Метод возвращает отражение свойства вызываемого класса в том числе, если свойство относится к родительскому классу.
    * @static
    * @abstract
-   *
    * @param string $propertyName Имя свойства.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @throws exceptions\ComponentClassException Выбрасывается при запросе отражения не определенного члена.
    * @return ReflectionProperty Отражение свойства класса.
@@ -27,9 +26,7 @@ interface Reflect{
    * Метод возвращает отражение метода вызываемого класса в том числе, если метод относится к родительскому классу.
    * @static
    * @abstract
-   *
    * @param string $methodName Имя метода.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @throws exceptions\ComponentClassException Выбрасывается при запросе отражения не определенного члена.
    * @return ReflectionMethod Отражение метода класса.

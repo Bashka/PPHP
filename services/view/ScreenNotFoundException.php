@@ -14,6 +14,6 @@ class ScreenNotFoundException extends \PPHP\tools\classes\standard\baseType\exce
    * @return static Объект данного класса с предустановленным сообщением.
    */
   public static function getException($moduleName, $screenName){
-    return new static('Требуемый экран ['.$moduleName.'::'.$screenName.'] отсутствует в системе.');
+    return new static('Требуемый экран [' . $moduleName . '::' . $screenName . '] отсутствует в системе.');
   }
 }

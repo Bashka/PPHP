@@ -1,7 +1,9 @@
 <?php
 namespace PPHP\tests\tools\patterns\io;
+
 use \PPHP\tools\patterns\io as io;
-spl_autoload_register(function($className){
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
@@ -10,6 +12,7 @@ class InStreamTest extends \PHPUnit_Framework_TestCase{
    * Имя файла, служащего входным потоком.
    */
   const fileName = 'file';
+
   /**
    * @var InStreamMock
    */
@@ -34,7 +37,7 @@ class InStreamTest extends \PHPUnit_Framework_TestCase{
   }
 
   protected function setUp(){
-    $this->setFileContent('First string'.PHP_EOL.'Вторая строка'.PHP_EOL.'Last string');
+    $this->setFileContent('First string' . PHP_EOL . 'Вторая строка' . PHP_EOL . 'Last string');
   }
 
   protected function tearDown(){
@@ -53,10 +56,8 @@ class InStreamTest extends \PHPUnit_Framework_TestCase{
   public function testRead(){
     $this->assertEquals('F', $this->object->read());
     $this->assertEquals('i', $this->object->read());
-
     $this->setFileContent('');
     $this->assertEquals('', $this->object->read());
-
     $this->setFileContent("\n");
     $this->assertEquals("\n", $this->object->read());
   }
@@ -67,13 +68,10 @@ class InStreamTest extends \PHPUnit_Framework_TestCase{
    */
   public function testReadString(){
     $this->assertEquals('First', $this->object->readString(5));
-
     $this->setFileContent("Test\ntest");
     $this->assertEquals("Test\ntest", $this->object->readString(9));
-
     $this->setFileContent('');
     $this->assertEquals('', $this->object->readString(2));
-
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
     $this->object->readString(0);
   }
@@ -86,10 +84,8 @@ class InStreamTest extends \PHPUnit_Framework_TestCase{
     $this->assertEquals('First string', $this->object->readLine());
     $this->assertEquals('Вторая строка', $this->object->readLine());
     $this->assertEquals('Last string', $this->object->readLine());
-
     $this->setFileContent('');
     $this->assertEquals('', $this->object->readLine());
-
     $this->setFileContent("\n");
     $this->assertEquals(false, $this->object->readLine());
   }
@@ -99,7 +95,7 @@ class InStreamTest extends \PHPUnit_Framework_TestCase{
    * @covers io\InStream::readAll
    */
   public function testReadAll(){
-    $this->assertEquals('First string'.PHP_EOL.'Вторая строка'.PHP_EOL.'Last string', $this->object->readAll());
+    $this->assertEquals('First string' . PHP_EOL . 'Вторая строка' . PHP_EOL . 'Last string', $this->object->readAll());
     $this->assertEquals('', $this->object->readAll());
   }
 }

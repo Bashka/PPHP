@@ -1,10 +1,10 @@
 <?php
 namespace PPHP\tools\classes\standard\network\socket;
+
 use \PPHP\tools\patterns\io as io;
 
 /**
  * Объекты данного класса представляют сокетное соединение в виде выходного потока.
- *
  * Класс использует открытое сокетное соединение для формирования потока вывода.
  * Закрытые потоки не могут быть использованы или октрыты повторно.
  * @author Artur Sh. Mamedbekov
@@ -19,9 +19,7 @@ class OutStream extends io\OutStream implements io\Closed{
 
   /**
    * Метод закрывает поток.
-   *
    * @throws io\IOException Выбрасывается в случае невозможности закрытия сокетного потока вызванного ошибкой.
-   *
    * @return boolean true - если поток удачно закрыт, иначе - false.
    */
   public function close(){
@@ -31,13 +29,14 @@ class OutStream extends io\OutStream implements io\Closed{
     else{
       if(socket_shutdown($this->resource) === false){
         $code = socket_last_error($this->resource);
-        throw new io\IOException('Ошибка закрытия сокета. '.socket_strerror($code), $code);
+        throw new io\IOException('Ошибка закрытия сокета. ' . socket_strerror($code), $code);
       }
       if(socket_close($this->resource) === false){
         $code = socket_last_error($this->resource);
-        throw new io\IOException('Ошибка закрытия сокета. '.socket_strerror($code), $code);
+        throw new io\IOException('Ошибка закрытия сокета. ' . socket_strerror($code), $code);
       }
       $this->isClose = true;
+
       return true;
     }
   }
@@ -52,9 +51,7 @@ class OutStream extends io\OutStream implements io\Closed{
 
   /**
    * Метод записывает строку в поток.
-   *
    * @param string $data Записываемая строка.
-   *
    * @throws io\IOException Выбрасывается в случае возникновения ошибки при записи в поток.
    * @return integer Число реально записанных байт.
    */

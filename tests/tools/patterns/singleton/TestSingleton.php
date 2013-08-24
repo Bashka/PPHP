@@ -1,9 +1,10 @@
 <?php
 namespace PPHP\tests\tools\patterns\singleton;
+
 use \PPHP\tools\patterns\singleton as singleton;
 
 class TestSingleton implements singleton\Singleton{
-use singleton\TSingleton;
+  use singleton\TSingleton;
 
   protected $var = 1;
 

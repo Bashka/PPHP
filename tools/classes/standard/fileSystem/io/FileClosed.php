@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\fileSystem\io;
+
 use \PPHP\tools\patterns\io as io;
 
 /**
@@ -24,6 +25,7 @@ trait FileClosed{
       return true;
     }
     $this->closed = fclose($this->resource);
+
     return $this->closed;
   }
 

@@ -17,6 +17,7 @@ use PPHP\tools\classes\standard\fileSystem\ComponentFileSystem;
 use PPHP\tools\classes\standard\fileSystem\loadingFiles\LoadedFile;
 use PPHP\tools\classes\standard\fileSystem\LockException;
 use PPHP\tools\classes\standard\fileSystem\NotExistsException;
+use PPHP\tools\classes\standard\storage\cache\Cache;
 
 /**
  * Модуль предоставляет текстовый интерфейс доступа к установленным модулям системы.
@@ -50,6 +51,7 @@ class Controller extends ModuleController{
     catch(\Exception $exc){
       $result .= 'failed.';
     }
+
     return $result;
   }
 

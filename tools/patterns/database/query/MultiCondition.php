@@ -1,7 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use PPHP\tools\patterns\interpreter\Restorable;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Множественное логическое выражение.
@@ -14,11 +14,13 @@ class MultiCondition extends Condition{
    * @var Condition
    */
   private $leftOperand;
+
   /**
    * Правый логический операнд.
    * @var Condition
    */
   private $rightOperand;
+
   /**
    * Логический оператор. Одно из следующих значений: AND, OR.
    * @var string
@@ -31,7 +33,7 @@ class MultiCondition extends Condition{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return ['\(('.Condition::getPatterns()['condition'].') '.self::getPatterns()['operator'].' ('.Condition::getPatterns()['condition'].')\)'];
+    return ['\((' . Condition::getPatterns()['condition'] . ') ' . self::getPatterns()['operator'] . ' (' . Condition::getPatterns()['condition'] . ')\)'];
   }
 
   /**
@@ -62,7 +64,6 @@ class MultiCondition extends Condition{
    * @param Condition $leftOperand Левый логический операнд.
    * @param string $logicOperator Логический оператор. Одно из следующих значений: AND, OR.
    * @param Condition $rightOperand Правый логический операнд.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct(Condition $leftOperand, $logicOperator, Condition $rightOperand){
@@ -74,16 +75,13 @@ class MultiCondition extends Condition{
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   *
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   *
    * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return string Результат интерпретации.
    */
-  public function interpretation($driver=null){
+  public function interpretation($driver = null){
     exceptions\InvalidArgumentException::verifyType($driver, 'Sn');
-
     try{
       return '(' . $this->leftOperand->interpretation($driver) . ' ' . $this->logicOperator . ' ' . $this->rightOperand->interpretation($driver) . ')';
     }

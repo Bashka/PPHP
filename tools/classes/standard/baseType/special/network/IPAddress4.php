@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\network;
+
 use \PPHP\tools\classes\standard\baseType as baseType;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
@@ -14,7 +15,7 @@ class IPAddress4 extends baseType\Wrapper implements IPAddress{
    * Компоненты адреса.
    * @var integer[]
    */
-  protected $trio = [0,0,0,0];
+  protected $trio = [0, 0, 0, 0];
 
   /**
    * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
@@ -22,9 +23,7 @@ class IPAddress4 extends baseType\Wrapper implements IPAddress{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      '('.self::getPatterns()['component'].')\.('.self::getPatterns()['component'].')\.('.self::getPatterns()['component'].')\.('.self::getPatterns()['component'].')'
-    ];
+    return ['(' . self::getPatterns()['component'] . ')\.(' . self::getPatterns()['component'] . ')\.(' . self::getPatterns()['component'] . ')\.(' . self::getPatterns()['component'] . ')'];
   }
 
   /**
@@ -33,9 +32,7 @@ class IPAddress4 extends baseType\Wrapper implements IPAddress{
    * @return string[]
    */
   public static function getPatterns($driver = null){
-    return [
-      'component' => '(?:[0-9])|(?:[1-9][0-9])|(?:1[0-9][0-9])|(?:2[0-5][0-5])'
-    ];
+    return ['component' => '(?:[0-9])|(?:[1-9][0-9])|(?:1[0-9][0-9])|(?:2[0-5][0-5])'];
   }
 
   /**
@@ -49,19 +46,18 @@ class IPAddress4 extends baseType\Wrapper implements IPAddress{
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     $m = parent::reestablish($string);
-
     $o = new self($string);
     $o->trio[0] = $m[1];
     $o->trio[1] = $m[2];
     $o->trio[2] = $m[3];
     $o->trio[3] = $m[4];
+
     return $o;
   }
 
   /**
    * Метод возвращает указанное значение компонента адреса.
    * @param integer $index Индекс компонента в диапазоне от 0 до 3.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае передаче параметра недопустимого типа.
    * @return integer Значение компонента адреса.
    */
@@ -74,9 +70,7 @@ class IPAddress4 extends baseType\Wrapper implements IPAddress{
 
   /**
    * Метод возвращает значение компонента адреса в двоичной форме.
-   *
    * @param integer $index Индекс компонента в диапазоне от 0 до 3.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае передаче параметра недопустимого типа.
    * @return string Значение компонента адреса в двоичной форме.
    */

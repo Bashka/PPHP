@@ -23,6 +23,7 @@ class VerifierData{
     foreach($args as $k => &$argVal){
       if($argVal === ''){
         unset($args[$k]);
+        continue;
       }
       try{
         $verifyClass = $method->getParameter($i++)->getClass();

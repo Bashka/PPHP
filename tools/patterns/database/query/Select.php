@@ -1,7 +1,8 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 use PPHP\tools\classes\standard\baseType\String;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет SQL запрос для получение записей из таблицы.
@@ -57,9 +58,7 @@ class Select extends ComponentQuery{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      'SELECT ((?:'.self::getPatterns()['fieldGroup'].')|(?:\*)) FROM ('.self::getPatterns()['tableGroup'].')((?: '.Join::getMasks()[0].')*)(?: ('.OrderBy::getMasks()[0].'))?(?: ('.Limit::getMasks()[0].'))?(?: ('.Where::getMasks()[0].'))?'
-    ];
+    return ['SELECT ((?:' . self::getPatterns()['fieldGroup'] . ')|(?:\*)) FROM (' . self::getPatterns()['tableGroup'] . ')((?: ' . Join::getMasks()[0] . ')*)(?: (' . OrderBy::getMasks()[0] . '))?(?: (' . Limit::getMasks()[0] . '))?(?: (' . Where::getMasks()[0] . '))?'];
   }
 
   /**
@@ -68,10 +67,7 @@ class Select extends ComponentQuery{
    * @return string[]
    */
   public static function getPatterns($driver = null){
-    return [
-      'fieldGroup' => '(?:(?:'. Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1].')|(?:'.FieldAlias::getMasks()[0].'))(?:, ?(?:(?:'. Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1].')))*',
-      'tableGroup' => '(?:`'.Table::getMasks()[0].'`)(?:, ?`'.Table::getMasks()[0].'`)*'
-    ];
+    return ['fieldGroup' => '(?:(?:' . Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1] . ')|(?:' . FieldAlias::getMasks()[0] . '))(?:, ?(?:(?:' . Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1] . ')))*', 'tableGroup' => '(?:`' . Table::getMasks()[0] . '`)(?:, ?`' . Table::getMasks()[0] . '`)*'];
   }
 
   /**
@@ -85,7 +81,6 @@ class Select extends ComponentQuery{
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     $m = parent::reestablish($string);
-
     $select = new self;
     if($m[1] == '*'){
       $select->addAllField();
@@ -102,39 +97,34 @@ class Select extends ComponentQuery{
         }
       }
     }
-
-    $tables = explode(',', str_replace(' ','',$m[2]));
+    $tables = explode(',', str_replace(' ', '', $m[2]));
     foreach($tables as $table){
       $select->addTable(Table::reestablish(substr($table, 1, -1)));
     }
-
     if(!empty($m[3])){
       // Разбор join компонентов на части по пробелу и склеивание их по средствам нахождения ключевых модификаторов типа join.
       // Не следует использовать ключевый модификаторы join (CROSS|INNER|LEFT|RIGHT|FULL) в условиях запроса!
       $joinComponents = explode(' ', trim($m[3]));
       $join = null;
       foreach($joinComponents as $component){
-        if(preg_match('/^('.Join::getPatterns()['types'].')$/u', $component)){
+        if(preg_match('/^(' . Join::getPatterns()['types'] . ')$/u', $component)){
           if(!is_null($join)){
             $select->addJoin(Join::reestablish(trim($join)));
           }
-          $join = $component.' ';
+          $join = $component . ' ';
         }
         else{
-          $join .= $component.' ';
+          $join .= $component . ' ';
         }
       }
       $select->addJoin(Join::reestablish(trim($join)));
     }
-
     if(!empty($m[4])){
       $select->insertOrderBy(OrderBy::reestablish($m[4]));
     }
-
     if(!empty($m[5])){
       $select->insertLimit(Limit::reestablish($m[5]));
     }
-
     if(!empty($m[6])){
       $select->insertWhere(Where::reestablish($m[6]));
     }
@@ -160,6 +150,7 @@ class Select extends ComponentQuery{
       throw new exceptions\DuplicationException('Ошибка дублирования компонента.');
     }
     $this->fields[] = $field;
+
     return $this;
   }
 
@@ -174,6 +165,7 @@ class Select extends ComponentQuery{
       throw new exceptions\DuplicationException('Ошибка дублирования компонента.');
     }
     $this->fields[] = $field;
+
     return $this;
   }
 
@@ -188,6 +180,7 @@ class Select extends ComponentQuery{
       throw new exceptions\DuplicationException('Ошибка дублирования компонента.');
     }
     $this->tables[] = $table;
+
     return $this;
   }
 
@@ -202,6 +195,7 @@ class Select extends ComponentQuery{
       throw new exceptions\DuplicationException('Ошибка дублирования компонента.');
     }
     $this->joins[] = $join;
+
     return $this;
   }
 
@@ -212,6 +206,7 @@ class Select extends ComponentQuery{
    */
   public function insertWhere(Where $where){
     $this->where = $where;
+
     return $this;
   }
 
@@ -222,6 +217,7 @@ class Select extends ComponentQuery{
    */
   public function insertOrderBy(OrderBy $orderBy){
     $this->orderBy = $orderBy;
+
     return $this;
   }
 
@@ -232,6 +228,7 @@ class Select extends ComponentQuery{
    */
   public function insertLimit(Limit $limit){
     $this->limit = $limit;
+
     return $this;
   }
 
@@ -241,6 +238,7 @@ class Select extends ComponentQuery{
    */
   public function addAllField(){
     $this->allField = true;
+
     return $this;
   }
 
@@ -253,11 +251,9 @@ class Select extends ComponentQuery{
    */
   public function interpretation($driver = null){
     exceptions\InvalidArgumentException::verifyType($driver, 'Sn');
-
     if((count($this->fields) == 0 && !$this->allField) || count($this->tables) == 0){
       throw new exceptions\NotFoundDataException('Недостаточно данных для интерпретации.');
     }
-
     if($this->allField){
       $fieldsString = '*';
     }
@@ -268,20 +264,17 @@ class Select extends ComponentQuery{
       }
       $fieldsString = substr($fieldsString, 0, -1);
     }
-
     $tableString = '';
     foreach($this->tables as $table){
       $tableString .= '`' . $table->interpretation($driver) . '`,';
     }
     $tableString = substr($tableString, 0, strlen($tableString) - 1);
-
     try{
       $joinString = [];
       foreach($this->joins as $join){
         $joinString[] = $join->interpretation($driver);
       }
       $joinString = implode(' ', $joinString);
-
       $whereString = (is_object($this->where)? $this->where->interpretation($driver) : '');
       $orderByString = (is_object($this->orderBy)? $this->orderBy->interpretation($driver) : '');
     }
@@ -291,7 +284,6 @@ class Select extends ComponentQuery{
     catch(exceptions\InvalidArgumentException $exc){
       throw $exc;
     }
-
     // Формирование платформо-независимой выборки при отсутствии несовместимых элементов.
     if(empty($this->limit)){
       return trim('SELECT ' . $fieldsString . ' FROM ' . $tableString . ' ' . $joinString . ' ' . $whereString . ' ' . $orderByString);
@@ -299,11 +291,9 @@ class Select extends ComponentQuery{
     // Формирования платформо-зависимой выборки при наличии несовместимых элементов.
     else{
       exceptions\InvalidArgumentException::verifyType($driver, 'S');
-
       // Обработка LIMIT элемента
       $limitString = $this->limit->interpretation($driver);
       $staticPartString = $fieldsString . ' FROM ' . $tableString . ' ' . $joinString . ' ' . $whereString . ' ';
-
       switch($driver){
         case 'sqlsrv': // MS SQL Server
         case 'firebird': // Firebird
@@ -328,6 +318,7 @@ class Select extends ComponentQuery{
     if($this->allField){
       return [];
     }
+
     return $this->fields;
   }
 

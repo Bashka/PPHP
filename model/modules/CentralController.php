@@ -1,16 +1,22 @@
 <?php
 namespace PPHP\model\modules;
 
+  //@todo: Протестировать отлов Warning и Notice
+// Автозагрузка классов
 use PPHP\model\classes\ModuleController;
 use PPHP\model\modules\SystemPackages\ReflectionModule;
+use PPHP\services\log\LogManager;
+use PPHP\services\log\Message;
 use PPHP\services\modules\ModuleNotFoundException;
 use PPHP\services\view\ViewProvider;
 use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\classes\standard\baseType\exceptions\RuntimeException;
 
 spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 ob_start();
+// Обработка error
 register_shutdown_function(function (){
   $error = error_get_last();
   // Обработка ошибки
@@ -18,10 +24,10 @@ register_shutdown_function(function (){
     $buffer = ob_get_contents();
     ob_end_clean();
     header('HTTP/1.1 200 OK');
-    $log = \PPHP\services\log\LogManager::getInstance();
+    $log = LogManager::getInstance();
     // Фатальные ошибки
-    if($error['type'] == E_CORE_ERROR || $error['type'] == E_ERROR || $error['type'] == E_PARSE || $error['type'] == E_USER_ERROR){
-      $log->setMessage(\PPHP\services\log\Message::createError($error['message'] . ' - ' . $error['file'] . ':' . $error['line']));
+    if($error['type'] == E_CORE_ERROR || $error['type'] == E_ERROR || $error['type'] == E_PARSE || $error['type'] == E_USER_ERROR || $error['type'] == E_RECOVERABLE_ERROR || $error['type'] == E_COMPILE_ERROR){
+      $log->setMessage(Message::createError($error['message'] . ' - ' . $error['file'] . ':' . $error['line']));
       // Обработка исключений
       $send = new \stdClass();
       $send->exception = new \stdClass();
@@ -46,13 +52,15 @@ register_shutdown_function(function (){
     ob_end_flush();
   }
 });
+// Обработка warning
 set_error_handler(function ($code, $message, $file, $line){
-  $log = \PPHP\services\log\LogManager::getInstance();
-  $log->setMessage(\PPHP\services\log\Message::createWarning($message . ' - ' . $file . ':' . $line));
+  $log = LogManager::getInstance();
+  $log->setMessage(Message::createWarning($message . ' - ' . $file . ':' . $line));
 }, E_COMPILE_WARNING | E_WARNING | E_USER_WARNING | E_DEPRECATED | E_USER_DEPRECATED | E_CORE_WARNING);
+// Обработка notice
 set_error_handler(function ($code, $message, $file, $line){
-  $log = \PPHP\services\log\LogManager::getInstance();
-  $log->setMessage(\PPHP\services\log\Message::createNotice($message . ' - ' . $file . ':' . $line));
+  $log = LogManager::getInstance();
+  $log->setMessage(Message::createNotice($message . ' - ' . $file . ':' . $line));
 }, E_NOTICE | E_USER_NOTICE | E_STRICT);
 /**
  * Класс является единой точной входа системы и отвечает за вызов и передачу модулю сообщений от слоя view, а так же за возврат ему ответа модуля.
@@ -65,14 +73,17 @@ class CentralController{
    * @static
    * @param string $moduleName Имя зарпашиваемого модуля.
    * @throws ModuleNotFoundException Выбрасывается в случае, если требуемого модуля не существует в системе.
-   * @throws NotExistsException Выбрасывается в случае, если не удалось получить доступ к модулю.
+   * @throws RuntimeException Выбрасывается в случае, если модуль не является конкретным.
    * @return ModuleController Контроллер целевого модуля.
    */
   public static function getControllerModule($moduleName){
     try{
       return (new ReflectionModule($moduleName))->getController();
     }
-    catch(NotExistsException $e){
+    catch(ModuleNotFoundException $e){
+      throw $e;
+    }
+    catch(RuntimeException $e){
       throw $e;
     }
   }

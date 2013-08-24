@@ -2,15 +2,18 @@
 namespace PPHP\model\modules\SystemPackages\InstallerModules;
 
 use PPHP\model\modules\SystemPackages as sp;
+use PPHP\services\log\LogManager;
 use PPHP\services\modules\ModuleNotFoundException;
 use PPHP\services\modules\ModulesRouter;
 use PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
 use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
+use PPHP\tools\classes\standard\baseType\exceptions\PDOException;
 use PPHP\tools\classes\standard\baseType\exceptions\RuntimeException;
 use PPHP\tools\classes\standard\baseType\Integer;
 use PPHP\tools\classes\standard\baseType\special\Alias;
 use PPHP\tools\classes\standard\baseType\special\Name;
 use PPHP\tools\classes\standard\fileSystem\ComponentFileSystem;
+use PPHP\tools\classes\standard\storage\database\UncertaintyException;
 
 /**
  * Класс расширяет стандартное отражения модуля для добавления возможностей их удаления из системы.
@@ -94,17 +97,17 @@ class ReflectionModule extends sp\ReflectionModule{
       $accessController = (new ReflectionModule('Access'))->getController();
       foreach($this->getAccess() as $method => $roles){
         // Получение права доступа
-        $rule = $accessController->getRuleFromPurpose(new Name($name), new Name($method));
-        if($rule !== false){
-          foreach($roles as $role){
-            if(($role = $accessController->getOIDRole(new Alias($role))) !== false){
-              // Удаление связей с правом доступа
-              $accessController->narrowRole(new Integer($role->getOID()), new Integer($rule->getOID()));
-            }
-          }
-          // Удаления права доступа
-          $accessController->deleteRule(new Integer($rule->getOID()));
+        try{
+          $rule = $accessController->getOIDRule(new Name($name), new Name($method));
         }
+        catch(UncertaintyException $e){
+          continue;
+        }
+        catch(PDOException $e){
+          throw $e;
+        }
+        // Удаления права доступа
+        $accessController->removeRule(new Integer($rule));
       }
     }
     else{
@@ -118,15 +121,13 @@ class ReflectionModule extends sp\ReflectionModule{
    * @return string Информация о результатах удаления модуля и ответ внутреннего инсталлятора.
    */
   public function uninstall(){
-    $name = $this->getName();
-    $result = 'The module [' . $name . '] is removed. Installer: ';
+    $result = 'The module [' . $this->getName() . '] is removed. Installer: ';
     // Выполнение внутреннего деинсталлятора
     if(($installer = $this->getInstaller()) !== false){
       $result .= $installer->uninstall(); // Выброс исключений не предполагается
     }
     // Удаление каталога модуля
-    $dir = ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . (new sp\ReflectionModule($name))->getAddress());
-    $dir->delete(); // Выброс исключений не предполагается
+    ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . substr($this->getAddress(), 0, -1))->delete(); // Выброс исключений не предполагается
     return $result;
   }
 }

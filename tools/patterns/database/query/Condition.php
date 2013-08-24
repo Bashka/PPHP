@@ -1,7 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
-use PPHP\tools\patterns\interpreter\Restorable;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Дочерние классы данного класса являются представлением логической конструкции.
@@ -42,6 +42,9 @@ abstract class Condition extends ComponentQuery{
     }
     elseif(OrMultiCondition::isReestablish($string)){
       return OrMultiCondition::reestablish($string);
+    }
+    else{
+      throw new exceptions\StructureException('Недопустимая структура исходной строки. Невозможно определить условие.');
     }
   }
 }

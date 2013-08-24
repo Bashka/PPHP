@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\fileSystem;
+
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
@@ -10,9 +11,7 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 class Directory extends ComponentFileSystem{
   /**
    * Метод изменяет имя компонента на заданное, если это возможно.
-   *
    * @param string $newName Новое имя компонента.
-   *
    * @throws exceptions\DuplicationException Выбрасывается в случае, если переименование компонента приведет к дублированию.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
@@ -22,14 +21,13 @@ class Directory extends ComponentFileSystem{
     if($this->getLocation()->isDirExists($newName)){
       throw new exceptions\DuplicationException('Невозможно выполнить действие. Компонент с данным именем уже существует.');
     }
+
     return parent::rename($newName);
   }
 
   /**
    * Метод перемещает компонент в данный каталог.
-   *
    * @param Directory $location Целевой каталог.
-   *
    * @throws exceptions\DuplicationException Выбрасывается в случае, если целевой каталог уже содержит компонент с тем же именем, что и перемещаемый.
    * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
    * @throws exceptions\RuntimeException Выбрасывается в случае нарушения логики работы файловой системы путем перемещения компонента в себя.
@@ -42,6 +40,7 @@ class Directory extends ComponentFileSystem{
     if($location->getAddress() == $this->getAddress()){
       throw new exceptions\RuntimeException('Ожидается отличный от данного каталога каталог.');
     }
+
     return parent::move($location);
   }
 
@@ -61,9 +60,7 @@ class Directory extends ComponentFileSystem{
 
   /**
    * Метод копирует компонента в данный каталог.
-   *
    * @param Directory $location Целевой каталог.
-   *
    * @throws exceptions\DuplicationException Выбрасывается в случае, если целевой каталог уже содержит копируемый компонент.
    * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
    * @return boolean true - в случае успешного завершения операции, иначе - false.
@@ -76,7 +73,6 @@ class Directory extends ComponentFileSystem{
     if($location->isDirExists($this->getName())){
       throw new exceptions\DuplicationException('Невозможно выполнить действие. Компонент с данным именем уже существует.');
     }
-
     $copyDirRoot = new Directory($this->getName(), $location);
     try{
       if(!$copyDirRoot->create()){
@@ -87,7 +83,6 @@ class Directory extends ComponentFileSystem{
       throw $e;
     }
     // Дальнейшая проверка не выполняется в связи с наличием проверки возможных исключений в начале метода
-
     $iterator = $this->getDirectoryIterator();
     foreach($iterator as $component){
       if($component == '.' || $component == '..'){
@@ -101,6 +96,7 @@ class Directory extends ComponentFileSystem{
         $this->getFile((string) $component)->copyPaste($copyDirRoot);
       }
     }
+
     return true;
   }
 
@@ -132,7 +128,6 @@ class Directory extends ComponentFileSystem{
       if($component == '.' || $component == '..'){
         continue;
       }
-
       // Перехват исключений не выполняется в связи с невозможностью их появления и возможной рекурсией с методом delete
       if($component->isDir()){
         $this->getDir((string) $component)->delete();
@@ -141,6 +136,7 @@ class Directory extends ComponentFileSystem{
         $this->getFile((string) $component)->delete();
       }
     }
+
     return true;
   }
 
@@ -159,7 +155,6 @@ class Directory extends ComponentFileSystem{
       if($component == '.' || $component == '..'){
         continue;
       }
-
       // Перехват исключений не выполняется в связи с невозможностью их появления
       if($component->isDir()){
         $size += $this->getDir((string) $component)->getSize();
@@ -168,6 +163,7 @@ class Directory extends ComponentFileSystem{
         $size += $this->getFile((string) $component)->getSize();
       }
     }
+
     return $size;
   }
 
@@ -183,14 +179,13 @@ class Directory extends ComponentFileSystem{
     if($this->isExists()){
       throw new exceptions\DuplicationException('Невозможно выполнить действие. Компонент с данным именем уже существует.');
     }
-
     $nameDir = $this->getAddress();
+
     return mkdir($nameDir, $mode);
   }
 
   /**
    * Метод пытается создать новый каталог в вызывающем каталоге и возвращает его представление в случае успеха.
-   *
    * @param string $dirName Имя создаваемого каталога.
    * @param int $mode Маска доступа
    * .
@@ -214,7 +209,6 @@ class Directory extends ComponentFileSystem{
 
   /**
    * Метод пытается создать новый файл в вызывающем каталоге и возвращает его представление в случае успеха.
-   *
    * @param string $dirName Имя создаваемого файла.
    * @param int $mode Маска доступа
    * .
@@ -231,7 +225,6 @@ class Directory extends ComponentFileSystem{
     if($this->isFileExists($fileName)){ // Перехват исключений не выполняется в связи с невозможностью их появления
       throw new exceptions\DuplicationException('Указанный компонент уже существует в файловой системе.');
     }
-
     $file = new File($fileName, $this);
     $file->create($mode); // Перехват исключений не выполняется в связи с невозможностью их появления
     return $file;
@@ -258,13 +251,13 @@ class Directory extends ComponentFileSystem{
     if(!$this->isExists() || !$this->isFileExists($fileName)){
       throw new NotExistsException('Невозможно выполнить действие. В файловой системе компонент не найден.');
     }
+
     return new File($fileName, $this);
   }
 
   /**
    * Возвращает компонент каталога, имя которого заданно в аргементе.
    * @param string $dirName Имя компонента.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @throws NotExistsException Выбрасывается в случае, если вызываемого или получаемого каталога на момент вызова метода не существует.
    * @return Directory Получаемый компонент.
@@ -275,6 +268,7 @@ class Directory extends ComponentFileSystem{
     if(!$this->isExists() || !$this->isDirExists($dirName)){
       throw new NotExistsException('Невозможно выполнить действие. В файловой системе компонент не найден.');
     }
+
     return new Directory($dirName, $this);
   }
 
@@ -291,19 +285,17 @@ class Directory extends ComponentFileSystem{
     if(!$this->isExists()){
       throw new NotExistsException('Невозможно выполнить действие. В файловой системе компонент не найден.');
     }
-
     $result = glob($this->getAddress() . '/' . $mask);
     foreach($result as $key => $address){
       $result[$key] = substr($address, strrpos($address, '/') + 1);
     }
+
     return $result;
   }
 
   /**
    * Метод проверяет, имеется ли в вызывающем каталоге заданный файл.
-   *
-   * @param $fileName Имя проверяемого файла.
-   *
+   * @param string $fileName Имя проверяемого файла.
    * @throws NotExistsException Выбрасывается в случае, если вызываемого компонента не существует.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return bool true - если в вызывающем каталоге имеется заданный файл, иначе - false.
@@ -311,17 +303,16 @@ class Directory extends ComponentFileSystem{
   public function isFileExists($fileName){
     exceptions\InvalidArgumentException::verifyType($fileName, 'S');
     if(!$this->isExists()){
-      throw new NotExistsException('Невозможно выполнить действие. В файловой системе родительский каталог ['.$this->getAddress().'] не найден.');
+      throw new NotExistsException('Невозможно выполнить действие. В файловой системе родительский каталог [' . $this->getAddress() . '] не найден.');
     }
     $fileAddress = $this->getAddress() . '/' . $fileName;
+
     return (file_exists($fileAddress) && is_file($fileAddress));
   }
 
   /**
    * Метод проверяет, имеется ли в вызывающем каталоге заданный каталог.
-   *
-   * @param $dirName Имя проверяемого каталога.
-   *
+   * @param string $dirName Имя проверяемого каталога.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @throws NotExistsException Выбрасывается в случае, если вызываемого компонента не существует.
    * @return bool true - если в вызывающем каталоге имеется заданный каталог, иначе - false.
@@ -329,9 +320,10 @@ class Directory extends ComponentFileSystem{
   public function isDirExists($dirName){
     exceptions\InvalidArgumentException::verifyType($dirName, 'S');
     if(!$this->isExists()){
-      throw new NotExistsException('Невозможно выполнить действие. В файловой системе компонент не найден ('.$this->getAddress().').');
+      throw new NotExistsException('Невозможно выполнить действие. В файловой системе компонент не найден (' . $this->getAddress() . ').');
     }
     $dirAddress = $this->getAddress() . '/' . $dirName;
+
     return (file_exists($dirAddress) && is_dir($dirAddress));
   }
 }

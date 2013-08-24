@@ -10,15 +10,16 @@ $_SERVER['DOCUMENT_ROOT'] = '/var/www';
 class ReflectionModuleTest extends \PHPUnit_Framework_TestCase{
   /**
    * @covers ReflectionModule::__construct
+   * @covers ReflectionSystemComponent::__construct
    */
   public function test__construct(){
     new ReflectionModule('Console');
-    $this->setExpectedException('\PPHP\services\modules\ModuleNotFoundException');
+    $this->setExpectedException('\PPHP\model\modules\SystemPackages\SystemComponentNotFoundException');
     new ReflectionModule('x');
   }
 
   /**
-   * @covers ReflectionModule::getName
+   * @covers ReflectionSystemComponent::getName
    */
   public function testGetName(){
     $o = new ReflectionModule('Console');
@@ -30,11 +31,11 @@ class ReflectionModuleTest extends \PHPUnit_Framework_TestCase{
    */
   public function testGetAddress(){
     $o = new ReflectionModule('Console');
-    $this->assertEquals('/PPHP/model/modules/SystemPackages/Console', $o->getAddress());
+    $this->assertEquals('/PPHP/model/modules/SystemPackages/Console/', $o->getAddress());
   }
 
   /**
-   * @covers ReflectionModule::getVersion
+   * @covers ReflectionSystemComponent::getVersion
    */
   public function testGetVersion(){
     $o = new ReflectionModule('Console');
@@ -55,15 +56,8 @@ class ReflectionModuleTest extends \PHPUnit_Framework_TestCase{
   public function testGetParent(){
     $o = new ReflectionModule('Console');
     $this->assertEquals('SystemPackages', $o->getParent());
-  }
-
-  /**
-   * @covers ReflectionModule::getController
-   */
-  public function testGetController(){
-    $o = new ReflectionModule('Console');
-    $o = $o->getController();
-    $this->assertInstanceOf('\PPHP\model\modules\SystemPackages\Console\Controller', $o);
+    $o = new ReflectionModule('SystemPackages');
+    $this->assertFalse($o->getParent());
   }
 
   /**
@@ -74,6 +68,9 @@ class ReflectionModuleTest extends \PHPUnit_Framework_TestCase{
     $o = $o->getChild();
     $this->assertEquals('Console', $o[0]);
     $this->assertEquals('InstallerModules', $o[1]);
+    $this->assertEquals('InstallerScreens', $o[2]);
+    $o = new ReflectionModule('Console');
+    $this->assertEquals([], $o->getChild());
   }
 
   /**
@@ -95,9 +92,26 @@ class ReflectionModuleTest extends \PHPUnit_Framework_TestCase{
   }
 
   /**
-   * @covers ReflectionModule::getDestitute
-   * @covers ReflectionModule::addDestitute
-   * @covers ReflectionModule::removeDestitute
+   * @covers ReflectionModule::getController
+   */
+  public function testGetController(){
+    $o = new ReflectionModule('Console');
+    $o = $o->getController();
+    $this->assertInstanceOf('\PPHP\model\modules\SystemPackages\Console\Controller', $o);
+  }
+
+  /**
+   * @covers ReflectionSystemComponent::getDestitute
+   */
+  public function testGetDestitute(){
+    $o = new ReflectionModule('Console');
+    $this->assertEquals([], $o->getDestitute());
+  }
+
+  /**
+   * @covers ReflectionSystemComponent::getDestitute
+   * @covers ReflectionSystemComponent::addDestitute
+   * @covers ReflectionSystemComponent::removeDestitute
    */
   public function testAddRemoveDestitute(){
     $o = new ReflectionModule('Console');
@@ -113,6 +127,17 @@ class ReflectionModuleTest extends \PHPUnit_Framework_TestCase{
     $this->assertTrue($o->removeDestitute('TestB'));
   }
 
+  /**
+   * @covers ReflectionSystemComponent::getUsed
+   */
+  public function testGetUsed(){
+    $o = new ReflectionModule('Console');
+    $this->assertEquals([], $o->getUsed());
+  }
+
+  /**
+   * @covers ReflectionModule::getAccess
+   */
   public function testGetAccess(){
     $o = new ReflectionModule('Console');
     $o = $o->getAccess();

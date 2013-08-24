@@ -1,13 +1,15 @@
 <?php
 namespace PPHP\services\view;
-use \PPHP\tools\patterns\singleton as singleton;
+
+use PPHP\tools\patterns\singleton as singleton;
+
 /**
  * Класс предоставляет доступ к виду и позволяет обмениваться с ним сообщениями.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\services\view
  */
 class ViewProvider implements singleton\Singleton{
-use singleton\TSingleton;
+  use singleton\TSingleton;
 
   /**
    * Метод возвращает сообщение, полученное от вида.

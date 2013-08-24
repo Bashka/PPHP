@@ -1,11 +1,13 @@
 <?php
 namespace PPHP\services\view;
-use PPHP\services\cache\CacheAdapter;
-use PPHP\services\cache\CacheSystem;
+
 use PPHP\services\configuration\Configurator;
 use PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
 use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
-use \PPHP\tools\patterns\singleton as singleton;
+use PPHP\tools\classes\standard\storage\cache\Cache;
+use PPHP\tools\classes\standard\storage\cache\CacheAdapter;
+use PPHP\tools\patterns\singleton as singleton;
+
 /**
  * Класс отвечает за роутинг экранов.
  * @author Artur Sh. Mamedbekov
@@ -24,23 +26,25 @@ class ViewRouter implements singleton\Singleton{
    * @var Configurator
    */
   protected $conf;
+
   /**
    * Кэш.
    * @var CacheAdapter
    */
   protected $cache;
+
   /**
    * @throws NotFoundDataException Выбрасывается в случае, если не удалось получить доступ к конфигурации системы.
    */
   private function __construct(){
     try{
       $this->conf = Configurator::getInstance();
-      $this->cache = CacheSystem::getInstance();
+      $this->cache = Cache::getInstance();
     }
     catch(NotFoundDataException $e){
       throw new NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
     }
-    if(CacheSystem::hasCache() && !isset($this->cache->ViewRouter_Init)){
+    if(Cache::hasCache() && !isset($this->cache->ViewRouter_Init)){
       $screensNames = $this->getScreensNames();
       foreach($screensNames as $screenName){
         $this->cache->set('ViewRouter_Screens_' . $screenName, $this->conf->get('Screens', $screenName));
@@ -65,6 +69,7 @@ class ViewRouter implements singleton\Singleton{
       $screen = $this->conf->get('Screens', $moduleName . '_' . $screenName);
       $this->cache->set('ViewRouter_Screens_' . $moduleName . '_' . $screenName, $screen);
     }
+
     return $screen;
   }
 
@@ -78,6 +83,7 @@ class ViewRouter implements singleton\Singleton{
     if($this->cache->get('ViewRouter_Screens_' . $moduleName . '_' . $screenName) === null){
       return $this->conf->isExists('Screens', $moduleName . '_' . $screenName);
     }
+
     return true;
   }
 
@@ -108,6 +114,7 @@ class ViewRouter implements singleton\Singleton{
       throw new ScreenNotFoundException('Указанный экран ' . $moduleName . '::' . $screenName . ' не установлен в системе.');
     }
     $this->cache->remove('ViewRouter_Screens_' . $moduleName . '_' . $screenName);
+
     return $this->conf->delete('Screens', $moduleName . '_' . $screenName);
   }
 
@@ -121,6 +128,7 @@ class ViewRouter implements singleton\Singleton{
     foreach($section as $screenName => $address){
       $screensNames[] = $screenName;
     }
+
     return $screensNames;
   }
 }

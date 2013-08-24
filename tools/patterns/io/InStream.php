@@ -1,40 +1,35 @@
 <?php
 namespace PPHP\tools\patterns\io;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
 
 /**
- * Классическая реализация входного потока данных.
+ * Данный класс представляет классическую реализацию входного потока данных.
+ * Дочернему классу достаточно реализовать метод read, использующий определенный здесь указатель на ресурс, остальные методы реализуются через использование этого метода.
  * @author  Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\io
  */
 abstract class InStream implements Reader{
   /**
-   * Указатель на входной поток, с которым работает объект.
-   * @var resource
+   * @var resource Указатель на ресурс, с которым работает объект.
    */
   protected $resource;
 
   /**
-   * @param resource $resource Указатель на входной поток.
+   * @param resource $resource Указатель на ресурс.
    */
   function __construct($resource){
     $this->resource = $resource;
   }
 
   /**
-   * Метод считывает указанное количество байт из потока.
-   *
-   * @param integer $length Количество считываемых байт.
-   *
-   * @throws IOException  Выбрасывается в случае возникновения ошибки при чтении из потока.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return string Если размер входного потока больше или равен размеру считываемой строки, то прочитанная строка указанного размера, если меньше, то оставшаяся в потоке строка, если в потоке нет данных - пустая строка.
+   * @prototype \PPHP\tools\patterns\io\Reader
    */
   public function readString($length){
-    exceptions\InvalidArgumentException::verifyType($length, 'i');
-    exceptions\InvalidArgumentException::verifyVal($length, 'i > 0');
-
+    InvalidArgumentException::verifyType($length, 'i');
+    InvalidArgumentException::verifyVal($length, 'i > 0');
     $result = '';
+    // Последовательное получение байт из потока.
     while($length--){
       try{
         $char = $this->read();
@@ -43,6 +38,7 @@ abstract class InStream implements Reader{
         throw $exc;
       }
       $result .= $char;
+      // Обнаружен конец потока.
       if($char === ''){
         break;
       }
@@ -52,54 +48,53 @@ abstract class InStream implements Reader{
   }
 
   /**
-   * Метод считывает строку от текущей позиции до символа конца строки EOL.
-   *
-   * @param string $EOLSymbol [optional] Символ, принимаемый за EOL при данном вызове метода.
-   *
-   * @throws IOException Выбрасывается в случае возникновения ошибки при чтении из потока.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return string Прочитанная строка или пустая строка, если достигнут конец потока или символ EOL.
+   * @prototype \PPHP\tools\patterns\io\Reader
    */
   public function readLine($EOLSymbol = PHP_EOL){
-    exceptions\InvalidArgumentException::verifyType($EOLSymbol, 'S');
-
-    $EOLLength = strlen($EOLSymbol);
+    InvalidArgumentException::verifyType($EOLSymbol, 'S');
+    $EOLLength = strlen($EOLSymbol); // Длина символа EOL.
     $result = '';
-
+    // Последовательное получение байт из потока.
     while(true){
       $portion = '';
+      // Считывание пакета размером в символ EOL.
       for($i = $EOLLength; $i--;){
+        // Получение текущего байта.
         try{
           $currentByte = $this->read();
         }
         catch(IOException $exc){
           throw $exc;
         }
-
+        // Обнаружен конец потока.
         if($currentByte === ''){
           $result .= $portion;
+
           return $result;
         }
+        // Формирование пакета.
         else{
           $portion .= $currentByte;
         }
       }
+      // Обнаружение конца строки.
       if($portion == $EOLSymbol){
         return $result;
       }
+      // Продолжение считывания.
       else{
         $result .= $portion;
       }
     }
+    return '';
   }
 
   /**
-   * Метод считывает все содержимое потока.
-   * @throws IOException Выбрасывается в случае возникновения ошибки при чтении из потока.
-   * @return string Прочитанный массив символов или пустая строка, если достигнут конец потока.
+   * @prototype \PPHP\tools\patterns\io\Reader
    */
   public function readAll(){
     $result = '';
+    // Последовательное получение байт из потока.
     do{
       try{
         $currentByte = $this->read();

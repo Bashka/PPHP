@@ -19,9 +19,7 @@ interface Originator{
   /**
    * Метод восстанавливает состояние вызываемого объекта из переданного хранителя.
    * @abstract
-   *
    * @param Memento $memento Хранитель, являющийся основой для восстановления.
-   *
    * @throws AccessException Выбрасывается в случае, если вызываемый объект пытается получить доступ к чужому хранителю.
    */
   public function restoreFromMemento(Memento $memento);

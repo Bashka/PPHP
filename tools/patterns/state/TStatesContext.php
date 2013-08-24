@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\state;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Классическая реализация интерфейса StatesContext.
@@ -9,15 +10,15 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  * @package PPHP\tools\patterns\state
  */
 trait TStatesContext{
-
   /**
    * Текущее состояние объекта.
    * @var State $currentState
    */
   protected $currentState;
+
   /**
    * Буфер, хранящий все инициализированные состояния.
-   * @var StateBuffer
+   * @var StateCache
    */
   private $statesBuffer;
 
@@ -34,10 +35,8 @@ trait TStatesContext{
    * Данный метод передает буферу имя требуемого состояния, а так же массив со следующими компонентами:
    * context - ссылка на контекст;
    * links - null или массив доступных для состояния свойств контекста.
-   *
    * @param string $stateName Устанавливаемое состояние.
    * @param State|StatesContext $substate Подсостояние, запрашивающее изменение.
-   *
    * @throws exceptions\RuntimeException Исключение выбрасывается при попытке программного изменения состояния.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @throws exceptions\NotFoundDataException Выбрасывается в случае отсутствия состояния с указанным именем.

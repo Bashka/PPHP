@@ -37,6 +37,7 @@ class FileTable implements Storage{
     $writer->clean();
     $writer->write(serialize($structure) . "\n");
     $writer->close();
+
     return new FileTable($fileTable);
   }
 
@@ -73,6 +74,7 @@ class FileTable implements Storage{
     }
     $result = $this->table->select($id, $reader);
     $reader->close();
+
     return $result;
   }
 
@@ -97,6 +99,7 @@ class FileTable implements Storage{
     }
     $result = $this->table->update($id, $writer, $data);
     $writer->close();
+
     return $result;
   }
 
@@ -120,6 +123,7 @@ class FileTable implements Storage{
     }
     $result = $this->table->delete($id, $writer);
     $writer->close();
+
     return $result;
   }
 
@@ -140,6 +144,7 @@ class FileTable implements Storage{
     }
     $result = $this->table->update($this->countRecord, $writer, $data);
     $writer->close();
+
     return $result;
   }
 

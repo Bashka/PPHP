@@ -2,7 +2,6 @@
 namespace PPHP\tests\tools\patterns\database;
 
 class TestAssoc extends \PPHP\tools\patterns\database\LongObject{
-
   private $propOne;
 
   private $propTwo;
@@ -42,6 +41,5 @@ class TestAssoc extends \PPHP\tools\patterns\database\LongObject{
 
 TestAssoc::getReflectionProperty('propOne')->setMetadata('NameFieldTable', 'propOneField');
 TestAssoc::getReflectionProperty('propTwo')->setMetadata('NameFieldTable', 'propTwoField');
-
 TestAssoc::getReflectionClass()->setMetadata('NameTable', 'Assoc');
 TestAssoc::getReflectionClass()->setMetadata('KeyTable', 'Key');

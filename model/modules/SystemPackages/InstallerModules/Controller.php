@@ -1,11 +1,12 @@
 <?php
 namespace PPHP\model\modules\SystemPackages\InstallerModules;
 
-use PPHP\model\modules\SystemPackages as sp;
 use PPHP\model\classes\ModuleController;
+use PPHP\model\modules\SystemPackages as sp;
 use PPHP\services\modules\ModuleDuplicationException;
 use PPHP\services\modules\ModuleNotFoundException;
 use PPHP\services\modules\ModulesRouter;
+use PPHP\tools\classes\standard\baseType\exceptions\DuplicationException;
 use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
 use PPHP\tools\classes\standard\baseType\exceptions\RuntimeException;
 use PPHP\tools\classes\standard\baseType\exceptions\StructureException;
@@ -32,14 +33,16 @@ class Controller extends ModuleController{
     catch(NotFoundDataException $e){
       throw $e;
     }
+
     return $router->getModulesNames();
   }
 
   /**
    * Метод возвращает массив используемых данным модулем модулей.
+   * @param Name $module Имя целевого модуля.
    * @throws ModuleNotFoundException Выбрасывается в случае отсутствия модуля, его файла состояния или каталога.
    * @throws RuntimeException Выбрасывается в случае, если вызываемый модуль не является конкретным.
-   * @return string[]|boolean Массив имен используемых модулей или false, если модуль не имеет зависимостей.
+   * @return string[] Массив имен используемых модулей.
    */
   public function getUsed(Name $module){
     try{
@@ -58,6 +61,7 @@ class Controller extends ModuleController{
 
   /**
    * Метод возвращает имя родительского модуля.
+   * @param Name $module Имя целевого модуля.
    * @throws ModuleNotFoundException Выбрасывается в случае отсутствия модуля, его файла состояния или каталога.
    * @return string Имя родительского модуля или false, если модуль не имеет родителя.
    */
@@ -68,11 +72,13 @@ class Controller extends ModuleController{
     catch(ModuleNotFoundException $e){
       throw $e;
     }
+
     return $module->getParent();
   }
 
   /**
    * Метод возвращает массив имен дочерних модулей.
+   * @param Name $module Имя целевого модуля.
    * @throws ModuleNotFoundException Выбрасывается в случае отсутствия модуля, его файла состояния или каталога.
    * @return string[] Массив имен дочерних модулей.
    */
@@ -83,11 +89,13 @@ class Controller extends ModuleController{
     catch(ModuleNotFoundException $e){
       throw $e;
     }
+
     return $module->getChild();
   }
 
   /**
    * Метод возвращает массив имен модулей, зависимых от данного.
+   * @param Name $module Имя целевого модуля.
    * @throws ModuleNotFoundException Выбрасывается в случае отсутствия модуля, его файла состояния или каталога.
    * @throws RuntimeException Выбрасывается в случае, если вызываемый модуль не является конкретным.
    * @return string[] Массив имен зависимых модулей.
@@ -109,6 +117,7 @@ class Controller extends ModuleController{
 
   /**
    * Метод возвращает тип вызываемого модуля.
+   * @param Name $module Имя целевого модуля.
    * @throws StructureException Выбрасывается в случает отсутствия обязательного свойства модуля.
    * @throws ModuleNotFoundException Выбрасывается в случае отсутствия модуля, его файла состояния или каталога.
    * @return string Тип модуля.
@@ -120,7 +129,6 @@ class Controller extends ModuleController{
     catch(ModuleNotFoundException $e){
       throw $e;
     }
-
     try{
       return $module->getType();
     }
@@ -131,6 +139,7 @@ class Controller extends ModuleController{
 
   /**
    * Метод возвращает версию вызываемого модуля.
+   * @param Name $module Имя целевого модуля.
    * @throws StructureException Выбрасывается в случает отсутствия обязательного свойства модуля.
    * @throws ModuleNotFoundException Выбрасывается в случае отсутствия модуля, его файла состояния или каталога.
    * @return string Версия модуля.
@@ -142,7 +151,6 @@ class Controller extends ModuleController{
     catch(ModuleNotFoundException $e){
       throw $e;
     }
-
     try{
       return $module->getVersion();
     }
@@ -159,6 +167,7 @@ class Controller extends ModuleController{
    * @throws ModuleDuplicationException Выбрасывается в случае, если целевой архив модуля уже установлен в системе.
    * @throws ModuleNotFoundException Выбрасывается в случае, если отсутствует необходимый родительский или один из используемых модулей.
    * @throws NotFoundDataException Выбрасывается в случае отсутствия доступа к конфигурации системы.
+   * @throws DuplicationException Выбрасывается в случае наличия каталога модуля в системе.
    * @return string Результаты выполнения установки.
    */
   public function installModule(FileSystemAddress $archiveAddress){
@@ -190,7 +199,12 @@ class Controller extends ModuleController{
     // Дальнейший выброс исключний не предполагается.
     $archive->sayParent();
     $archive->sayUsed();
-    $result = $archive->install();
+    try{
+      $result = $archive->install();
+    }
+    catch(DuplicationException $e){
+      throw $e;
+    }
     if(ModulesRouter::getInstance()->hasModule('Access')){
       $archive->addAccess();
     }
@@ -268,6 +282,7 @@ class Controller extends ModuleController{
     catch(NotFoundDataException $e){
       throw $e;
     }
+
     return $result;
   }
 }

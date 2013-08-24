@@ -1,12 +1,12 @@
 <?php
 namespace PPHP\tests\tools\classes\special\storage\relationTable;
 
-spl_autoload_register(function($className){
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
-
 class TestStorage{
   private $data = [];
+
   private $i = 0;
 
   public function set($data){
@@ -37,7 +37,6 @@ class TestWriter implements \PPHP\tools\patterns\io\Writer, \PPHP\tools\patterns
   function __construct(TestStorage $storage){
     $this->storage = $storage;
   }
-
 
   /**
    * Метод устанавливает указатель символа на указанную позицию.
@@ -73,11 +72,9 @@ class TestReader implements \PPHP\tools\patterns\io\Reader, \PPHP\tools\patterns
     $this->storage = $storage;
   }
 
-
   /**
    * Метод устанавливает указатель символа на указанную позицию.
    * @param integer $position Позиция символа.
-   * @return boolean true - если позиция установлена, иначе - false.
    */
   public function setPosition($position){
     $this->storage->setI($position);
@@ -98,8 +95,6 @@ class TestReader implements \PPHP\tools\patterns\io\Reader, \PPHP\tools\patterns
   public function read(){
     return $this->storage->get();
   }
-
-
 }
 
 /**

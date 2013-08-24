@@ -1,7 +1,9 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\network\protocols\applied\http;
+
 use \PPHP\tools\classes\standard\network\protocols\applied\http as http;
-spl_autoload_register(function($className){
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
@@ -19,13 +21,11 @@ class HeaderTest extends \PHPUnit_Framework_TestCase{
    * @covers http\Header::reestablish
    */
   public function testReestablish(){
-    $header = http\Header::reestablish('nameA:valueA'."\r\n".'nameB:valueB'."\r\n");
+    $header = http\Header::reestablish('nameA:valueA' . "\r\n" . 'nameB:valueB' . "\r\n");
     $this->assertEquals('valueA', $header->getParameter('nameA')->getValue());
     $this->assertEquals('valueB', $header->getParameter('nameB')->getValue());
-
-    $header = http\Header::reestablish('nameA:valueA'."\r\n");
+    $header = http\Header::reestablish('nameA:valueA' . "\r\n");
     $this->assertEquals('valueA', $header->getParameter('nameA')->getValue());
-
     $header = http\Header::reestablish("\r\n");
     $this->assertEquals(0, count($header->getParameters()));
   }
@@ -35,13 +35,12 @@ class HeaderTest extends \PHPUnit_Framework_TestCase{
    */
   public function testIsReestablish(){
     $this->assertTrue(http\Header::isReestablish("\r\n"));
-    $this->assertTrue(http\Header::isReestablish('a:b'."\r\n"));
-    $this->assertTrue(http\Header::isReestablish('a:b'."\r\n".'c:d'."\r\n"));
-
+    $this->assertTrue(http\Header::isReestablish('a:b' . "\r\n"));
+    $this->assertTrue(http\Header::isReestablish('a:b' . "\r\n" . 'c:d' . "\r\n"));
     $this->assertFalse(http\Header::isReestablish(''));
     $this->assertFalse(http\Header::isReestablish('a:b'));
-    $this->assertFalse(http\Header::isReestablish('a:b'."\r\n".'c:d'));
-    $this->assertFalse(http\Header::isReestablish('a:b'."\r\n"."\r\n"));
+    $this->assertFalse(http\Header::isReestablish('a:b' . "\r\n" . 'c:d'));
+    $this->assertFalse(http\Header::isReestablish('a:b' . "\r\n" . "\r\n"));
   }
 
   /**
@@ -75,7 +74,7 @@ class HeaderTest extends \PHPUnit_Framework_TestCase{
   public function testInterpretation(){
     $this->object->addParameterStr('nameA', 'valueA');
     $this->object->addParameterStr('nameB', 'valueB');
-    $this->assertEquals('nameA:valueA'."\r\n".'nameB:valueB'."\r\n", $this->object->interpretation());
+    $this->assertEquals('nameA:valueA' . "\r\n" . 'nameB:valueB' . "\r\n", $this->object->interpretation());
   }
 
   /**

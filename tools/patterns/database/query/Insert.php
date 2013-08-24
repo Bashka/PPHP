@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет SQL запрос для вставки записи в таблицу.
@@ -52,20 +53,17 @@ class Insert extends ComponentQuery{
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     $mask = parent::reestablish($string);
-
     $o = new self(Table::reestablish($mask[1]));
     $data = explode('VALUES', $mask[2]);
-
     // Обработка полей
     $fields = explode(',', substr(trim($data[0]), 1, -1));
-
     // Обработка значений
     $values = explode(',', substr(trim($data[1]), 1, -1));
-
     // Запись данных в запрос
     foreach($fields as $k => $v){
       $o->addData(Field::reestablish(trim($v)), substr(trim($values[$k]), 1, -1));
     }
+
     return $o;
   }
 
@@ -93,6 +91,7 @@ class Insert extends ComponentQuery{
     exceptions\InvalidArgumentException::verifyType($value, 'sifb');
     $this->fields[] = $field;
     $this->values[] = $value;
+
     return $this;
   }
 
@@ -103,6 +102,7 @@ class Insert extends ComponentQuery{
    */
   public function setSelect(Select $select){
     $this->select = $select;
+
     return $this;
   }
 
@@ -118,17 +118,16 @@ class Insert extends ComponentQuery{
     if(count($this->values) == 0 && !is_object($this->select)){
       throw new exceptions\NotFoundDataException('Нет данных для формирования строки.');
     }
-
     try{
       $resultString = 'INSERT INTO `' . $this->table->interpretation($driver) . '` (';
       foreach($this->fields as $field){
         $resultString .= $field->interpretation($driver) . ',';
       }
       $resultString = substr($resultString, 0, strlen($resultString) - 1);
-
       // Генерация запроса с данными вложенного запроса
       if(is_object($this->select)){
         $resultString = ') (' . $this->select->interpretation($driver) . ')';
+
         return $resultString;
       }
     }
@@ -138,7 +137,6 @@ class Insert extends ComponentQuery{
     catch(exceptions\InvalidArgumentException $exc){
       throw $exc;
     }
-
     // Генерация запроса с константными данными
     $resultString .= ') VALUES (';
     foreach($this->values as $val){
@@ -146,6 +144,7 @@ class Insert extends ComponentQuery{
     }
     $resultString = substr($resultString, 0, strlen($resultString) - 1);
     $resultString .= ')';
+
     return $resultString;
   }
 

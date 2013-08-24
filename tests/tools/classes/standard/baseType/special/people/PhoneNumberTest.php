@@ -1,7 +1,9 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\baseType\special\people;
+
 use PPHP\tools\classes\standard\baseType\special\people\PhoneNumber;
-spl_autoload_register(function($className){
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
@@ -12,7 +14,6 @@ class PhoneNumberTest extends \PHPUnit_Framework_TestCase{
   public function testIsReestablish(){
     $this->assertTrue(PhoneNumber::isReestablish('+9(99999)999999999'));
     $this->assertTrue(PhoneNumber::isReestablish('+123(1)1'));
-
     $this->assertFalse(PhoneNumber::isReestablish(''));
     $this->assertFalse(PhoneNumber::isReestablish('+0(0)0'));
     $this->assertFalse(PhoneNumber::isReestablish('0(123)4567890'));

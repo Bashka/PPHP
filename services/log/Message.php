@@ -14,16 +14,19 @@ class Message implements Interpreter{
    * @var string
    */
   protected $content;
+
   /**
    * Тип сообщения.
    * @var string
    */
   protected $type;
+
   /**
    * Дата создания сообщения.
    * @var string
    */
   protected $date;
+
   /**
    * Исключение.
    * @var \Exception
@@ -47,7 +50,7 @@ class Message implements Interpreter{
    * @param \Exception $exception [optional] Исклюлчение - основание.
    * @return Message
    */
-  public static function createNotice($content, \Exception $exception=null){
+  public static function createNotice($content, \Exception $exception = null){
     return new static($content, LogManager::NOTICE);
   }
 
@@ -58,7 +61,7 @@ class Message implements Interpreter{
    * @param \Exception $exception [optional] Исклюлчение - основание.
    * @return Message
    */
-  public static function createWarning($content, \Exception $exception=null){
+  public static function createWarning($content, \Exception $exception = null){
     return new static($content, LogManager::WARNING, $exception);
   }
 
@@ -69,7 +72,7 @@ class Message implements Interpreter{
    * @param \Exception $exception [optional] Исклюлчение - основание.
    * @return Message
    */
-  public static function createError($content, \Exception $exception=null){
+  public static function createError($content, \Exception $exception = null){
     return new static($content, LogManager::ERROR, $exception);
   }
 
@@ -78,7 +81,7 @@ class Message implements Interpreter{
    * @param string $type Тип сообщения.
    * @param \Exception $exception [optional] Исклюлчение - основание.
    */
-  private function __construct($content, $type=LogManager::ERROR, \Exception $exception=null){
+  private function __construct($content, $type = LogManager::ERROR, \Exception $exception = null){
     $this->date = date('d.m.Y H:i:s', time());
     $this->content = $content;
     $this->type = $type;
@@ -119,10 +122,11 @@ class Message implements Interpreter{
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){
-    $result = strtoupper($this->type).'['.$this->date.']: '.$this->content;
+    $result = strtoupper($this->type) . '[' . $this->date . ']: ' . $this->content;
     if(!empty($this->exception)){
-      $result .= get_class($this->exception).'['.$this->exception->getFile().' - '.$this->exception->getLine().']: '.$this->exception->getMessage()."\n";
+      $result .= get_class($this->exception) . '[' . $this->exception->getFile() . ' - ' . $this->exception->getLine() . ']: ' . $this->exception->getMessage() . "\n";
     }
-    return $result.';'.PHP_EOL;
+
+    return $result . ';' . PHP_EOL;
   }
 }

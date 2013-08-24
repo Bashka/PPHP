@@ -40,17 +40,29 @@ class Field extends query\Field implements Metamorphosis{
     catch(exceptions\ComponentClassException $e){
       throw new exceptions\NotFoundDataException('Отсутствует требуемое свойство [' . $driver . '] у класса [' . $className->getName() . '].', 1, $e);
     }
-    if(!$reflectionField->isMetadataExists(self::ORM_FIELD_NAME)){
-      throw new exceptions\NotFoundDataException('Отсутствуют необходимые метаданные [' . self::ORM_FIELD_NAME . '] свойства [' . $driver . '] для формирования объекта.');
+    if($reflectionField->getName() == 'OID'){
+      $field = new query\Field($object->getMetadata(Join::ORM_PK));
+      // Поле относится к текущему классу
+      try{
+        $field->setTable(Table::metamorphose($object));
+      }
+      catch(exceptions\NotFoundDataException $e){
+        throw $e;
+      }
     }
-    $field = new query\Field($reflectionField->getMetadata(self::ORM_FIELD_NAME));
-    // Поиск класса, к которому относится поле
-    $reflectionClass = $reflectionField->getDeclaringClass()->getName();
-    try{
-      $field->setTable(Table::metamorphose($reflectionClass::getReflectionClass()));
-    }
-    catch(exceptions\NotFoundDataException $e){
-      throw $e;
+    else{
+      if(!$reflectionField->isMetadataExists(self::ORM_FIELD_NAME)){
+        throw new exceptions\NotFoundDataException('Отсутствуют необходимые метаданные [' . self::ORM_FIELD_NAME . '] свойства [' . $driver . '] для формирования объекта.');
+      }
+      $field = new query\Field($reflectionField->getMetadata(self::ORM_FIELD_NAME));
+      // Поиск класса, к которому относится поле
+      $reflectionClass = $reflectionField->getDeclaringClass()->getName();
+      try{
+        $field->setTable(Table::metamorphose($reflectionClass::getReflectionClass()));
+      }
+      catch(exceptions\NotFoundDataException $e){
+        throw $e;
+      }
     }
 
     return $field;

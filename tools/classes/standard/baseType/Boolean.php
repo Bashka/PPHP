@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType;
+
 use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
@@ -17,9 +18,7 @@ class Boolean extends Wrapper{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      '((?:true)|(?:false))'
-    ];
+    return ['((?:true)|(?:false))'];
   }
 
   /**
@@ -33,7 +32,6 @@ class Boolean extends Wrapper{
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     parent::reestablish($string);
-
     if($string == 'true'){
       return new self(true);
     }

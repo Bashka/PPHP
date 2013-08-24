@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\storage\session;
+
 use \PPHP\tools\patterns\singleton as singleton;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
@@ -9,22 +10,38 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  * @package PPHP\tools\classes\standard\storage\session
  */
 class SessionProvider implements singleton\Singleton{
-use singleton\TSingleton;
+  use singleton\TSingleton;
+
+  const DEFAULT_SESSION_NAME = 'PHPSESSID';
 
   /**
    * Метод открывает сессию.
-   * @param string $sessionName Имя сессии.
-   *
+   * @param string $sessionName [optional] Имя сессии.
+   * @param string $id [optional] Идентификатор сессии.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return boolean true - в случае успешного завершения операции, иначе - false.
    */
-  public function start($sessionName = 'PHPSESSID'){
+  public function start($sessionName = self::DEFAULT_SESSION_NAME, $id = null){
     exceptions\InvalidArgumentException::verifyType($sessionName, 'S');
-
-    if(session_status() == 1){
+    exceptions\InvalidArgumentException::verifyType($id, 'nS');
+    if(session_status() == PHP_SESSION_NONE){
+      if(!is_null($id)){
+        session_id($id);
+      }
       session_name($sessionName);
+
       return session_start();
     }
+
+    return true;
+  }
+
+  /**
+   * Метод возвращает идентификатор текущей сессии.
+   * @return string Идентификатор сессии или пустая строка, если сессия не открыта.
+   */
+  public function getID(){
+    return session_id();
   }
 
   /**
@@ -32,11 +49,14 @@ use singleton\TSingleton;
    * @return boolean true - в случае успешного завершения операции, иначе - false.
    */
   public function destroy(){
-    if(session_status() != 1){
+    if(session_status() != PHP_SESSION_NONE){
       $_SESSION = [];
       unset($_COOKIE[session_name()]);
+
       return session_destroy();
     }
+
+    return true;
   }
 
   /**
@@ -58,6 +78,7 @@ use singleton\TSingleton;
    */
   public function get($key){
     exceptions\InvalidArgumentException::verifyType($key, 'S');
+
     return isset($_SESSION[$key])? $_SESSION[$key] : null;
   }
 
@@ -73,6 +94,7 @@ use singleton\TSingleton;
       return false;
     }
     unset($_SESSION[$key]);
+
     return true;
   }
 
@@ -84,6 +106,7 @@ use singleton\TSingleton;
    */
   public function isExists($key){
     exceptions\InvalidArgumentException::verifyType($key, 'S');
+
     return isset($_SESSION[$key]);
   }
 }

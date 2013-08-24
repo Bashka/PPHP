@@ -10,12 +10,14 @@ class ChildMock extends ParentMock{
   // Свойство проецируется на поле df таблицы класса
   /**
    * @ORM\ColumnName df
+   * @ORM\Unique
    */
   private $d = 4;
 
   // Свойство проецируется на поле ef таблицы класса
   /**
    * @ORM\ColumnName ef
+   * @ORM\Unique
    */
   protected $e = 5;
 

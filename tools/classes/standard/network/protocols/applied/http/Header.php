@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\network\protocols\applied\http;
+
 use \PPHP\tools\patterns\interpreter as interpreter;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
@@ -24,9 +25,8 @@ class Header extends interpreter\RestorableAdapter implements interpreter\Interp
     if(is_null($driver)){
       $driver = "\r\n";
     }
-    return [
-      '(?:'.$driver.')|(?:(?:'.Parameter::getMasks()[0].$driver.')+)'
-    ];
+
+    return ['(?:' . $driver . ')|(?:(?:' . Parameter::getMasks()[0] . $driver . ')+)'];
   }
 
   /**
@@ -43,7 +43,6 @@ class Header extends interpreter\RestorableAdapter implements interpreter\Interp
     }
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     parent::reestablish($string, $driver);
-
     $o = new self;
     $string = trim($string);
     if($string !== ''){
@@ -52,6 +51,7 @@ class Header extends interpreter\RestorableAdapter implements interpreter\Interp
         $o->addParameter(Parameter::reestablish($param));
       }
     }
+
     return $o;
   }
 
@@ -84,9 +84,7 @@ class Header extends interpreter\RestorableAdapter implements interpreter\Interp
   /**
    * Метод возвращает строку, полученную при интерпретации объекта.
    * @abstract
-   *
    * @param mixed $driver [optional] Разделитель компонентов заголовка. По умолчанию \r\n.
-   *
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){
@@ -100,6 +98,7 @@ class Header extends interpreter\RestorableAdapter implements interpreter\Interp
     foreach($this->parameters as $parameter){
       $result .= $parameter->interpretation($driver) . $driver;
     }
+
     return $result;
   }
 
@@ -120,6 +119,7 @@ class Header extends interpreter\RestorableAdapter implements interpreter\Interp
     if(!$this->hasParameter($name)){
       return false;
     }
+
     return $this->parameters[$name];
   }
 
@@ -130,6 +130,7 @@ class Header extends interpreter\RestorableAdapter implements interpreter\Interp
    */
   public function getParameterValue($name){
     $parameter = $this->getParameter($name);
+
     return ($parameter)? $parameter->getValue() : false;
   }
 }

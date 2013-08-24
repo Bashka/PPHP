@@ -7,7 +7,7 @@ namespace PPHP\tools\classes\standard\fileSystem\io;
  * @package PPHP\tools\classes\standard\fileSystem\io
  */
 class BlockingFileReader extends FileReader implements \SplSubject{
-use \PPHP\tools\patterns\observer\TSubject;
+  use \PPHP\tools\patterns\observer\TSubject;
 
   /**
    * Метод дополнен оповещением подписчиков о закрытии потока.
@@ -18,6 +18,7 @@ use \PPHP\tools\patterns\observer\TSubject;
     if($result){
       $this->notify();
     }
+
     return $result;
   }
 }

@@ -1,12 +1,13 @@
 <?php
 namespace PPHP\services\configuration;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 use PPHP\tools\classes\standard\fileSystem\ComponentFileSystem;
 use PPHP\tools\classes\standard\fileSystem\FileINI;
 use PPHP\tools\classes\standard\fileSystem\LockException;
 use PPHP\tools\classes\standard\fileSystem\NotExistsException;
 use PPHP\tools\patterns\io\IOException;
-use \PPHP\tools\patterns\singleton as singleton;
+use PPHP\tools\patterns\singleton as singleton;
 
 /**
  * Класс служит для управления конфигурацией системы.
@@ -14,7 +15,7 @@ use \PPHP\tools\patterns\singleton as singleton;
  * @package PPHP\services\configuration
  */
 class Configurator implements singleton\Singleton{
-use singleton\TSingleton;
+  use singleton\TSingleton;
 
   /**
    * Имя файла инициализации.
@@ -50,7 +51,8 @@ use singleton\TSingleton;
     $positionDelimiter = strpos($varName, '_');
     $result = new \stdClass();
     $result->section = substr($varName, 0, $positionDelimiter);
-    $result->key = substr($varName, $positionDelimiter+1);
+    $result->key = substr($varName, $positionDelimiter + 1);
+
     return $result;
   }
 
@@ -91,7 +93,7 @@ use singleton\TSingleton;
   public function set($section, $key, $value){
     exceptions\InvalidArgumentException::verifyType($section, 'S');
     exceptions\InvalidArgumentException::verifyType($key, 'S');
-    $value = (string)$value;
+    $value = (string) $value;
     try{
       $this->ini->set($key, $value, $section);
       $this->ini->rewrite();
@@ -105,6 +107,7 @@ use singleton\TSingleton;
     catch(IOException $e){
       throw new exceptions\NotFoundDataException('Невозможно получить доступ к конфигурации системы.', 1, $e);
     }
+
     return true;
   }
 
@@ -154,6 +157,7 @@ use singleton\TSingleton;
     catch(IOException $e){
       throw new exceptions\NotFoundDataException('Невозможно получить доступ к конфигурации системы.', 1, $e);
     }
+
     return true;
   }
 
@@ -179,6 +183,7 @@ use singleton\TSingleton;
 
   function __get($name){
     $name = $this->parseVarName($name);
+
     return $this->get($name->section, $name->key);
   }
 
@@ -189,6 +194,7 @@ use singleton\TSingleton;
 
   function __isset($name){
     $name = $this->parseVarName($name);
+
     return $this->isExists($name->section, $name->key);
   }
 

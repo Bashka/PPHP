@@ -3,7 +3,7 @@ namespace PPHP\tests\services\database;
 
 use PPHP\services\database\DataMapperManager;
 
-spl_autoload_register(function($className){
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';

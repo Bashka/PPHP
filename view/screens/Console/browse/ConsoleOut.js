@@ -56,11 +56,29 @@ YUI.add('PJS.screens.Console.browse.ConsoleOut', function(Y){
         action: action,
         args: args
       };
-      this.get('content').append(request);
+      var firstChild = this.get('content').one('*');
+      if(!firstChild){
+        this.get('content').append(request);
+      }
+      else{
+        firstChild.insert(request, 'before');
+      }
     },
 
     addAnswer: function(text){
-      this.get('content').append(ConsoleOut.ANSWER.cloneNode().setHTML(this._generateNumerator()+'. < '+text));
+      var node = ConsoleOut.ANSWER.cloneNode().setHTML(this._generateNumerator()+'. < '+text);
+      if((typeof text) == 'object' || (typeof text) == 'array'){
+        node.PJS_answer = Y.JSON.stringify(text);
+        node.addClass('pjs-screens-console-browse-complexAnswer');
+      }
+      var firstChild = this.get('content').one('*');
+      if(!firstChild){
+        this.get('content').append(node);
+      }
+      else{
+        firstChild.insert(node, 'before');
+      }
+
     },
 
     empty: function(){
@@ -69,4 +87,4 @@ YUI.add('PJS.screens.Console.browse.ConsoleOut', function(Y){
   });
 
   Y.namespace('PJS.screens.Console.browse').ConsoleOut = ConsoleOut;
-}, '1.0', {requires: ['widget', 'node']});
+}, '1.0', {requires: ['widget', 'node', 'json-stringify']});

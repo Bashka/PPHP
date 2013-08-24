@@ -13,6 +13,7 @@ use PPHP\tools\classes\standard\baseType\Integer;
 use PPHP\tools\classes\standard\baseType\special\Alias;
 use PPHP\tools\classes\standard\baseType\special\Name;
 use PPHP\tools\classes\standard\fileSystem\ComponentFileSystem;
+use PPHP\tools\classes\standard\storage\database\UncertaintyException;
 
 /**
  * Класс расширяет стандартное отражения архива модуля для добавления возможностей их установки в систему.
@@ -164,17 +165,20 @@ class ReflectionArchiveModule extends sp\ReflectionArchiveModule{
       foreach($this->getAccess() as $method => $roles){
         foreach($roles as $role){
           // Определения наличия указанной роли.
-          if(($role = $accessController->getOIDRole(new Alias($role))) !== false){
+          try{
+            $role = $accessController->getOIDRole(new Alias($role));
             try{
               // Попытка добавление права доступа.
               $rule = $accessController->addRule(new Name($name), new Name($method));
             }
             catch(DuplicationException $exc){
               // В случае наличия добавляемого права доступа, получение его идентификатора.
-              $rule = $accessController->getRuleFromPurpose(new Name($name), new Name($method))->getOID();
+              $rule = $accessController->getOIDRule(new Name($name), new Name($method));
             }
-            // Расширение роли указанным правом доступа.
             $accessController->expandRole(new Integer($role), new Integer($rule));
+          }
+          catch(UncertaintyException $e){
+            continue;
           }
         }
       }
@@ -197,10 +201,17 @@ class ReflectionArchiveModule extends sp\ReflectionArchiveModule{
       $address = $_SERVER['DOCUMENT_ROOT'] . (new sp\ReflectionModule($parent))->getAddress(); // Выброс исключений не предполагается
     }
     else{
-      $address = $_SERVER['DOCUMENT_ROOT'] . '/' . ModulesRouter::MODULES_DIR;
+      $address = $_SERVER['DOCUMENT_ROOT'] . '/' . ModulesRouter::MODULES_DIR . '/';
     }
     try{
-      $this->expand(ComponentFileSystem::constructDirFromAddress($address));
+      $rootDir = ComponentFileSystem::constructDirFromAddress($address . $name);
+      $rootDir->create();
+    }
+    catch(DuplicationException $e){
+      throw new DuplicationException('Невозможно распаковать архив. Целевой модуль [' . $name . '] уже существует в файловой системе.', 1, $e);
+    }
+    try{
+      $this->expand($rootDir);
     }
     catch(DuplicationException $e){
       throw $e;

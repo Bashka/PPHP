@@ -1,0 +1,40 @@
+/*Root tape*/
+.yui3-menutape-root > ul{
+    color: red;
+    list-style-type: none;
+}
+
+/*Root tape items*/
+.yui3-menutape-root > ul > .yui3-menuitem{
+    float: left;
+    margin-left: 10px;
+}
+
+/*Sub tape*/
+.yui3-menutape-sub > ul{
+    color: black;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid black;
+}
+
+/*Sub tape items*/
+.yui3-menutape-sub > ul > .yui3-menuitem{
+
+}
+
+/*Sub tape close*/
+.yui3-menutape-close{
+    display: none;
+}
+
+/*Multisub tape*/
+.yui3-menutape-multisub{
+
+}
+
+/*All items*/
+.yui3-menuitem-content{
+
+}

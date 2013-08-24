@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\essence\access\authenticated;
+
 use \PPHP\tools\patterns\database as database;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
@@ -11,14 +12,28 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  * Класс может использоваться как родительский для таких сущностей, как: Учетная запись, Доступный по паролю файл, Доступный по паролю контент и т.д.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\essence\access\authenticated
+ * @ORM\Table AuthenticatedEntity
+ * @ORM\PK OID
  */
 abstract class AuthenticatedEntity extends database\LongObject{
   /**
    * Пароль.
    * @var string
+   * @ORM\ColumnName password
    */
   protected $password;
 
+  protected function getSavedState(){
+    return get_object_vars($this);
+  }
+
+  protected function setSavedState(array $state){
+    foreach($state as $k => $v){
+      if(property_exists($this, $k) && $this::getReflectionProperty($k)->getDeclaringClass()->getName() === get_class()){
+        $this->$k = $state[$k];
+      }
+    }
+  }
 
   /**
    * Метод устанавливает пароль сущности.
@@ -27,7 +42,6 @@ abstract class AuthenticatedEntity extends database\LongObject{
    */
   public function setPassword($password){
     exceptions\InvalidArgumentException::verifyType($password, 'S');
-
     $this->password = $password;
   }
 
@@ -38,9 +52,4 @@ abstract class AuthenticatedEntity extends database\LongObject{
     return $this->password;
   }
 }
-
-AuthenticatedEntity::getReflectionClass()->setMetadata('NameTable', 'AuthenticatedEntity');
-AuthenticatedEntity::getReflectionClass()->setMetadata('KeyTable', 'OID');
-
-AuthenticatedEntity::getReflectionProperty('password')->setMetadata('NameFieldTable', 'password');
 

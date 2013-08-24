@@ -15,7 +15,11 @@ html{
 }
 
 .yui3-consoleout .pjs-screens-console-browse-answer{
-    color: silver
+    color: silver;
+}
+
+.pjs-screens-console-browse-complexAnswer{
+    cursor: help;
 }
 
 

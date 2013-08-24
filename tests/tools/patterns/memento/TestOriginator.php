@@ -1,12 +1,12 @@
 <?php
 namespace PPHP\tests\tools\patterns\memento;
+
 use \PPHP\tools\patterns\memento as memento;
 
 class TestOriginator implements memento\Originator{
-use memento\TOriginator;
+  use memento\TOriginator;
 
   private $testVar = 5;
-
 
   public function getTestVar(){
     return $this->testVar;

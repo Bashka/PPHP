@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\metadata;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Классическая реализация интерфейса Described.
@@ -25,41 +26,34 @@ trait TDescribed{
 
   /**
    * Метод возвращает значение конкретных метаданных элемента.
-   *
-   * @param $metadataName Имя метаданных.
-   *
+   * @param string $metadataName Имя метаданных.
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @return string|null Метод возвращает значение метаданных или null, если метаданные не установлены.
    */
   public function getMetadata($metadataName){
     exceptions\InvalidArgumentException::verifyType($metadataName, 'S');
-
     if(!array_key_exists($metadataName, $this->metadata)){
       return null;
     }
+
     return $this->metadata[$metadataName];
   }
 
   /**
    * Метод устанавливает значение метаданных.
-   *
    * @param string $metadataName  Имя метаданных.
    * @param string $metadataValue Значение метаданных.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   public function setMetadata($metadataName, $metadataValue){
     exceptions\InvalidArgumentException::verifyType($metadataName, 'S');
     exceptions\InvalidArgumentException::verifyType($metadataValue, 's');
-
     $this->metadata[$metadataName] = $metadataValue;
   }
 
   /**
    * Метод проверяет, существуют ли заданные метаданные в вызываемом представлении.
-   *
-   * @param $metadataName Имя метаданных.
-   *
+   * @param string $metadataName Имя метаданных.
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @return boolean true - если метаданные существуют, иначе - false.
    */
@@ -71,14 +65,11 @@ trait TDescribed{
 
   /**
    * Метод удаляет метаданные из класса.
-   *
    * @param string $metadataName Удаляемые метаданные.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   public function removeMetadata($metadataName){
     exceptions\InvalidArgumentException::verifyType($metadataName, 'S');
-
     if(isset($this->metadata[$metadataName])){
       unset($this->metadata[$metadataName]);
     }

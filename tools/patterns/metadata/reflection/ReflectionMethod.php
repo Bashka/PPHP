@@ -1,7 +1,8 @@
 <?php
 namespace PPHP\tools\patterns\metadata\reflection;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use \PPHP\tools\patterns\metadata as metadata;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\patterns\metadata as metadata;
 
 /**
  * Отражение метода класса, расширенное возможностью добавления метаданных.
@@ -28,7 +29,6 @@ class ReflectionMethod extends \ReflectionMethod implements metadata\Described{
    */
   public function __construct($class, $name){
     parent::__construct($class, $name);
-
     $docs = explode("\n", $this->getDocComment());
     $docs = array_splice($docs, 1, -1);
     foreach($docs as $doc){
@@ -36,7 +36,7 @@ class ReflectionMethod extends \ReflectionMethod implements metadata\Described{
       if($doc[0] == '@'){
         $point = strpos($doc, ' ');
         if($point !== false){
-          $this->setMetadata(substr($doc, 1, $point-1), substr($doc, $point+1));
+          $this->setMetadata(substr($doc, 1, $point - 1), substr($doc, $point + 1));
         }
         else{
           $this->setMetadata(substr($doc, 1), '');
@@ -47,9 +47,7 @@ class ReflectionMethod extends \ReflectionMethod implements metadata\Described{
 
   /**
    * Метод возвращает отражение параметра метода.
-   *
    * @param integer|string $param Порядковый индекс или имя параметра.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @throws exceptions\ComponentClassException Выбрасывается в случае, если указанного параметра не существует в методе.
    * @return ReflectionParameter Отражение параметра.
@@ -68,11 +66,19 @@ class ReflectionMethod extends \ReflectionMethod implements metadata\Described{
         return $this->reflectionParameters[$param];
       }
       else{
-        throw new exceptions\ComponentClassException('Запрашиваемого параметра ['.$param.'] метода ['.$this->getName().'] не существует.');
+        throw new exceptions\ComponentClassException('Запрашиваемого параметра [' . $param . '] метода [' . $this->getName() . '] не существует.');
       }
     }
     else{
       throw exceptions\InvalidArgumentException::getTypeException(['integer', 'string'], gettype($param));
     }
+  }
+
+  /**
+   * Метод возвращает документацию компонента.
+   * @return ReflectionDoc Документация компонента.
+   */
+  public function getDoc(){
+    return new ReflectionDoc($this->getDocComment());
   }
 }

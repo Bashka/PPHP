@@ -1,7 +1,8 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
-use \PPHP\tools\patterns\interpreter as interpreter;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\patterns\interpreter as interpreter;
 
 /**
  * Классы, реализующие данный класс являются частью унифицированной SQL инструкции.

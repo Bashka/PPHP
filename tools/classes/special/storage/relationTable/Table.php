@@ -10,11 +10,13 @@ class Table{
    * @var \PPHP\tools\classes\special\storage\relationTable\Structure
    */
   private $structure;
+
   /**
    * Указатель таблицы.
    * @var \PPHP\tools\classes\special\storage\relationTable\Pointer
    */
   private $pointer;
+
   /**
    * Длина записи.
    * @var integer
@@ -57,6 +59,7 @@ class Table{
     }
     $this->pointer->nextPosition();
     $result = $this->structure->unserializeData($data);
+
     return $result;
   }
 
@@ -83,6 +86,7 @@ class Table{
       $writer->write(substr($data, $i++, 1));
     }
     $this->pointer->nextPosition();
+
     return true;
   }
 
@@ -107,6 +111,7 @@ class Table{
       $writer->write(' ');
     }
     $this->pointer->nextPosition();
+
     return true;
   }
 }

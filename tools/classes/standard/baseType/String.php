@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType;
+
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
@@ -44,9 +45,7 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      '.*'
-    ];
+    return ['.*'];
   }
 
   /**
@@ -58,6 +57,7 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
    */
   public static function reestablish($string, $driver = null){
     exceptions\InvalidArgumentException::verifyType($string, 's');
+
     return new self((string) $string);
   }
 
@@ -71,10 +71,8 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
   /**
    * Метод формирует случайную строку зананной длины.
    * @static
-   *
    * @param integer $length Длина строки.
    * @param integer $srand Число для инициализации генератора случайных чисел.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return String
    */
@@ -82,7 +80,6 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
     exceptions\InvalidArgumentException::verifyType($length, 'i');
     $srand = !is_null($srand)? $srand : time();
     exceptions\InvalidArgumentException::verifyType($srand, 'if');
-
     $string = '';
     srand($srand);
     while($length > 0){
@@ -90,6 +87,7 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
       $string .= self::$symbol[$index][rand(0, count(self::$symbol[$index]) - 1)];
       $length--;
     }
+
     return new self($string);
   }
 
@@ -124,10 +122,8 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Присваивание значение элементу запщено.
-   *
    * @param $offset
    * @param $value
-   *
    * @throws exceptions\RuntimeException Выбрасывается в случае вызова метода.
    */
   public function offsetSet($offset, $value){
@@ -170,6 +166,7 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
   public function prev(){
     if($this->point > 0){
       $this->point--;
+
       return true;
     }
     else{
@@ -198,6 +195,7 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
     if($this->point < 0 || $this->point >= $this->count()){
       return false;
     }
+
     return true;
   }
 
@@ -229,63 +227,55 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод возвращает подстроку строки.
-   *
    * @param integer $start [optional] Позиция начального символа. Если параметр не задан, используется позиция, на которую ссылается внутренний указатель.
    * @param integer $length [optional] Число отбираемых символов справа от начального символа если значение положительное, и слева если отрицательное. Если параметр не задан, выбирается все символы до конца строки.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return self Результирующая подстрока.
    */
   public function sub($start = null, $length = null){
     $start = ($start === null)? $this->point : $start;
     $length = ($length === null)? $this->count() : $length;
-
     exceptions\InvalidArgumentException::verifyType($start, 'i');
     exceptions\InvalidArgumentException::verifyType($length, 'i');
-
     if($length < 0){
-      $start = $start+$length;
+      $start = $start + $length;
       if($start < 0){
-        $length = $length+(-$start);
+        $length = $length + (-$start);
         $start = 0;
       }
       $length = -$length;
     }
+
     return new static(iconv_substr($this->val, $start, $length, 'UTF-8'));
   }
 
   /**
    * Метод возвращает подстроку строки в байтах.
-   *
    * @param integer $start [optional] Позиция начального байта.
    * @param integer $length [optional] Число отбираемых символов справа от начального символа если значение положительное, и слева если отрицательное. Если параметр не задан, выбирается все символы до конца строки.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return self Результирующая подстрока.
    */
   public function subByte($start = null, $length = null){
     $start = ($start === null)? $this->point : $start;
     $length = ($length === null)? $this->count() : $length;
-
     exceptions\InvalidArgumentException::verifyType($start, 'i');
     exceptions\InvalidArgumentException::verifyType($length, 'i');
-
     if($length < 0){
-      $start = $start+$length;
+      $start = $start + $length;
       if($start < 0){
-        $length = $length+(-$start);
+        $length = $length + (-$start);
         $start = 0;
       }
       $length = -$length;
     }
+
     return new static(substr($this->val, $start, $length));
   }
 
   /**
    * Метод возвращает подстроку из указанно числа символов начиная с первого.
-   *
    * @param integer $length Отбираемое число символов.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return self Результирующая подстрока.
    */
@@ -298,9 +288,7 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод возвращает подстроку из указанного числа символов начиная с последнего.
-   *
    * @param integer $length Отбираемое число символов.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return self Результирующая подстрока.
    */
@@ -313,11 +301,9 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод дополняет строку до указанной длины символов.
-   *
    * @param integer $length Требуемая длина строки. Если текущая длина больше или равна требуемой, то дополнения не происходит.
    * @param string $char [optional] Символ, заполняющий недостающую длину строки. По умолчанию пробел.
    * @param integer $type Тип дополнения. Одна из констрант данного класса тип PAD_*.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return self Результирующая строка.
    */
@@ -326,7 +312,6 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
     exceptions\InvalidArgumentException::verifyVal($length, 'i > 0');
     exceptions\InvalidArgumentException::verifyType($char, 'S');
     exceptions\InvalidArgumentException::verifyType($type, 'i');
-
     $count = $this->count();
     if($count < $length){
       $val = $this->getVal();
@@ -347,6 +332,7 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
           }
         }
       }
+
       return new static($val);
     }
     else{
@@ -356,10 +342,8 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод заменяет указанные подстроки в строке на данные.
-   *
    * @param string $search Искомая подстрока.
    * @param string $replace Заменяющая подстрока.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return static Результирующая строка.
    */
@@ -372,10 +356,8 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод заменяет указанный шаблон на заданную строку.
-   *
    * @param string $pattern Регулярное выражение для поиска.
    * @param string $replacement Замещающая строка.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return static Результирующая строка.
    */
@@ -388,11 +370,9 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод выполняет поиск указанной подстроки в строке и возвращает ее позицию.
-   *
    * @param string $search Искомая строка.
    * @param boolean $registry [optional] Если true - то поиск выполняется без учета регистра, иначе - false.
    * @param boolean $beginning [optional] Если true - то поиск выполняется с начала строки, false - с конца строки.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return integer Позиция искомой подстроки в строке или -1 - если подстрока не найдена.
    */
@@ -400,7 +380,6 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
     exceptions\InvalidArgumentException::verifyType($search, 'S');
     exceptions\InvalidArgumentException::verifyType($registry, 'b');
     exceptions\InvalidArgumentException::verifyType($beginning, 'b');
-
     if($beginning){
       if($registry){
         return strpos($this->val, $search);
@@ -421,9 +400,7 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод выполняет поиск подстроки с помощью регулярного выражения.
-   *
    * @param string $pattern Регулярное выражение.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return integer Число найденых совпадений с шаблоном. 1 - если подстрока найдена и 0 - если нет.
    */
@@ -435,9 +412,7 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод разбивает строку на массив по указанному разделителю.
-   *
    * @param string $delimiter Разделитель.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return string[] Массив подстрок.
    */
@@ -465,7 +440,6 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод выполняет верификацию строки в соответствии с маской.
-   *
    * @param string $mask Маска верификации
    * Аргумент имеет структуру: <типВалидации> <ключи валидации>.
    * Возможные значения аргумента:
@@ -480,17 +454,14 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
    * - <= <целоеЧисло> - не более чем указанное число символов в строке;
    * - [] <целоеЧисло> <целоеЧисло> - от указанного до указанного числа символов в строке включительно;
    * - () <целоеЧисло> <целоеЧисло> - от указанного до указанного числа символов в строке.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получение недопустимого значения второго аргумента.
    * @return boolean true - если верификация пройдена, иначе - false.
    */
   public function verify($mask){
     exceptions\InvalidArgumentException::verifyType($mask, 'S');
-
     $options = explode(' ', $mask);
     $typeVerify = array_shift($options);
     $count = $this->count();
-
     switch($typeVerify){
       case '==':
         if($count != $options[0]){
@@ -557,11 +528,9 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод удаляет из строки запрещенные символы и приводит ее к указанной длине.
-   *
    * @param integer $minLength Минимальная длина строки в байтах. Если строка меньше, она дополняется слева пробелами.
    * @param integer $maxLength Максимальная длина строки в байтах. Если строка больше, она обрезается.
    * @param string $illegalChars [optional] Шаблон запрещенных символов, удаляемых из строки. Шаблон соответствует регулярному выражению для конструкции [].
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return static Результирующая строка.
    */
@@ -571,7 +540,6 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
     exceptions\InvalidArgumentException::verifyType($maxLength, 'i');
     exceptions\InvalidArgumentException::verifyVal($maxLength, 'i >= 0');
     exceptions\InvalidArgumentException::verifyType($illegalChars, 's');
-
     $count = $this->count();
     if($count < $minLength){
       $val = $this->pad($minLength)->getVal();
@@ -582,25 +550,22 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
     else{
       $val = $this->getVal();
     }
-
     if(empty($illegalChars)){
       return new static($val);
     }
     $illegalChars = preg_replace('/([\\\#\/\]\[])/', '\\\${1}', $illegalChars);
+
     return new static(preg_replace('/[' . $illegalChars . ']+/u', '', $val));
   }
 
   /**
    * Метод изменяет позицию внутреннего указателя строки на заданную.
-   *
    * @param integer $point Новая позиция внутреннего указателя строки.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае передаче параметра недопустимого типа.
    */
   public function setPoint($point){
     exceptions\InvalidArgumentException::verifyType($point, 'i');
-    exceptions\InvalidArgumentException::verifyVal($point, 'i [] 0 '.$this->length());
-
+    exceptions\InvalidArgumentException::verifyVal($point, 'i [] 0 ' . $this->length());
     $this->point = $point;
   }
 
@@ -614,21 +579,19 @@ class String extends Wrapper implements \ArrayAccess, \Iterator{
 
   /**
    * Метод возвращает следующий компонент от текущей позиции указателя компонента до указанного ограничителя.
-   *
    * @param string $delimiter Ограничитель компонента.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае передаче параметра недопустимого типа.
    * @return boolean|static Компонент или false - если указанный ограничитель не найден.
    */
   public function nextComponent($delimiter){
     exceptions\InvalidArgumentException::verifyType($delimiter, 'S');
-
     $positionDelimiter = strpos($this->val, $delimiter, $this->point);
     if($positionDelimiter < 0 || $positionDelimiter === false){
       return false;
     }
-    $component = substr($this->val, $this->point, $positionDelimiter-$this->point);
-    $this->point += strlen($component)+strlen($delimiter);
+    $component = substr($this->val, $this->point, $positionDelimiter - $this->point);
+    $this->point += strlen($component) + strlen($delimiter);
+
     return new static($component);
   }
 }

@@ -13,6 +13,6 @@ class ModuleNotFoundException extends \PPHP\tools\classes\standard\baseType\exce
    * @return static Объект данного класса с предустановленным сообщением.
    */
   public static function getException($moduleName){
-    return new static('Требуемый модуль ['.$moduleName.'] отсутствует в системе.');
+    return new static('Требуемый модуль [' . $moduleName . '] отсутствует в системе.');
   }
 }

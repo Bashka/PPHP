@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет условие сортировки результата запроса.
@@ -13,6 +14,7 @@ class OrderBy extends ComponentQuery{
    * @var Field[]
    */
   private $fields;
+
   /**
    * Способ сортировки.
    * @var string
@@ -25,7 +27,7 @@ class OrderBy extends ComponentQuery{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return ['ORDER BY (?:(?:'.Field::getMasks()[0].')|(?:'.Field::getMasks()[1].'))(?:, ?(?:(?:'.Field::getMasks()[0].')|(?:'.Field::getMasks()[1].')))* '.self::getPatterns()['types']];
+    return ['ORDER BY (?:(?:' . Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1] . '))(?:, ?(?:(?:' . Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1] . ')))* ' . self::getPatterns()['types']];
   }
 
   /**
@@ -43,14 +45,13 @@ class OrderBy extends ComponentQuery{
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
    * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return static Результирующий объект.
+   * @return OrderBy Результирующий объект.
    */
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     parent::reestablish($string);
-
     $type = trim(substr($string, -4));
-    $orderBy = new static($type);
+    $orderBy = new OrderBy($type);
     $fields = explode(',', substr(substr($string, 9), 0, -4));
     foreach($fields as $field){
       $field = trim($field);
@@ -64,6 +65,7 @@ class OrderBy extends ComponentQuery{
         throw $e;
       }
     }
+
     return $orderBy;
   }
 
@@ -87,23 +89,21 @@ class OrderBy extends ComponentQuery{
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   *
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   *
    * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return string Результат интерпретации.
    */
-  public function interpretation($driver=null){
+  public function interpretation($driver = null){
     exceptions\InvalidArgumentException::verifyType($driver, 'Sn');
     if(count($this->fields) == 0){
       throw new exceptions\NotFoundDataException('Недостаточно данных для формирования строки.');
     }
-
     $result = 'ORDER BY ';
     foreach($this->fields as $field){
-        $result .= $field->interpretation($driver) . ',';
+      $result .= $field->interpretation($driver) . ',';
     }
+
     return substr($result, 0, strlen($result) - 1) . ' ' . $this->sortedType;
   }
 

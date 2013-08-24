@@ -2,14 +2,14 @@
 namespace PPHP\services\formatting\localisation;
 
 use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
-use PPHP\tools\patterns\buffer\MapBuffer;
+use PPHP\tools\patterns\cache\Cache;
 
 /**
  * Класс отвечает за буферизацию файлов локализаций.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\services\formatting\localisation
  */
-class LocaliseBuffer extends MapBuffer{
+class LocaliseBuffer extends Cache{
   /**
    * Метод служит для запроса данных из первоисточника в случае отсутствия их в буфере.
    * @param string $key
@@ -19,8 +19,9 @@ class LocaliseBuffer extends MapBuffer{
    */
   protected function getFromSource($key, array $arguments = null){
     if(!file_exists($key)){
-      throw new NotFoundDataException('Отсутствует файл локализации ['.$key.'].');
+      throw new NotFoundDataException('Отсутствует файл локализации [' . $key . '].');
     }
+
     return parse_ini_file($key, true);
   }
 }

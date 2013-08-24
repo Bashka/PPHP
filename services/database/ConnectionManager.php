@@ -1,12 +1,13 @@
 <?php
 namespace PPHP\services\database;
-use PPHP\services\cache\CacheAdapter;
-use PPHP\services\cache\CacheSystem;
+
 use PPHP\services\configuration\Configurator;
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 use PPHP\tools\classes\standard\fileSystem\NotExistsException;
+use PPHP\tools\classes\standard\storage\cache\Cache;
+use PPHP\tools\classes\standard\storage\cache\CacheAdapter;
 use PPHP\tools\classes\standard\storage\database\PDO;
-use \PPHP\tools\patterns\singleton as singleton;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\patterns\singleton as singleton;
 
 /**
  * Класс позволяет соединиться с базой данных.
@@ -70,21 +71,18 @@ class ConnectionManager implements singleton\Singleton{
    */
   private function __construct(){
     try{
-      $this->cache = CacheSystem::getInstance();
+      $this->cache = Cache::getInstance();
     }
     catch(exceptions\NotFoundDataException $e){
       throw $e;
     }
-
-
-    if(!CacheSystem::hasCache() || !isset($this->cache->ConnectionManager_Driver)){
+    if(!Cache::hasCache() || !isset($this->cache->ConnectionManager_Driver)){
       try{
         $this->conf = Configurator::getInstance();
       }
       catch(NotExistsException $e){
         throw new exceptions\NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
       }
-
       if(!isset($this->conf->Database_Driver) || !isset($this->conf->Database_Host) || !isset($this->conf->Database_DBName) || !isset($this->conf->Database_User)){
         throw new exceptions\NotFoundDataException('Недостаточно данных для инициализации, необходимыми полями являются: Driver, Host, DBName, User');
       }
@@ -93,7 +91,6 @@ class ConnectionManager implements singleton\Singleton{
       $this->dbName = $this->conf->Database_DBName;
       $this->user = $this->conf->Database_User;
       $this->password = (isset($this->conf->Database_Password))? $this->conf->Database_Password : '';
-
       $this->cache->ConnectionManager_Driver = $this->driver;
       $this->cache->ConnectionManager_Host = $this->host;
       $this->cache->ConnectionManager_DBName = $this->dbName;
@@ -141,6 +138,7 @@ class ConnectionManager implements singleton\Singleton{
         throw $e;
       }
     }
+
     return $this->PDO;
   }
 
@@ -148,14 +146,12 @@ class ConnectionManager implements singleton\Singleton{
    * Метод изменяет одно из инициализирующих свойств на данное.
    * @param string $attributeName Имя изменяемого свойства.
    * @param string $value Новое значение свойства.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае, если недопустимый параметр или значения переданных параметров имеют неверный тип.
    */
   public function setAttribute($attributeName, $value){
     exceptions\InvalidArgumentException::verifyType($attributeName, 'S');
     exceptions\InvalidArgumentException::verifyType($value, 'S');
     exceptions\InvalidArgumentException::verifyVal($attributeName, 's # Driver|Host|DBName|User|Password');
-
     $this->conf->set('Database', $attributeName, $value);
     switch($attributeName){
       case 'Driver':
@@ -184,13 +180,11 @@ class ConnectionManager implements singleton\Singleton{
   /**
    * Метод возвращает значение заданного инициализирующего свойства.
    * @param string $attributeName Имя инициализирующего свойства.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае, если значение переданного аргумента имеет неверный тип.
    * @return string
    */
   public function getAttribute($attributeName){
     exceptions\InvalidArgumentException::verifyType($attributeName, 'S');
-
     switch($attributeName){
       case 'Driver':
         return $this->driver;

@@ -1,12 +1,13 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\storage\session;
+
 use PPHP\tools\classes\standard\storage\session\SessionProvider;
-spl_autoload_register(function($className){
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
 session_start();
-
 class SessionProviderTest extends \PHPUnit_Framework_TestCase{
   /**
    * @var SessionProvider

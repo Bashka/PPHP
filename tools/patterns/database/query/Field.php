@@ -1,13 +1,14 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет поле таблицы в запросе.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\database\query
  */
-class Field extends  ComponentQuery{
+class Field extends ComponentQuery{
   /**
    * Имя поля.
    * @var string
@@ -26,10 +27,7 @@ class Field extends  ComponentQuery{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      '`'.self::getPatterns()['fieldName'].'`',
-      Table::getPatterns()['tableName'].'\.'.self::getPatterns()['fieldName']
-    ];
+    return ['`' . self::getPatterns()['fieldName'] . '`', Table::getPatterns()['tableName'] . '\.' . self::getPatterns()['fieldName']];
   }
 
   /**
@@ -38,9 +36,7 @@ class Field extends  ComponentQuery{
    * @return string[]
    */
   public static function getPatterns($driver = null){
-    return [
-      'fieldName' => '[A-Za-z_][A-Za-z0-9_]*'
-    ];
+    return ['fieldName' => '[A-Za-z_][A-Za-z0-9_]*'];
   }
 
   /**
@@ -49,21 +45,24 @@ class Field extends  ComponentQuery{
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
    * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return static Результирующий объект.
+   * @return Field Результирующий объект.
    */
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     $mask = parent::reestablish($string);
-
     $object = null;
     if($mask['key'] == 0){
       $object = new static(substr(substr($string, 0, -1), 1));
     }
     elseif($mask['key'] == 1){
       $components = explode('.', $string);
+      /**
+       * @var Field $object
+       */
       $object = new static($components[1]);
       $object->setTable(Table::reestablish($components[0]));
     }
+
     return $object;
   }
 
@@ -83,19 +82,18 @@ class Field extends  ComponentQuery{
    */
   public function setTable(Table $table){
     $this->table = $table;
+
     return $this;
   }
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   *
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   *
    * @return string Результат интерпретации.
    */
-  public function interpretation($driver=null){
+  public function interpretation($driver = null){
     if(!empty($this->table)){
-        return $this->table->interpretation($driver) . '.' . $this->name;
+      return $this->table->interpretation($driver) . '.' . $this->name;
     }
     else{
       return '`' . $this->name . '`';

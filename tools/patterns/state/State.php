@@ -10,13 +10,12 @@ namespace PPHP\tools\patterns\state;
  */
 abstract class State{
   /**
-   * Ссылка на конеткст состояния.
-   * @var StatesContext
+   * @var StatesContext Ссылка на конеткст состояния.
    */
   protected $context;
+
   /**
-   * Массив ссылок на доступные состоянию свойства контекста.
-   * @var mixed[]
+   * @var mixed[] Массив ссылок на доступные состоянию свойства контекста.
    */
   protected $propertyLinks = [];
 

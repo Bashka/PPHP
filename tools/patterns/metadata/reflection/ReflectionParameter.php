@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\metadata\reflection;
-use \PPHP\tools\patterns\metadata as metadata;
+
+use PPHP\tools\patterns\metadata as metadata;
 
 /**
  * Отражение параметра метода, расширенное возможностью добавления метаданных.

@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType;
+
 use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
@@ -15,9 +16,7 @@ class Integer extends Wrapper{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      '-?(?:(?:0)|(?:[1-9]))([0-9]*)(.0+)?'
-    ];
+    return ['-?(?:(?:0)|(?:[1-9]))([0-9]*)(.0+)?'];
   }
 
   /**
@@ -55,13 +54,13 @@ class Integer extends Wrapper{
    * @return integer Число разрядов.
    */
   public function count(){
-    $strVal = new String(($this->val >= 0)? (string)$this->val : (string)abs($this->val));
+    $strVal = new String(($this->val >= 0)? (string) $this->val : (string) abs($this->val));
+
     return $strVal->count();
   }
 
   /**
    * Метод выполняет верификацию числа в соответствии с маской.
-   *
    * @param string $mask Маска верификации
    * Аргумент имеет структуру: <типВалидации> <ключи валидации>.
    * Возможные значения аргумента:
@@ -75,16 +74,13 @@ class Integer extends Wrapper{
    * - () <целоеЧисло> <целоеЧисло> - на отрезке чисел;
    * - in <целоеЧисло> <целоеЧисло> ... - среди указанных чисел;
    * - !in <целоеЧисло> <целоеЧисло> ... - не среди указанных чисел.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получение недопустимого значения второго аргумента.
    * @return boolean true - если верификация пройдена, иначе - false.
    */
   public function verify($mask){
     exceptions\InvalidArgumentException::verifyType($mask, 'S');
-
     $options = explode(' ', $mask);
     $typeVerify = array_shift($options);
-
     switch($typeVerify){
       case '==':
         if($this->getVal() != $options[0]){
@@ -145,23 +141,21 @@ class Integer extends Wrapper{
 
   /**
    * Метод приводит число к указанному интервалу.
-   *
    * @param integer $min [optional] Минимально допустимое значение. Если null, то ограничения нет.
    * @param integer $max [optional] Максимально допустимое значение. Если null, то ограничения нет.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return self Результирующее число.
    */
   public function prevent($min = null, $max = null){
     exceptions\InvalidArgumentException::verifyType($min, 'in');
     exceptions\InvalidArgumentException::verifyType($max, 'in');
-
     if(!is_null($min) && $this->val < $min){
       return new Integer($min);
     }
     if(!is_null($max) && $this->val > $max){
       return new Integer($max);
     }
+
     return $this;
   }
 }

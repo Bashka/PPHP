@@ -1,7 +1,8 @@
 <?php
 namespace PPHP\tools\patterns\interpreter;
 
-use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
+use PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
 
 /**
  * Объекты классов, реализующие данный интерфейс, могут быть восстановлены из других объектов.
@@ -10,12 +11,12 @@ use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 interface Metamorphosis{
   /**
-   * Метод восстанавливает объект из другого объекта.
+   * Метод восстанавливает вызываемый объект из другого объекта.
    * @abstract
-   * @param Object $object Исходный объект.
+   * @param Object $object Объект-основание.
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   * @throws exceptions\NotFoundDataException Выбрасывается в случае отсутствия требуемых для восстановления данных.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае отсутствия требуемых для восстановления данных.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return static Результирующий объект.
    */
   public static function metamorphose($object, $driver = null);

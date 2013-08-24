@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\network;
+
 use \PPHP\tools\classes\standard\baseType as baseType;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
@@ -15,16 +16,19 @@ class URL extends baseType\Wrapper{
    * @var Report
    */
   protected $report;
+
   /**
    * Адрес ресурса.
    * @var IPAddress|DomainName
    */
   protected $address;
+
   /**
    * Порт.
    * @var Port
    */
   protected $port;
+
   /**
    * Физический адрес ресурса.
    * @var baseType\special\fileSystem\FileSystemAddress
@@ -37,9 +41,7 @@ class URL extends baseType\Wrapper{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      Report::getMasks()[0].'((?:'.DomainName::getMasks()[0].')|(?:'.IPAddress4::getMasks()[0].'))(?::('.Port::getMasks()[0].'))?('.baseType\special\fileSystem\FileSystemAddress::getMasks()[0].')?'
-    ];
+    return [Report::getMasks()[0] . '((?:' . DomainName::getMasks()[0] . ')|(?:' . IPAddress4::getMasks()[0] . '))(?::(' . Port::getMasks()[0] . '))?(' . baseType\special\fileSystem\FileSystemAddress::getMasks()[0] . ')?'];
   }
 
   /**
@@ -53,9 +55,8 @@ class URL extends baseType\Wrapper{
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     $m = parent::reestablish($string);
-
     $o = new self($string);
-    $o->report = Report::reestablish($m[1].'://');
+    $o->report = Report::reestablish($m[1] . '://');
     if(DomainName::isReestablish($m[2])){
       $o->address = DomainName::reestablish($m[2]);
     }
@@ -64,6 +65,7 @@ class URL extends baseType\Wrapper{
     }
     $o->port = Port::reestablish($m[7]);
     $o->fileSystemAddress = baseType\special\fileSystem\FileSystemAddress::reestablish($m[8]);
+
     return $o;
   }
 

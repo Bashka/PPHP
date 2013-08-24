@@ -19,7 +19,7 @@ var YUI_config = {
         },
         'PJS.widgets.Screen': {
           path: 'Screen.js',
-          requires: ['widget', 'node', 'node-load', 'get', 'PJS.classes.Controller', 'PJS.services.Transformer', 'event']
+          requires: ['widget', 'node', 'node-load', 'get', 'PJS.classes.Controller', 'PJS.services.Transformer', 'event', 'PJS.services.User']
         },
         'PJS.widgets.UploaderHTML': {
           path: 'UploaderHTML.js',
@@ -56,6 +56,10 @@ var YUI_config = {
         'PJS.services.Query': {
           path: 'Query.js',
           requires: ['io-base', 'json-parse', 'json-stringify', 'event', 'node', 'oop']
+        },
+        'PJS.services.User': {
+          path: 'User.js',
+          requires: ['PJS.services.Query', 'event', 'oop']
         },
         'PJS.services.Transformer': {
           path: 'Transformer.js',

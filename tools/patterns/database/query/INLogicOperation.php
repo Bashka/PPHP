@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Логический оператор вхождения значения в указанное множество значений.
@@ -32,7 +33,7 @@ class INLogicOperation extends Condition{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return ['\(((?:'.Field::getMasks()[0].')|(?:'.Field::getMasks()[1].')) IN \(('.LogicOperation::getPatterns()['stringValue'].'(, ?'.LogicOperation::getPatterns()['stringValue'].')*)\)\)'];
+    return ['\(((?:' . Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1] . ')) IN \((' . LogicOperation::getPatterns()['stringValue'] . '(, ?' . LogicOperation::getPatterns()['stringValue'] . ')*)\)\)'];
   }
 
   /**
@@ -46,12 +47,12 @@ class INLogicOperation extends Condition{
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     $mask = parent::reestablish($string);
-
     $o = new self(Field::reestablish($mask[1]));
     $values = explode(',', $mask[2]);
     foreach($values as $value){
       $o->addValue(substr(trim($value), 1, -1));
     }
+
     return $o;
   }
 
@@ -65,9 +66,7 @@ class INLogicOperation extends Condition{
 
   /**
    * Метод добавляет значение в список допустимых.
-   *
    * @param string|integer|float|boolean $value Добавляемое значение.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @return $this Метод возвращает вызываемый объект.
    */
@@ -77,6 +76,7 @@ class INLogicOperation extends Condition{
       $value = 'true';
     }
     $this->values[] = $value;
+
     return $this;
   }
 
@@ -87,19 +87,18 @@ class INLogicOperation extends Condition{
    */
   public function setSelectQuery(Select $selectQuery){
     $this->selectQuery = $selectQuery;
+
     return $this;
   }
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   *
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   *
    * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return string Результат интерпретации.
    */
-  public function interpretation($driver=null){
+  public function interpretation($driver = null){
     exceptions\InvalidArgumentException::verifyType($driver, 'Sn');
     try{
       return '(' . $this->field->interpretation($driver) . ' IN ("' . ((empty($this->selectQuery))? implode('","', $this->values) : $this->selectQuery->interpretation($driver)) . '"))';

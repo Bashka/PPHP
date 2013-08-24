@@ -1,8 +1,10 @@
 <?php
 namespace PPHP\tools\patterns\database\associations;
-use \PPHP\tools\patterns\database\query as query;
-use \PPHP\tools\patterns\metadata\reflection as reflection;
 
+use PPHP\tools\patterns\database\query\Select;
+use PPHP\tools\patterns\metadata\reflection\ReflectionClass;
+
+// @todo: Пересмотреть документацию класса для приведения к стандарту.
 /**
  * Класс представляет множество, которое может быть восстановлено из БД.
  * Данный класс представляет множество ссылок на персистентные объекты.
@@ -15,34 +17,33 @@ use \PPHP\tools\patterns\metadata\reflection as reflection;
  */
 class LongAssociation extends \SplObjectStorage{
   /**
-   * SQL инструкция, служащая для восстановления множества.
-   * @var query\Select
+   * @var Select SQL инструкция, служащая для восстановления множества.
    */
   protected $selectQuery;
+
   /**
-   * Отображение класса, являющегося основанием для восстановления. Ассоциация может включать ссылки только на экземпляры данного класса.
-   * @var reflection\ReflectionClass
+   * @var ReflectionClass Отображение класса, являющегося основанием для восстановления. Ассоциация может включать ссылки только на экземпляры данного класса.
    */
   protected $assocClass;
 
   /**
-   * @param query\Select $selectQuery SQL инструкция, служащая для восстановления множества.
-   * @param reflection\ReflectionClass $assocClass Отображение класса, являющегося основанием для восстановления.
+   * @param Select $selectQuery SQL инструкция, служащая для восстановления множества.
+   * @param ReflectionClass $assocClass Отображение класса, являющегося основанием для восстановления.
    */
-  function __construct(query\Select $selectQuery, reflection\ReflectionClass $assocClass){
+  function __construct(Select $selectQuery, ReflectionClass $assocClass){
     $this->selectQuery = $selectQuery;
     $this->assocClass = $assocClass;
   }
 
   /**
-   * @return reflection\ReflectionClass
+   * @return ReflectionClass
    */
   public function getAssocClass(){
     return $this->assocClass;
   }
 
   /**
-   * @return query\Select
+   * @return Select
    */
   public function getSelectQuery(){
     return $this->selectQuery;

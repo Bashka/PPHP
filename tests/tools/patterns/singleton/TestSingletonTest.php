@@ -1,12 +1,13 @@
 <?php
 namespace PPHP\tests\tools\patterns\singleton;
+
 use \PPHP\tools\patterns\singleton as singleton;
-spl_autoload_register(function($className){
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
 class SingletonTest extends \PHPUnit_Framework_TestCase{
-
   /**
    * @covers singleton\Singleton::getInstance
    * @covers singleton\TSingleton::getInstance

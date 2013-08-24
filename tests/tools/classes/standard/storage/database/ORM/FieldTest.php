@@ -13,6 +13,7 @@ class FieldTest extends \PHPUnit_Framework_TestCase{
    */
   public function testMetamorphose(){
     $this->assertEquals('ParentTable.af', Field::metamorphose(ParentMock::getReflectionClass(), 'a')->interpretation());
+    $this->assertEquals('ParentTable.OID', Field::metamorphose(ParentMock::getReflectionClass(), 'OID')->interpretation());
     $this->assertEquals('ChildTable.df', Field::metamorphose(ChildMock::getReflectionClass(), 'd')->interpretation());
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException');
     Field::metamorphose(ParentMock::getReflectionClass(), 'c');

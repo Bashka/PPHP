@@ -1,7 +1,9 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\network\protocols\applied\http;
+
 use \PPHP\tools\classes\standard\network\protocols\applied\http as http;
-spl_autoload_register(function($className){
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
@@ -22,11 +24,9 @@ class ParameterTest extends \PHPUnit_Framework_TestCase{
     $param = http\Parameter::reestablish('name:value');
     $this->assertEquals('name', $param->getName());
     $this->assertEquals('value', $param->getValue());
-
     $param = http\Parameter::reestablish('name:  value');
     $this->assertEquals('name', $param->getName());
     $this->assertEquals('value', $param->getValue());
-
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\StructureException');
     http\Parameter::reestablish('name');
   }
@@ -39,7 +39,6 @@ class ParameterTest extends \PHPUnit_Framework_TestCase{
     $this->assertTrue(http\Parameter::isReestablish('a:1'));
     $this->assertTrue(http\Parameter::isReestablish('HEllo:world_'));
     $this->assertTrue(http\Parameter::isReestablish('a:'));
-
     $this->assertFalse(http\Parameter::isReestablish(':b'));
     $this->assertFalse(http\Parameter::isReestablish('ab'));
     $this->assertFalse(http\Parameter::isReestablish('a:

@@ -1,7 +1,9 @@
 <?php
 namespace PPHP\tests\tools\patterns\memento;
+
 use \PPHP\tools\patterns\memento as memento;
-spl_autoload_register(function($className){
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
@@ -20,7 +22,6 @@ class MementoTest extends \PHPUnit_Framework_TestCase{
     $this->originator = new TestOriginator();
     $this->memento = $this->originator->createMemento();
   }
-
 
   /**
    * @covers memento\TOriginator::createMemento

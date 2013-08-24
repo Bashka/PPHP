@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special;
+
 use \PPHP\tools\classes\standard\baseType as baseType;
 use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
@@ -16,9 +17,7 @@ class Name extends baseType\Wrapper{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      '[A-Za-z_][A-Za-z_0-9]*'
-    ];
+    return ['[A-Za-z_][A-Za-z_0-9]*'];
   }
 
   /**

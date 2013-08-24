@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\network\protocols\applied\http;
+
 use \PPHP\tools\patterns\interpreter as interpreter;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
@@ -14,6 +15,7 @@ class Parameter extends interpreter\RestorableAdapter implements interpreter\Int
    * @var string
    */
   protected $name;
+
   /**
    * Значение параметра.
    * @var string
@@ -26,9 +28,7 @@ class Parameter extends interpreter\RestorableAdapter implements interpreter\Int
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      '([A-Za-z0-9_\-]+):([^\n\r]*)'
-    ];
+    return ['([A-Za-z0-9_\-]+):([^\n\r]*)'];
   }
 
   /**
@@ -54,13 +54,11 @@ class Parameter extends interpreter\RestorableAdapter implements interpreter\Int
   /**
    * Метод возвращает строку, полученную при интерпретации объекта.
    * @abstract
-   *
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   *
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){
-    return $this->name.':'.$this->value;
+    return $this->name . ':' . $this->value;
   }
 
   /**

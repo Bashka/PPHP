@@ -2,11 +2,11 @@
 namespace PPHP\services\modules;
 
 use PPHP\model\modules\SystemPackages\ReflectionModule;
-use PPHP\services\cache\CacheAdapter;
-use PPHP\services\cache\CacheSystem;
 use PPHP\services\configuration\Configurator;
 use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
 use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\classes\standard\storage\cache\Cache;
+use PPHP\tools\classes\standard\storage\cache\CacheAdapter;
 use PPHP\tools\patterns\singleton as singleton;
 
 /**
@@ -40,14 +40,14 @@ class ModulesRouter implements singleton\Singleton{
   private function __construct(){
     try{
       $this->conf = Configurator::getInstance();
-      $this->cache = CacheSystem::getInstance();
+      $this->cache = Cache::getInstance();
     }
     catch(NotFoundDataException $e){
       throw new NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
     }
     // Заполнение кэша
     // Выброс исключений не предполагается
-    if(CacheSystem::hasCache() && !isset($this->cache->ModulesRouter_Init)){
+    if(Cache::hasCache() && !isset($this->cache->ModulesRouter_Init)){
       $modulesNames = $this->getModulesNames();
       foreach($modulesNames as $moduleName){
         // Выброс исключений не предполагается

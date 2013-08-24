@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\network;
+
 use \PPHP\tools\classes\standard\baseType as baseType;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
@@ -15,6 +16,7 @@ class EMail extends baseType\Wrapper{
    * @var string
    */
   protected $local;
+
   /**
    * Домен электронной почты.
    * @var DomainName
@@ -27,9 +29,7 @@ class EMail extends baseType\Wrapper{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      '([A-Za-z0-9_-]+)@('.DomainName::getMasks()[0].')'
-    ];
+    return ['([A-Za-z0-9_-]+)@(' . DomainName::getMasks()[0] . ')'];
   }
 
   /**
@@ -43,10 +43,10 @@ class EMail extends baseType\Wrapper{
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     $m = parent::reestablish($string);
-
     $o = new self($string);
     $o->local = $m[1];
     $o->domain = DomainName::reestablish($m[2]);
+
     return $o;
   }
 

@@ -1,7 +1,9 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\baseType;
+
 use \PPHP\tools\classes\standard\baseType\Integer;
-spl_autoload_register(function($className){
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
@@ -22,7 +24,6 @@ class IntegerTest extends \PHPUnit_Framework_TestCase{
     new Integer(0);
     new Integer(-1);
     new Integer(1);
-
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
     new Integer(1.0);
   }
@@ -33,13 +34,10 @@ class IntegerTest extends \PHPUnit_Framework_TestCase{
   public function testReestablish(){
     $o = Integer::reestablish('1');
     $this->assertEquals(1, $o->getVal());
-
     $o = Integer::reestablish('-1');
     $this->assertEquals(-1, $o->getVal());
-
     $o = Integer::reestablish('0');
     $this->assertEquals(0, $o->getVal());
-
     $o = Integer::reestablish('-1.0');
     $this->assertEquals(-1, $o->getVal());
   }
@@ -57,7 +55,6 @@ class IntegerTest extends \PHPUnit_Framework_TestCase{
     $this->assertTrue(Integer::isReestablish('1.0'));
     $this->assertTrue(Integer::isReestablish('1.00'));
     $this->assertTrue(Integer::isReestablish('0.0'));
-
     $this->assertFalse(Integer::isReestablish(''));
     $this->assertFalse(Integer::isReestablish('t'));
     $this->assertFalse(Integer::isReestablish('1.1'));
@@ -95,7 +92,6 @@ class IntegerTest extends \PHPUnit_Framework_TestCase{
     $this->assertTrue($this->object->verify('() 12344 12346'));
     $this->assertTrue($this->object->verify('in 12344 12345 12346'));
     $this->assertTrue($this->object->verify('!in 12344 12346'));
-
     $this->assertFalse($this->object->verify('== 12346'));
     $this->assertFalse($this->object->verify('!= 12345'));
     $this->assertFalse($this->object->verify('> 12345'));

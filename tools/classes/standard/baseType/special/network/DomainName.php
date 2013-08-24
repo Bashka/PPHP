@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\network;
+
 use \PPHP\tools\classes\standard\baseType as baseType;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
@@ -22,9 +23,7 @@ class DomainName extends baseType\Wrapper{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      '[A-Za-z0-9][A-Za-z0-9-]*(?:(?:\.[A-Za-z0-9-]+)*|\.)[A-Za-z0-9]'
-    ];
+    return ['[A-Za-z0-9][A-Za-z0-9-]*(?:(?:\.[A-Za-z0-9-]+)*|\.)[A-Za-z0-9]'];
   }
 
   /**
@@ -38,9 +37,9 @@ class DomainName extends baseType\Wrapper{
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     parent::reestablish($string);
-
     $o = new self($string);
     $o->subDomains = array_reverse(explode('.', $string));
+
     return $o;
   }
 
@@ -52,7 +51,7 @@ class DomainName extends baseType\Wrapper{
    */
   public function getComponent($index){
     exceptions\InvalidArgumentException::verifyType($index, 'i');
-    exceptions\InvalidArgumentException::verifyVal($index, 'i [] 0 '.count($this->subDomains));
+    exceptions\InvalidArgumentException::verifyVal($index, 'i [] 0 ' . count($this->subDomains));
 
     return $this->subDomains[$index];
   }

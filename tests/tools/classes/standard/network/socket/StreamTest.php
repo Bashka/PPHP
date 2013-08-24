@@ -1,7 +1,9 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\network\socket;
+
 use \PPHP\tools\classes\standard\network\socket as socket;
-spl_autoload_register(function($className){
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
@@ -9,6 +11,7 @@ class StreamTest extends \PHPUnit_Framework_TestCase{
   const HOST = 'localhost';
 
   const PORT = 10000;
+
   /**
    * @var socket\Stream
    */
@@ -22,7 +25,6 @@ class StreamTest extends \PHPUnit_Framework_TestCase{
     $serverSocket = new socket\Socket();
     $clientSocket = new socket\Socket();
     $serverSocket->listen(self::HOST, self::PORT);
-
     $clientStream = $clientSocket->connect(self::HOST, self::PORT);
     $clientStream->close();
     $this->setExpectedException('\PPHP\tools\patterns\io\IOException');
@@ -37,7 +39,6 @@ class StreamTest extends \PHPUnit_Framework_TestCase{
     $serverSocket = new socket\Socket();
     $clientSocket = new socket\Socket();
     $serverSocket->listen(self::HOST, self::PORT);
-
     $clientStream = $clientSocket->connect(self::HOST, self::PORT);
     $this->assertFalse($clientStream->isClose());
     $clientStream->close();
@@ -53,10 +54,8 @@ class StreamTest extends \PHPUnit_Framework_TestCase{
     $serverSocket = new socket\Socket();
     $clientSocket = new socket\Socket();
     $serverSocket->listen(self::HOST, self::PORT);
-
     $clientStream = $clientSocket->connect(self::HOST, self::PORT);
     $serverStream = $serverSocket->accept();
-
     $clientStream->write('data');
     $this->assertEquals('d', $serverStream->read());
     $serverStream->read();
@@ -75,7 +74,6 @@ class StreamTest extends \PHPUnit_Framework_TestCase{
     $serverSocket = new socket\Socket();
     $clientSocket = new socket\Socket();
     $serverSocket->listen(self::HOST, self::PORT);
-
     $clientStream = $clientSocket->connect(self::HOST, self::PORT);
     $serverStream = $serverSocket->accept();
     $clientStream->write('data');
@@ -94,7 +92,6 @@ class StreamTest extends \PHPUnit_Framework_TestCase{
     $serverSocket = new socket\Socket();
     $clientSocket = new socket\Socket();
     $serverSocket->listen(self::HOST, self::PORT);
-
     $clientStream = $clientSocket->connect(self::HOST, self::PORT);
     $serverStream = $serverSocket->accept();
     $clientStream->write('data');
@@ -112,7 +109,6 @@ class StreamTest extends \PHPUnit_Framework_TestCase{
     $serverSocket = new socket\Socket();
     $clientSocket = new socket\Socket();
     $serverSocket->listen(self::HOST, self::PORT);
-
     $clientStream = $clientSocket->connect(self::HOST, self::PORT);
     $serverStream = $serverSocket->accept();
     $clientStream->write('data');
@@ -130,7 +126,6 @@ class StreamTest extends \PHPUnit_Framework_TestCase{
     $serverSocket = new socket\Socket();
     $clientSocket = new socket\Socket();
     $serverSocket->listen(self::HOST, self::PORT);
-
     $clientStream = $clientSocket->connect(self::HOST, self::PORT);
     $this->assertInstanceOf('\PPHP\tools\classes\standard\network\socket\inStream', $clientStream->getIn());
     $clientStream->close();
@@ -145,7 +140,6 @@ class StreamTest extends \PHPUnit_Framework_TestCase{
     $serverSocket = new socket\Socket();
     $clientSocket = new socket\Socket();
     $serverSocket->listen(self::HOST, self::PORT);
-
     $clientStream = $clientSocket->connect(self::HOST, self::PORT);
     $this->assertInstanceOf('\PPHP\tools\classes\standard\network\socket\outStream', $clientStream->getOut());
     $clientStream->close();

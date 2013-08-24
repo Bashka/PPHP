@@ -1,7 +1,9 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\baseType\special\fileSystem;
+
 use PPHP\tools\classes\standard\baseType\special\fileSystem\FileSystemName;
-spl_autoload_register(function($className){
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
@@ -13,7 +15,6 @@ class FileSystemNameTest extends \PHPUnit_Framework_TestCase{
     $o = FileSystemName::reestablish('test.Name');
     $this->assertEquals('test', $o->getName());
     $this->assertEquals('Name', $o->getExpansion());
-
     $o = FileSystemName::reestablish('test');
     $this->assertEquals('test', $o->getName());
   }

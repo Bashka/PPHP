@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\metadata;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс, реализующий данный интерфейс может быть описан с использованием метаданных.
@@ -20,9 +21,7 @@ interface Described{
   /**
    * Метод возвращает значение конкретных метаданных элемента.
    * @abstract
-   *
-   * @param $metadataName Имя метаданных.
-   *
+   * @param string $metadataName Имя метаданных.
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @return string|null Метод возвращает значение метаданных или null, если метаданные не установлены.
    */
@@ -31,10 +30,8 @@ interface Described{
   /**
    * Метод устанавливает значение метаданных.
    * @abstract
-   *
    * @param string $metadataName  Имя метаданных.
    * @param string $metadataValue Значение метаданных.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   public function setMetadata($metadataName, $metadataValue);
@@ -42,9 +39,7 @@ interface Described{
   /**
    * Метод проверяет, существуют ли заданные метаданные в вызываемом представлении.
    * @abstract
-   *
-   * @param $metadataName Имя метаданных.
-   *
+   * @param string $metadataName Имя метаданных.
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @return boolean true - если метаданные существуют, иначе - false.
    */
@@ -53,9 +48,7 @@ interface Described{
   /**
    * Метод удаляет метаданные из класса.
    * @abstract
-   *
    * @param string $metadataName Удаляемые метаданные.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   public function removeMetadata($metadataName);

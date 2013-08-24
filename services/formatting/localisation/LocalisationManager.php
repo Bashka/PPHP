@@ -1,12 +1,14 @@
 <?php
 namespace PPHP\services\formatting\localisation;
+
 use PPHP\services\configuration\Configurator;
 use PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
 use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
 use PPHP\tools\patterns\database\LongObject;
 use PPHP\tools\patterns\metadata\reflection\ReflectionClass;
 use PPHP\tools\patterns\metadata\reflection\ReflectionProperty;
-use \PPHP\tools\patterns\singleton as singleton;
+use PPHP\tools\patterns\singleton as singleton;
+
 /**
  * Класс позволяет локализовать сообщения в соответствии с файлами локализации.
  * Файл локализации толжен находится в том же каталоге, что и локализуемый класс, начинаться с того же имени, а так же иметь постфикс в соответствии с локализацией, так для английской локализации постфикс должен иметь вид _en
@@ -14,20 +16,23 @@ use \PPHP\tools\patterns\singleton as singleton;
  * @package PPHP\services\formatting\localisation
  */
 class LocalisationManager implements singleton\Singleton{
-use singleton\TSingleton;
+  use singleton\TSingleton;
 
   /**
    * Английская локализация
    */
   const ENGLISH = 'en';
+
   /**
    * Русская локализация
    */
   const RUSSIA = 'ru';
+
   /**
    * Максимальный размер буфера
    */
   const bufferSize = 50;
+
   /**
    * Буфер данных для локализации
    * @var LocaliseBuffer
@@ -61,7 +66,6 @@ use singleton\TSingleton;
     catch(NotFoundDataException $e){
       throw new NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
     }
-
   }
 
   private function __construct(){
@@ -98,6 +102,7 @@ use singleton\TSingleton;
     if(isset($localiseData[$message])){
       return $localiseData[$message];
     }
+
     return $message;
   }
 
@@ -110,6 +115,7 @@ use singleton\TSingleton;
   public function localiseClass(ReflectionClass $class){
     $className = $class->getName();
     $localiseMessage = substr($className, strrpos($className, '\\') + 1);
+
     return $this->localiseMessage($class, $localiseMessage);
   }
 

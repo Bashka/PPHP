@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType;
+
 use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
@@ -15,9 +16,7 @@ class Date extends Wrapper{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      '(?:(?:[1-9])|(?:[1-2][0-9])|(?:3[0-1]))\.(?:(?:[1-9])|(?:1[0-2]))\.[0-9]+'
-    ];
+    return ['(?:(?:[1-9])|(?:[1-2][0-9])|(?:3[0-1]))\.(?:(?:[1-9])|(?:1[0-2]))\.[0-9]+'];
   }
 
   /**

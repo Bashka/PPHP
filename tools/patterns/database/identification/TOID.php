@@ -1,7 +1,9 @@
 <?php
 namespace PPHP\tools\patterns\database\identification;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+// @todo: Пересмотреть документацию класса для приведения к стандарту.
 /**
  * Классическая реализация интерфейса OID
  * @author Artur Sh. Mamedbekov
@@ -9,8 +11,7 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 trait TOID{
   /**
-   * Целочисленный идентификатор объекта или null - если объект не идентифицирован.
-   * @var integer|null
+   * @var integer|null Целочисленный идентификатор объекта или null - если объект не идентифицирован.
    */
   private $OID = null;
 
@@ -20,18 +21,19 @@ trait TOID{
    * Такого рода объект может быть использован как объектная ссылка на свое состояние для последующего восстановления.
    * Данная реализация использует конструктор класса не передавая ему параметров, это может привести к ошибке в случае, если конструктор ожидает параметры при вызове. Для решения этой проблемы следует переопределить метод.
    * @static
-   *
    * @param integer $OID Идентификатор объекта.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа или недопустимого значения.
    * @return static Фиктивный (proxy) объект.
    */
   public static function getProxy($OID){
     exceptions\InvalidArgumentException::verifyType($OID, 'i');
     exceptions\InvalidArgumentException::verifyVal($OID, 'i > 0');
-
+    /**
+     * @var OID $proxy Proxy вызываемого объекта.
+     */
     $proxy = new static;
     $proxy->setOID($OID);
+
     return $proxy;
   }
 
@@ -45,9 +47,7 @@ trait TOID{
 
   /**
    * Метод устанавливает идентификатор для не идентифицированного объекта.
-   *
    * @param integer $OID Идентификатор объекта.
-   *
    * @throws OIDException Выбрасывается при передаче в качестве параметра уже идентифицированного объекта.
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа или недопустимого значения.
    */
@@ -57,7 +57,6 @@ trait TOID{
     }
     exceptions\InvalidArgumentException::verifyType($OID, 'i');
     exceptions\InvalidArgumentException::verifyVal($OID, 'i > 0');
-
     $this->OID = $OID;
   }
 

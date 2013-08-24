@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет SQL запрос для удаления записей из таблицы.
@@ -13,6 +14,7 @@ class Delete extends ComponentQuery{
    * @var Table
    */
   private $table;
+
   /**
    * Условие отбора.
    * @var Where
@@ -25,7 +27,7 @@ class Delete extends ComponentQuery{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return ['DELETE FROM `('.Table::getMasks()[0].')`( '.Where::getMasks()[0].')?'];
+    return ['DELETE FROM `(' . Table::getMasks()[0] . ')`( ' . Where::getMasks()[0] . ')?'];
   }
 
   /**
@@ -38,10 +40,13 @@ class Delete extends ComponentQuery{
    */
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
+    /**
+     * @var string $mask
+     */
     $mask = parent::reestablish($string);
-
-    $o = new self(Table::reestablish($mask[1]));
+    $o = new Delete(Table::reestablish($mask[1]));
     $o->insertWhere(Where::reestablish(trim($mask[2])));
+
     return $o;
   }
 
@@ -59,23 +64,21 @@ class Delete extends ComponentQuery{
    */
   public function insertWhere(Where $where){
     $this->where = $where;
+
     return $this;
   }
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   *
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   *
    * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return string Результат интерпретации.
    */
-  public function interpretation($driver=null){
+  public function interpretation($driver = null){
     exceptions\InvalidArgumentException::verifyType($driver, 'Sn');
-
     try{
-      return 'DELETE FROM `' . $this->table->interpretation($driver) . '`' . (is_object($this->where)? ' '.$this->where->interpretation($driver) : '');
+      return 'DELETE FROM `' . $this->table->interpretation($driver) . '`' . (is_object($this->where)? ' ' . $this->where->interpretation($driver) : '');
     }
     catch(exceptions\NotFoundDataException $exc){
       throw $exc;

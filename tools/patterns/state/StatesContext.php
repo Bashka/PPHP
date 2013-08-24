@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\state;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Интерфейс определяет классы, которые изменяют свое поведение с изменением состояния.
@@ -14,10 +15,8 @@ interface StatesContext{
   /**
    * Метод изменяет состояние объекта на заданное. Изменить состояние объекта может только его подсостояние, передаваемое во втором аргументе. На практике это означает, что нет возможности изменить состояние объекта программно.
    * @abstract
-   *
    * @param string $stateName Устанавливаемое состояние.
    * @param State|StatesContext $substate Подсостояние, запрашивающее изменение.
-   *
    * @throws exceptions\RuntimeException Исключение выбрасывается при попытке программного изменения состояния.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @throws exceptions\NotFoundDataException Выбрасывается в случае отсутствия состояния с указанным именем.

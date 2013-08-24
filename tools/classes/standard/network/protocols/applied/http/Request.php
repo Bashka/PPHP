@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\network\protocols\applied\http;
+
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 use \PPHP\tools\classes\standard\baseType as baseType;
 
@@ -13,6 +14,7 @@ class Request extends Message{
    * Метод GET запроса.
    */
   const GET = 'GET';
+
   /**
    * Метод POST запроса.
    */
@@ -39,7 +41,8 @@ class Request extends Message{
     if(is_null($driver)){
       $driver = "\r\n";
     }
-    return ['(' . self::GET . '|' . self::POST . ') ((?:' . baseType\special\fileSystem\FileSystemAddress::getMasks()[0] . '|\/)(?:\?'.self::getPatterns()['var'].'(?:&'.self::getPatterns()['var'].')*)?) HTTP\/1.1' . $driver . '(' . Header::getMasks($driver)[0] . ')?' . $driver . '(.*)'];
+
+    return ['(' . self::GET . '|' . self::POST . ') ((?:' . baseType\special\fileSystem\FileSystemAddress::getMasks()[0] . '|\/)(?:\?' . self::getPatterns()['var'] . '(?:&' . self::getPatterns()['var'] . ')*)?) HTTP\/1.1' . $driver . '(' . Header::getMasks($driver)[0] . ')?' . $driver . '(.*)'];
   }
 
   /**
@@ -65,12 +68,12 @@ class Request extends Message{
     }
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     $m = parent::reestablish($string, $driver);
-
     $method = $m[1];
     $uri = $m[2];
     $header = Header::reestablish($m[4]);
     $host = $header->getParameterValue('Host');
     $body = $m[7];
+
     return new self($host, $uri, $method, $header, $body);
   }
 
@@ -128,7 +131,6 @@ class Request extends Message{
 
     return new static($host, $URI, $method, $header, $body);
   }*/
-
   /**
    * @param string $host Узел запроса и порт запроса.
    * @param string $URI Адрес ресурса.
@@ -138,7 +140,6 @@ class Request extends Message{
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    */
   function __construct($host, $URI, $method = self::GET, Header $header = null, $body = null){
-
     exceptions\InvalidArgumentException::verifyType($host, 'S');
     exceptions\InvalidArgumentException::verifyType($URI, 'S');
     exceptions\InvalidArgumentException::verifyType($method, 'S');
@@ -174,6 +175,7 @@ class Request extends Message{
       $driver = "\r\n";
     }
     $generalHeader = $this->method . ' ' . $this->URI . ' HTTP/1.1';
+
     return $generalHeader . $driver . $this->header->interpretation($driver) . $driver . $this->body;
   }
 

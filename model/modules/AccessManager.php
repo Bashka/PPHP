@@ -40,7 +40,7 @@ class AccessManager implements Singleton{
         throw $e;
       }
 
-      return $accessController->isResolved(new Name($active), new Name($module));
+      return $accessController->isResolved(new Name($module), new Name($active));
     }
     else{
       return true;

@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\fileSystem;
+
 use \PPHP\tools\classes\standard\baseType as baseType;
 use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
@@ -22,9 +23,7 @@ class FileSystemAddress extends baseType\Wrapper{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      '(\/)?(?:'.FileSystemName::getPatterns()['fieldName'].')(?:\/'.FileSystemName::getPatterns()['fieldName'].')*(?:\/)?'
-    ];
+    return ['(\/)?(?:' . FileSystemName::getPatterns()['fieldName'] . ')(?:\/' . FileSystemName::getPatterns()['fieldName'] . ')*(?:\/)?'];
   }
 
   /**
@@ -38,7 +37,6 @@ class FileSystemAddress extends baseType\Wrapper{
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     $m = parent::reestablish($string);
-
     $o = new self($string);
     if(isset($m[1])){
       $o->isRoot = true;
@@ -46,6 +44,7 @@ class FileSystemAddress extends baseType\Wrapper{
     else{
       $o->isRoot = false;
     }
+
     return $o;
   }
 

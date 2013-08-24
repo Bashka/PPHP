@@ -12,6 +12,7 @@ $_SERVER['DOCUMENT_ROOT'] = '/var/www';
 class ReflectionArchiveModuleTest extends \PHPUnit_Framework_TestCase{
   /**
    * @covers ReflectionArchiveModule::__construct
+   * @covers ReflectionArchive::__construct
    */
   public function test__construct(){
     new ReflectionArchiveModule('TestA.zip');
@@ -26,7 +27,7 @@ class ReflectionArchiveModuleTest extends \PHPUnit_Framework_TestCase{
   }
 
   /**
-   * @covers ReflectionArchiveModule::getName
+   * @covers ReflectionArchive::getName
    */
   public function testGetName(){
     $o = new ReflectionArchiveModule('TestA.zip');
@@ -34,7 +35,7 @@ class ReflectionArchiveModuleTest extends \PHPUnit_Framework_TestCase{
   }
 
   /**
-   * @covers ReflectionArchiveModule::getVersion
+   * @covers ReflectionArchive::getVersion
    */
   public function testGetVersion(){
     $o = new ReflectionArchiveModule('TestA.zip');
@@ -60,13 +61,13 @@ class ReflectionArchiveModuleTest extends \PHPUnit_Framework_TestCase{
   }
 
   /**
-   * @covers ReflectionArchiveModule::getUsed
-   * @covers ReflectionArchiveModule::hasUsed
+   * @covers ReflectionArchive::getUsed
+   * @covers ReflectionArchive::hasUsed
    */
   public function testHasGetUsed(){
     $o = new ReflectionArchiveModule('TestA.zip');
     $this->assertFalse($o->hasUsed());
-    $this->assertFalse($o->getUsed());
+    $this->assertEquals([], $o->getUsed());
   }
 
   /**
@@ -89,16 +90,16 @@ class ReflectionArchiveModuleTest extends \PHPUnit_Framework_TestCase{
 
   /**
    * @covers ReflectionArchiveModule::expand
+   * @covers ReflectionArchive::expand
    */
   public function testExpand(){
     $o = new ReflectionArchiveModule('TestA.zip');
-    $address = $_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/SystemPackages/tests';
-    $d = $o->expand(ComponentFileSystem::constructDirFromAddress($address));
-    $this->assertEquals('TestA', $d->getName());
-    $this->assertTrue(file_exists($address . '/TestA/Controller.php'));
-    $this->assertTrue(file_exists($address . '/TestA/state.ini'));
-    $this->assertFalse(file_exists($address . '/TestA/conf.ini'));
-    $this->assertTrue(file_exists($address . '/TestA/testDir'));
-    $d->delete();
+    $address = $_SERVER['DOCUMENT_ROOT'] . '/PPHP/model/modules/SystemPackages/tests/location';
+    $o->expand(ComponentFileSystem::constructDirFromAddress($address));
+    $this->assertTrue(file_exists($address . '/Controller.php'));
+    $this->assertTrue(file_exists($address . '/state.ini'));
+    $this->assertFalse(file_exists($address . '/conf.ini'));
+    $this->assertTrue(file_exists($address . '/testDir'));
+    ComponentFileSystem::constructDirFromAddress($address)->clear();
   }
 }

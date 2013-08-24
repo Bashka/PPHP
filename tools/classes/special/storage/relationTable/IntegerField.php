@@ -30,6 +30,7 @@ class IntegerField extends Field{
     if($this->isRequired() && is_null($data)){
       return false;
     }
+
     return true;
   }
 
@@ -51,6 +52,7 @@ class IntegerField extends Field{
     if($this->maxLength > strlen($data)){
       $data = str_pad($data, $this->maxLength, ' ', STR_PAD_LEFT);
     }
+
     return $data;
   }
 
@@ -82,10 +84,10 @@ class IntegerField extends Field{
   }
 
   /**
-   * @param $name Имя поля.
+   * @param string $name Имя поля.
    * @param bool $required Обязательность заполнения поля.
    * @param integer|null $default Значение поля по умолчанию.
-   * @param $maxLength Максимальная разрядность числа.
+   * @param integer $maxLength Максимальная разрядность числа.
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если в качестве аргумента передано значение, отличное от integer типа.
    */
   function __construct($name, $maxLength, $required = false, $default = null){

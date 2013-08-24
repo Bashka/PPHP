@@ -1,23 +1,21 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use PPHP\tools\patterns\interpreter\Restorable;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс-оболочка для добавления алиаса компоненту.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\database\query
  */
-abstract class Alias extends  ComponentQuery{
+abstract class Alias extends ComponentQuery{
   /**
-   * Псевдоним компонента.
-   * @var string
+   * @var string Псевдоним компонента.
    */
   protected $alias;
 
   /**
-   * Компонент, к которому устанавливается псевдоним.
-   * @var ComponentQuery
+   * @var ComponentQuery Компонент, к которому устанавливается псевдоним.
    */
   protected $component;
 
@@ -25,8 +23,7 @@ abstract class Alias extends  ComponentQuery{
    * Данный метод должен быть переопределен в дочерних классах и восстанавливать компонент alias.
    * @param string $string Исходная строка компонента.
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @throws exceptions\ComponentClassException Исключение свидетельствует о том, что дочерний класс не переопределил данный метод.
    * @return ComponentQuery
    */
   protected static function reestablishChild($string, $driver = null){
@@ -39,9 +36,7 @@ abstract class Alias extends  ComponentQuery{
    * @return string[]
    */
   public static function getPatterns($driver = null){
-    return [
-      'aliasValue' => '[A-Za-z_][A-Za-z0-9_]*'
-    ];
+    return ['aliasValue' => '[A-Za-z_][A-Za-z0-9_]*'];
   }
 
   /**
@@ -55,7 +50,9 @@ abstract class Alias extends  ComponentQuery{
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     parent::reestablish($string);
-
+    /**
+     * @var string[] $components
+     */
     $components = explode(' as ', $string);
     try{
       return new static(static::reestablishChild($components[0]), $components[1]);
@@ -69,7 +66,7 @@ abstract class Alias extends  ComponentQuery{
   }
 
   /**
-   * @param $component Компонент, к которому устанавливается псевдоним. Выбор конкретного типа компонента зависит от реализации.
+   * @param mixed $component Компонент, к которому устанавливается псевдоним. Выбор конкретного типа компонента зависит от реализации.
    * @param string $alias Псевдоним компонента.
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */

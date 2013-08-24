@@ -1,13 +1,14 @@
 <?php
 namespace PPHP\services\log;
-use PPHP\services\cache\CacheAdapter;
-use PPHP\services\cache\CacheSystem;
+
 use PPHP\services\configuration\Configurator;
 use PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
 use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
 use PPHP\tools\classes\standard\fileSystem\ComponentFileSystem;
 use PPHP\tools\classes\standard\fileSystem\io\BlockingFileWriter;
-use \PPHP\tools\patterns\singleton as singleton;
+use PPHP\tools\classes\standard\storage\cache\Cache;
+use PPHP\tools\classes\standard\storage\cache\CacheAdapter;
+use PPHP\tools\patterns\singleton as singleton;
 
 /**
  * Класс служит для журналирования сообщений системы.
@@ -15,19 +16,23 @@ use \PPHP\tools\patterns\singleton as singleton;
  * @package PPHP\services\log
  */
 class LogManager implements singleton\Singleton{
-use singleton\TSingleton;
+  use singleton\TSingleton;
+
   /**
    * Журнализация ошибок.
    */
   const ERROR = 'Error';
+
   /**
    * Журнализация ошибок и предупреждений.
    */
   const WARNING = 'Warning';
+
   /**
    * Журнализация ошибок, предупреждений и уведомлений.
    */
   const NOTICE = 'Notice';
+
   /**
    * Журнализация ошибок, предупреждений, уведомлений и информационных сообщений.
    */
@@ -49,6 +54,7 @@ use singleton\TSingleton;
    * @var Configurator
    */
   protected $conf;
+
   /**
    * @var CacheAdapter
    */
@@ -59,12 +65,11 @@ use singleton\TSingleton;
    */
   private function __construct(){
     try{
-      $this->cache = CacheSystem::getInstance();
+      $this->cache = Cache::getInstance();
     }
     catch(NotFoundDataException $e){
       throw new NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
     }
-
     if(!isset($this->cache->LogManager_Type)){
       try{
         $this->conf = Configurator::getInstance();
@@ -72,7 +77,6 @@ use singleton\TSingleton;
       catch(NotFoundDataException $e){
         throw new NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
       }
-
       if(!isset($this->conf->Log_Type)){
         throw new NotFoundDataException('Недостаточно данных для инициализации службы. Отсутствует обязательное свойство [Log::Type].');
       }
@@ -82,7 +86,6 @@ use singleton\TSingleton;
       catch(NotFoundDataException $e){
         throw new NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
       }
-
       $this->cache->LogManager_Type = $this->type;
     }
     else{
@@ -102,8 +105,7 @@ use singleton\TSingleton;
    */
   public function setType($type){
     InvalidArgumentException::verifyType($type, 'S');
-    InvalidArgumentException::verifyVal($type, 's # '.self::ERROR.'|'.self::WARNING.'|'.self::NOTICE.'|'.self::INFO);
-
+    InvalidArgumentException::verifyVal($type, 's # ' . self::ERROR . '|' . self::WARNING . '|' . self::NOTICE . '|' . self::INFO);
     $this->type = $type;
     try{
       $this->conf->Log_Type = $type;
@@ -111,8 +113,8 @@ use singleton\TSingleton;
     catch(NotFoundDataException $e){
       throw new NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
     }
-
     $this->cache->LogManager_Type = $type;
+
     return true;
   }
 
@@ -134,6 +136,7 @@ use singleton\TSingleton;
       $this->writer = $this->writer->getWriter();
       $this->writer->setPosition($lengthWriter);
     }
+
     return $this->writer;
   }
 
@@ -154,6 +157,7 @@ use singleton\TSingleton;
       return false;
     }
     $this->getLog()->write($message->interpretation());
+
     return true;
   }
 }

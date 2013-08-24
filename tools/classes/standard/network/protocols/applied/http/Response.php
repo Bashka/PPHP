@@ -1,11 +1,11 @@
 <?php
 namespace PPHP\tools\classes\standard\network\protocols\applied\http;
+
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 use \PPHP\tools\classes\standard\baseType as baseType;
 
 /**
  * Класс представляет HTTP ответ сервера.
- *
  * @author  Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\network\protocols\applied\http
  */
@@ -31,6 +31,7 @@ class Response extends Message{
     if(is_null($driver)){
       $driver = "\r\n";
     }
+
     return ['HTTP\/1.1 ([0-9]{1,3}) ([A-Za-z ]+)' . $driver . '(' . Header::getMasks($driver)[0] . ')?' . $driver . '(.*)'];
   }
 
@@ -48,21 +49,17 @@ class Response extends Message{
     }
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     $m = parent::reestablish($string, $driver);
-
     $code = $m[1];
     $message = $m[2];
-
     $body = $m[6];
     if($body === ''){
       $body = null;
     }
-
     if($m[3] !== ''){
       $header = Header::reestablish($m[3]);
-
       if(!is_null($body)){
         if($header->hasParameter('Content-Length')){
-          $body = substr($body, 0, (int)$header->getParameterValue('Content-Length'));
+          $body = substr($body, 0, (int) $header->getParameterValue('Content-Length'));
         }
       }
     }
@@ -91,9 +88,7 @@ class Response extends Message{
   /**
    * Метод возвращает строку, полученную при интерпретации объекта.
    * @abstract
-   *
    * @param mixed $driver [optional] Разделитель компонентов ответа. По умолчанию PHP_EOL.
-   *
    * @return string Результат интерпретации.
    */
   public function interpretation($driver = null){
@@ -101,6 +96,7 @@ class Response extends Message{
       $driver = "\r\n";
     }
     $generalHeader = 'HTTP/1.1 ' . $this->code . ' ' . $this->message;
+
     return $generalHeader . $driver . $this->header->interpretation($driver) . $driver . $this->body;
   }
 

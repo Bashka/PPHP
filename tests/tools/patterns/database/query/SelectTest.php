@@ -36,7 +36,7 @@ class SelectTest extends \PHPUnit_Framework_TestCase{
     $o->addJoin($j);
     $o->insertOrderBy($ob);
     $o->insertWhere($w);
-    $this->assertEquals('SELECT tableA.fieldA as fieldAAlias,`fieldB` FROM `tableA`,`tableB` INNER JOIN `tableC` ON (tableC.fieldC = `fieldB`) WHERE (`fieldB` > "0") ORDER BY `fieldB` ASC', $o->interpretation());
+    $this->assertEquals('SELECT tableA.fieldA AS fieldAAlias,`fieldB` FROM `tableA`,`tableB` INNER JOIN `tableC` ON (tableC.fieldC = `fieldB`) WHERE (`fieldB` > "0") ORDER BY `fieldB` ASC', $o->interpretation());
   }
 
   /**
@@ -45,7 +45,7 @@ class SelectTest extends \PHPUnit_Framework_TestCase{
   public function testIsReestablish(){
     $this->assertTrue(query\Select::isReestablish('SELECT * FROM `tableA`'));
     $this->assertTrue(query\Select::isReestablish('SELECT `fieldA` FROM `tableA`'));
-    $this->assertTrue(query\Select::isReestablish('SELECT `fieldA` as fa FROM `tableA`'));
+    $this->assertTrue(query\Select::isReestablish('SELECT `fieldA` AS fa FROM `tableA`'));
     $this->assertTrue(query\Select::isReestablish('SELECT `fieldA`,tableB.fieldB FROM `tableA`, `tableB`'));
     $this->assertTrue(query\Select::isReestablish('SELECT `fieldA`,tableB.fieldB FROM `tableA`, `tableB` INNER JOIN `tableC` ON (tableC.fieldC = `fieldB`)'));
     $this->assertTrue(query\Select::isReestablish('SELECT `fieldA`,tableB.fieldB FROM `tableA`, `tableB` INNER JOIN `tableC` ON (tableC.fieldC = `fieldB`) LEFT JOIN `tableD` ON (tableD.id = `fieldB`)'));
@@ -84,7 +84,7 @@ class SelectTest extends \PHPUnit_Framework_TestCase{
     $o = query\Select::reestablish('SELECT `fieldA` FROM `tableA`');
     $this->assertEquals('fieldA', $o->getFields()[0]->getName());
     $this->assertEquals('tableA', $o->getTables()[0]->getTableName());
-    $o = query\Select::reestablish('SELECT `fieldA` as fa FROM `tableA`');
+    $o = query\Select::reestablish('SELECT `fieldA` AS fa FROM `tableA`');
     $this->assertEquals('fieldA', $o->getFields()[0]->getComponent()->getName());
     $this->assertEquals('fa', $o->getFields()[0]->getAlias());
     $o = query\Select::reestablish('SELECT `fieldA`, tableB.fieldB FROM `tableA`, `tableB`');

@@ -1,7 +1,9 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\baseType\special\network;
+
 use PPHP\tools\classes\standard\baseType\special\network\URL;
-spl_autoload_register(function($className){
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
@@ -50,7 +52,6 @@ class URLTest extends \PHPUnit_Framework_TestCase{
     $this->assertEquals('8080', $o->getPort()->getVal());
     $this->assertEquals('/test/text.txt', $o->getFileSystemAddress()->getVal());
     $this->assertTrue($o->getFileSystemAddress()->isRoot());
-
     $o = URL::reestablish('http://192.168.1.1:8080/test/text.txt');
     $this->assertEquals('168', $o->getAddress()->getTrio(1));
   }

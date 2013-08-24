@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\fileSystem;
+
 use \PPHP\tools\classes\standard\baseType as baseType;
 use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
@@ -28,9 +29,7 @@ class FileSystemName extends baseType\Wrapper{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      FileSystemName::getPatterns()['fieldName']
-    ];
+    return [FileSystemName::getPatterns()['fieldName']];
   }
 
   /**
@@ -39,9 +38,7 @@ class FileSystemName extends baseType\Wrapper{
    * @return string[]
    */
   public static function getPatterns($driver = null){
-    return [
-      'fieldName' => '[^\/:*?"<>\|\0\\\]+'
-    ];
+    return ['fieldName' => '[^\/:*?"<>\|\0\\\]+'];
   }
 
   /**
@@ -55,17 +52,17 @@ class FileSystemName extends baseType\Wrapper{
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     parent::reestablish($string);
-
     $o = new self($string);
     $strVal = new baseType\String($string);
     $positionPoint = $strVal->search('.', false, false);
     if($positionPoint > -1){
       $o->name = $strVal->subLeft($positionPoint)->getVal();
-      $o->expansion = $strVal->subRight($strVal->length()-2-$positionPoint)->getVal();
+      $o->expansion = $strVal->subRight($strVal->length() - 2 - $positionPoint)->getVal();
     }
     else{
       $o->name = $string;
     }
+
     return $o;
   }
 

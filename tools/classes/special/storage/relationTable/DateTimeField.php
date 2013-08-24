@@ -19,6 +19,7 @@ class DateTimeField extends Field{
     if($this->isRequired() && is_null($data)){
       return false;
     }
+
     return true;
   }
 

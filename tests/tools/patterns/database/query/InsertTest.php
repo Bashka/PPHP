@@ -37,7 +37,7 @@ class InsertTest extends \PHPUnit_Framework_TestCase{
   public function testIsReestablish(){
     $this->assertTrue(query\Insert::isReestablish('INSERT INTO `table` (`fieldA`) VALUES ("1")'));
     $this->assertTrue(query\Insert::isReestablish('INSERT INTO `table` (`fieldA`,`fieldB`, `fieldC`) VALUES ("1","2","3")'));
-    $this->assertTrue(query\Insert::isReestablish('INSERT INTO `table` (table.fieldA, table.fieldB) VALUES ("1","2")'));
+    $this->assertTrue(query\Insert::isReestablish('INSERT INTO `table` (table.fieldA, TABLE.fieldB) VALUES ("1","2")'));
     $this->assertTrue(query\Insert::isReestablish('INSERT INTO `table`
                                                           (`fieldA`,`fieldB`, `fieldC`)
                                                    VALUES ("1",     "2",      "3")'));

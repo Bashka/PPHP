@@ -2,25 +2,21 @@
 namespace PPHP\tools\patterns\observer;
 
 /**
- * Классическая реализация интерфейса SplObserver.
+ * Классическая реализация интерфейса \SplSubject.
+ * Данный trait позволяет реализовать логику "Издателя" для класса, оповещающего слушателей об изменении своего состояния.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\observer
  */
 trait TSubject{
   /**
-   * Хранилище подписчиков.
-   * @var \SplObjectStorage
+   * @var \SplObjectStorage Хранилище подписчиков.
    */
   private $observers;
 
   /**
-   * (PHP 5 &gt;= 5.1.0)<br/>
-   * Attach an SplObserver
+   * Метод добавляет подписчика в список слушателей данного издателя.
    * @link http://php.net/manual/en/splsubject.attach.php
-   * @param \SplObserver $observer <p>
-   * The <b>SplObserver</b> to attach.
-   * </p>
-   * @return void
+   * @param \SplObserver $observer Добавляемый подписчик.
    */
   public function attach(\SplObserver $observer){
     if(empty($this->observers)){
@@ -30,13 +26,9 @@ trait TSubject{
   }
 
   /**
-   * (PHP 5 &gt;= 5.1.0)<br/>
-   * Detach an longObject
+   * Метод удаляет подписчика из списка слушателей данного издателя.
    * @link http://php.net/manual/en/splsubject.detach.php
-   * @param \SplObserver $observer <p>
-   * The <b>SplObserver</b> to detach.
-   * </p>
-   * @return void
+   * @param \SplObserver $observer Удаляемый подписчик.
    */
   public function detach(\SplObserver $observer){
     if(empty($this->observers)){
@@ -46,16 +38,20 @@ trait TSubject{
   }
 
   /**
-   * (PHP 5 &gt;= 5.1.0)<br/>
-   * Notify an longObject
+   * Метод оповещает подписчиков об изменении состояния данного издателя.
    * @link http://php.net/manual/en/splsubject.notify.php
-   * @return void
    */
   public function notify(){
     if(empty($this->observers)){
       $this->observers = new \SplObjectStorage();
     }
+    /**
+     * @var \SplObserver $observer
+     */
     foreach($this->observers as $observer){
+      /**
+       * @var \SplSubject $this
+       */
       $observer->update($this);
     }
   }

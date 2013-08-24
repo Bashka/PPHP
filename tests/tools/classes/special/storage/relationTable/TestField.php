@@ -1,10 +1,9 @@
 <?php
 namespace PPHP\tests\tools\classes\special\storage\relationTable;
 
-spl_autoload_register(function($className){
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
-
 class TestField extends \PPHP\tools\classes\special\storage\relationTable\Field{
   /**
    * Метод верифицирует данные в соответствии с типом.

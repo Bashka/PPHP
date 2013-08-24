@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\people;
+
 use \PPHP\tools\classes\standard\baseType as baseType;
 use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
@@ -15,11 +16,13 @@ class PhoneNumber extends baseType\Wrapper{
    * @var string
    */
   protected $region;
+
   /**
    * Код города.
    * @var string
    */
   protected $code;
+
   /**
    * Номер.
    * @var string
@@ -32,9 +35,7 @@ class PhoneNumber extends baseType\Wrapper{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      '\+([1-9][0-9]*)\(([0-9]+)\)([0-9]+)'
-    ];
+    return ['\+([1-9][0-9]*)\(([0-9]+)\)([0-9]+)'];
   }
 
   /**
@@ -48,11 +49,11 @@ class PhoneNumber extends baseType\Wrapper{
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     $m = parent::reestablish($string);
-
     $o = new self($string);
     $o->region = $m[1];
     $o->code = $m[2];
     $o->number = $m[3];
+
     return $o;
   }
 

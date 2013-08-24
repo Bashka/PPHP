@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\network;
+
 use \PPHP\tools\classes\standard\baseType as baseType;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
@@ -16,9 +17,7 @@ class Port extends baseType\Wrapper{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      '(?:(?:[0-9]{1,4})|(?:[1-6][0-5][0-5][0-3][0-6]))'
-    ];
+    return ['(?:(?:[0-9]{1,4})|(?:[1-6][0-5][0-5][0-3][0-6]))'];
   }
 
   /**

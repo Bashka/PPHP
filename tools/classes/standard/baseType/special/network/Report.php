@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\baseType\special\network;
+
 use \PPHP\tools\classes\standard\baseType as baseType;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
@@ -11,11 +12,17 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 class Report extends baseType\Wrapper{
   const HTTP = 'http';
+
   const HTTPS = 'https';
+
   const FTP = 'ftp';
+
   const DNS = 'dns';
+
   const SSH = 'ssh';
+
   const POP3 = 'pop3';
+
   const SMTP = 'smtp';
 
   /**
@@ -30,9 +37,7 @@ class Report extends baseType\Wrapper{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return [
-      '('.self::HTTP.'|'.self::HTTPS.'|'.self::FTP.'|'.self::DNS.'|'.self::SSH.'|'.self::POP3.'|'.self::SMTP.'):\/\/'
-    ];
+    return ['(' . self::HTTP . '|' . self::HTTPS . '|' . self::FTP . '|' . self::DNS . '|' . self::SSH . '|' . self::POP3 . '|' . self::SMTP . '):\/\/'];
   }
 
   /**
@@ -46,9 +51,9 @@ class Report extends baseType\Wrapper{
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     $m = parent::reestablish($string);
-
     $o = new self($string);
     $o->name = $m[1];
+
     return $o;
   }
 

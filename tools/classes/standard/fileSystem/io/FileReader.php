@@ -1,5 +1,6 @@
 <?php
 namespace PPHP\tools\classes\standard\fileSystem\io;
+
 use \PPHP\tools\patterns\io as io;
 
 /**
@@ -8,7 +9,7 @@ use \PPHP\tools\patterns\io as io;
  * @package PPHP\tools\classes\standard\fileSystem\io
  */
 class FileReader extends io\InStream implements io\SeekIO, io\Closed{
-use FileSeekIO, FileClosed;
+  use FileSeekIO, FileClosed;
 
   /**
    * Метод считывает один байт из потока.
@@ -20,6 +21,7 @@ use FileSeekIO, FileClosed;
     if($result === false){
       throw new io\IOException('Ошибка использования потока ввода.');
     }
+
     return $result;
   }
 }

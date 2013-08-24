@@ -24,6 +24,46 @@ YUI.add('PJS.widgets.Screen', function(Y){
   Screen.NAME = 'screen';
   Screen.ATTRS = {
     /**
+     * Логический флаг, определяющий готовность DOM экрана.
+     * @public
+     * @type {boolean}
+     */
+    _isDOMReady: {
+      writeOnce: true
+    },
+    /**
+     * Логический флаг, определяющий завершение трансформации DOM экрана.
+     * @public
+     * @type {boolean}
+     */
+    _isDOMTransform: {
+      writeOnce: true
+    },
+    /**
+     * Логический флаг, определяющий инстанциацию контроллера экрана.
+     * @public
+     * @type {boolean}
+     */
+    _isControllerCreate: {
+      writeOnce: true
+    },
+    /**
+     * Логический флаг, определяющий инициализацию контроллера экрана.
+     * @public
+     * @type {boolean}
+     */
+    _isControllerInit: {
+      writeOnce: true
+    },
+    /**
+     * Логический флаг, определяющий загрузку и инициализацию контроллеров вложенных экранов.
+     * @public
+     * @type {boolean}
+     */
+    _isComponentsControllersInit: {
+      writeOnce: true
+    },
+    /**
      * Имя модуля экрана.
      * @public
      * @type {String}
@@ -46,13 +86,21 @@ YUI.add('PJS.widgets.Screen', function(Y){
       }
     },
     /**
+     * Контроллер экрана.
+     * @public
+     * @type {PJS.classes.Controller}
+     */
+    controller: {
+      writeOnce: true
+    },
+    /**
      * Расположение экрана относительно корня сайта.
      * @public
      * @type {String}
      */
     location: {
       valueFn: function(){
-        return '/PPHP/view/screens/'+this.get('module')+'/'+this.get('screen')+'/';
+        return '/PPHP/view/screens/' + this.get('module') + '/' + this.get('screen') + '/';
       },
       writeOnce: 'readOnly'
     },
@@ -63,7 +111,7 @@ YUI.add('PJS.widgets.Screen', function(Y){
      */
     locationController: {
       valueFn: function(){
-        return this.get('module')+'/'+this.get('screen')+'/'+this.get('screen')+'.js';
+        return this.get('module') + '/' + this.get('screen') + '/' + this.get('screen') + '.js';
       },
       writeOnce: 'readOnly'
     },
@@ -94,165 +142,370 @@ YUI.add('PJS.widgets.Screen', function(Y){
       value: true,
       writeOnce: 'initOnly'
     },
-    transformNode: {}
+    /**
+     * Определение наличия визуальной панели управления модулем.
+     * @public
+     * @type {bool}
+     */
+    hasAdminPanel: {
+      value: false
+    },
+    /**
+     * Множество внедренных компонентов экрана.
+     * @public
+     * @type {Object}
+     */
+    handling: {},
+    /**
+     * Множество внедренных ссылок на компоненты экрана.
+     * @public
+     * @type {Object}
+     */
+    filling: {}
   };
 
   Y.extend(Screen, Y.Widget, {
     /**
-     * Метод подключает файл стиля экрана.
+     * Метод добавляет инструмент управления экраном для администратора.
+     * @private
+     * @function
+     */
+    _addAdminMenu: function(){
+      if(this.get('hasAdminPanel') && (Y.PJS.services.User.hasRole('Moderator role') || Y.PJS.services.User.hasRole('Administrator role'))){
+        var adminButton = Y.Node.create('<input type="button" title="' + this.get('module') + ':' + this.get('screen') + '" class="yui3-button" value="edit" style="width: 28px; height: 24px; float: right"/>'),
+        context = this;
+        Y.use('panel', function(){
+          var panel = new Y.Panel({
+            bodyContent: '<div dWidget="PJS-widgets-Screen" dWidgetProperties="module: '+context.get('module')+'; screen: admin; navigate: horizontal; hasAdminPanel: false" ></div>',
+            zIndex: 6,
+            width: '100%',
+            modal: true
+          });
+          panel.render();
+          Y.PJS.services.Transformer.transform(panel.get('bodyContent'));
+          panel.hide();
+          adminButton.panel = panel;
+        });
+
+        this.get('contentBox').one('*').insert(adminButton, 'before');
+
+
+        adminButton.on('mouseover', function(){
+          context.get('boundingBox').setStyle('border', '1px solid red');
+        });
+        adminButton.on('mouseout', function(){
+          context.get('boundingBox').setStyle('border', 'none');
+        });
+        adminButton.on('click', function(){
+          this.panel.show();
+        });
+      }
+    },
+
+    /**
+     * Метод подключает файл стиля экрана, если таковой имеется у экрана.
      * @private
      * @function
      */
     _loadCSS: function(){
-      Y.Get.css(this.get('location')+this.get('screen')+'.css', {
-        timeout:500
-      });
+      if(this.get('hasCSS')){
+        Y.Get.css(this.get('location') + this.get('screen') + '.css', {
+          timeout: 500
+        });
+      }
     },
 
     /**
-     * Метод формирует и возвращает внедренные узлы.
-     * Внедренными узлами являются узлы с установленым атрибутом dHandling.
-     * Атрибут dHandling может включать следующие значения, перечисленные через точку с запятой:
-     * - filling: <name> - внедрение узла в свойство filling контроллера;
-     * - init: <name> - вызов метода name контроллера с передачей ему узла для инициализации;
-     * - listen: <name> - вызов метода name контроллера с передачей ему узла для установки слушателей;
-     * - access: <name> - вызов метода name контроллера с передачей ему узла для определения доступа. Если метод вернет false, узел будет удален из экрана.
+     * Метод загружает DOM экрана, если для экрана задан файл структуры.
+     * Метод генерирует событие PJS.widgets.Screen:DOMReady после загрузки DOM экрана.
      * @private
      * @function
      */
-    _getHandlingNodes: function(){
-      var handlingNodes = this.get('boundingBox').all('[dHandling]'),
-        result = [[], [], [], []];
-      handlingNodes.each(function(node){
-        var properties = node.getAttribute('dHandling').split(';');
-        for(var i in properties){
-          var property = properties[i].split(':');
-          switch (property[0].trim()){
-            case 'filling':
-              result[0][property[1].trim()] = node;
-              break;
-            case 'init':
-              result[1][property[1].trim()] = node;
-              break;
-            case 'listen':
-              result[2][property[1].trim()] = node;
-              break;
-            case 'access':
-              result[3][property[1].trim()] = node;
-              break;
+    _loadDOM: function(){
+      if(this.get('hasHTML')){
+        var context = this;
+        this.get('contentBox').load(this.get('location') + this.get('screen') + '.html', function(){
+          context._addAdminMenu();
+          context.set('_isDOMReady', true);
+          context.fire('PJS.widgets.Screen:DOMReady');
+        });
+      }
+      else{
+        var cb = this.get('contentBox');
+        // Перенос компонентов экрана в content box
+        this.get('boundingBox').all('> *').each(function(node){
+          if(node != cb){
+            cb.append(node);
           }
-        }
-      });
-      return result;
+        });
+        this._addAdminMenu();
+        this.set('_isDOMReady', true);
+        this.fire('PJS.widgets.Screen:DOMReady');
+      }
     },
 
     /**
-     * Метод подключает и инициализирует контроллер экрана.
+     * Метод трансформирует DOM экрана.
+     * Метод генерирует событие PJS.widgets.Screen:DOMTransform после трансформации DOM экрана.
+     * @private
+     * @function
+     */
+    _transformDOM: function(){
+      if(this.get('hasHTML')){
+        var dwidgets = this.get('boundingBox').all('[dWidget]'),
+          widgets = [];
+
+        dwidgets.each(function(node){
+          if(node.getAttribute('dWidget') != 'PJS.widgets.Screen'){
+            widgets.push(node);
+          }
+        });
+        widgets = new Y.NodeList(widgets);
+
+        Y.PJS.services.Transformer.transform(widgets, function(){
+          this.set('_isDOMTransform', true);
+          this.fire('PJS.widgets.Screen:DOMTransform');
+        }, this);
+      }
+      else{
+        this.set('_isDOMTransform', true);
+        this.fire('PJS.widgets.Screen:DOMTransform');
+      }
+    },
+
+    /**
+     * Метод загружает и инстанциирует контроллер экрана.
+     * Метод генерирует событие PJS.widgets.Screen:ControllerCreate после инстанциации контроллера экрана.
      * @private
      * @function
      */
     _loadController: function(){
-      // Информирование песочницы о расположении контроллера
-      var module = 'PJS.screens.'+this.get('module')+'.'+this.get('screen')+'.Controller',
-        screen = this,
-        handlingNodes = this._getHandlingNodes();
-      Y.config.groups.PJS_controllers.modules[module] = {
-        path: this.get('locationController')
-      };
+      if(this.get('hasController')){
+        // Информирование песочницы о расположении контроллера
+        var module = 'PJS.screens.' + this.get('module') + '.' + this.get('screen') + '.Controller',
+          context = this,
+          controllerParams = Y.PJS.services.Transformer.getWidgetProperties(this.get('boundingBox'));
+        controllerParams['screen'] = this;
 
-      // Создание и инициализация контроллера
-      Y.use(module, function(){
-        var controller = eval('Y.'+module);
-        controller = new controller({
-          screen: screen,
-          filling: handlingNodes[0]
+        // Определение адреса контроллера
+        Y.config.groups.PJS_controllers.modules[module] = {
+          path: this.get('locationController')
+        };
+
+        // Создание контроллера
+        Y.use(module, function(){
+          var controller = eval('Y.' + module);
+          controller = new controller(controllerParams);
+          context.set('controller', controller);
+          context.set('_isControllerCreate', true);
+          context.fire('PJS.widgets.Screen:ControllerCreate');
         });
+      }
+      else{
+        this.set('_isControllerCreate', true);
+        this.fire('PJS.widgets.Screen:ControllerCreate');
+      }
+    },
 
-        // Разграничение доступа
-        for(var access in handlingNodes[3]){
-          if((typeof controller[access]) == 'function'){
-            if(!controller[access](handlingNodes[3][access])){
-              handlingNodes[3][access].remove();
+    /**
+     * Метод инициализирует контроллер экрана.
+     * Метод генерирует событие PJS.widgets.Screen:ControllerInit после инициализации контроллера экрана.
+     * @private
+     * @function
+     */
+    _initController: function(){
+      if(this.get('hasController')){
+        var controller = this.get('controller'),
+          context = this,
+          handlingNodes = this.get('handling');
+
+        // Передача внедренных узлов контроллеру
+        controller.set('filling', this.get('filling'));
+
+        // Обработка узлов
+        handlingNodes.each(function(handlingNode){
+          // Разграничение видимости
+          var role = handlingNode.getData('PJS.handling.visible');
+          if(role){
+            if(!Y.PJS.services.User.hasRole(role)){
+              handlingNode.remove();
+              return false;
             }
           }
-          else{
-            Y.log('Невозможно определить права доступа для узла. Отсутствует требуемый метод контроллера ['+screen.get('module')+'.'+screen.get('screen')+'::'+access+'].');
+
+          // Разграничение доступа
+          var access = handlingNode.getData('PJS.handling.access');
+          if(access){
+            if((typeof controller[access]) == 'function'){
+              if(!controller[access](handlingNode)){
+                handlingNode.remove();
+                return false;
+              }
+            }
+            else{
+              Y.log('Невозможно определить права доступа для узла. Отсутствует требуемый метод контроллера [' + context.get('module') + '.' + context.get('screen') + '::' + access + '].');
+            }
           }
 
-        }
+          // Инициализация узлов
+          var init = handlingNode.getData('PJS.handling.init');
+          if(init){
+            if((typeof controller[init]) == 'function'){
+              controller[init](handlingNode);
+            }
+            else{
+              Y.log('Невозможно инициализировать узел. Отсутствует требуемый метод контроллера [' + context.get('module') + '.' + context.get('screen') + '::' + init + '].');
+            }
+          }
+
+          // Установка слушателей узлов
+          var listen = handlingNode.getData('PJS.handling.listen');
+          if(listen){
+            if((typeof controller[listen]) == 'function'){
+              controller[listen](handlingNode);
+            }
+            else{
+              Y.log('Невозможно слушать узел. Отсутствует требуемый метод контроллера [' + context.get('module') + '.' + context.get('screen') + '::' + listen + '].');
+            }
+          }
+        });
 
         // Инициализация экрана
         controller.initScreen();
 
-        // Инициализация узлов
-        for(var init in handlingNodes[1]){
-          if((typeof controller[init]) == 'function'){
-            controller[init](handlingNodes[1][init]);
-          }
-          else{
-            Y.log('Невозможно инициализировать узел. Отсутствует требуемый метод контроллера ['+screen.get('module')+'.'+screen.get('screen')+'::'+init+'].');
-          }
-        }
+        this.set('_isControllerInit', true);
+        this.fire('PJS.widgets.Screen:ControllerInit');
+      }
+      else{
+        this.set('_isControllerInit', true);
+        this.fire('PJS.widgets.Screen:ControllerInit');
+      }
+    },
 
-        // Установка слушателей узлов
-        for(var listener in handlingNodes[2]){
-          if((typeof controller[listener]) == 'function'){
-            controller[listener](handlingNodes[2][listener]);
-          }
-          else{
-            Y.log('Невозможно слушать узел. Отсутствует требуемый метод контроллера ['+screen.get('module')+'.'+screen.get('screen')+'::'+listener+'].');
-          }
-        }
+    /**
+     * Метод запускает загрузку экранов-компонентов в данном экране.
+     * Метод генерирует событие PJS.widgets.Screen:ComponentsControllersInit после загрузки и инициализации всех контроллеров экранов-компонентов.
+     * @private
+     * @function
+     */
+    _loadComponents: function(){
+      var components = this.get('boundingBox').all('[dWidget=PJS-widgets-Screen]'),
+        countComponents = components.size(),
+        countCreateControllers = 0,
+        context = this;
+
+      Y.use('PJS.widgets.Screen', function(){
+        components.each(function(screen){
+          var properties = Y.PJS.services.Transformer.getWidgetProperties(screen);
+          properties.boundingBox = screen;
+
+          screen.widget = new Y.PJS.widgets.Screen(properties);
+          screen.widget.once('PJS.widgets.Screen:ControllerReady', function(){
+            countCreateControllers++;
+            if(countCreateControllers == countComponents){
+              context.set('_isComponentsControllersInit', true);
+              context.fire('PJS.widgets.Screen:ComponentsControllersInit');
+            }
+          });
+        });
+      });
+
+      components.each(function(screen){
+        screen.widget.render();
       });
     },
 
     /**
      * Метод загружает внедренный экран.
-     * Метод генерирует событие PJS.widgets.Screen:DOMReady на объекте, что информирует о завершении загрузки DOM экрана.
+     * Рендеринг экрана проходит следующие стадии:
+     * 1. Загрузка DOM и CSS стиля экрана;
+     * 2. Трансформация DOM экрана;
+     * 3. Загрузка контроллера экрана;
+     * 4. Если экран не имеет экранов-компонентов, то инициализация экрана;
+     * 5. Иначе рендеринг экранов-компонентов и их инициализация, а после инициализация текущего экрана.
+     * Данный подход позволяет инициализировать экран только после того, когда контроллеры экранов-компонентов готовы к событийному связыванию.
      */
     renderUI: function(){
-      //this.get('boundingBox').screen = this;
+      var context = this;
 
-      // Визуализация виджета после полной загрузки и инициализации контроллера
-      this.on('PJS.widgets.Screen:ControllerReady', function(){
-        this.get('boundingBox').setStyle('visibility', 'visible')
+      // Управление видимостью экрана
+      this.get('boundingBox').setStyle('visibility', 'hidden');
+      this.once('PJS.widgets.Screen:ControllerInit', function(){
+        // Показ экрана после инициализации его контроллера
+        context.get('boundingBox').setStyle('visibility', '')
       });
 
-      var object = this;
-      this.get('boundingBox').setStyle('visibility', 'hidden');
-      if(this.get('hasHTML')){
-        // Загрузка DOM. Отключение видимости виджета до загрузки и инициализации контроллера
-        this.get('contentBox').load(this.get('location')+this.get('screen')+'.html', function(){
-          object.fire('PJS.widgets.Screen:DOMReady');
+      // 4 Инициализация контроллера
+      if(this.get('boundingBox').all('[dWidget=PJS-widgets-Screen]').size() == 0){
+        // Инициализация листового экрана
 
-          // Трансформация компонентов
-          Y.PJS.services.Transformer.transform(object.get('contentBox'));
+        // 4.a Инициализация контроллера после его загрузки
+        this.once('PJS.widgets.Screen:ControllerCreate', function(){
+          context._initController();
         });
       }
       else{
-        this.fire('PJS.widgets.Screen:DOMReady');
-      }
+        // Инициализация не листового экрана
 
-      // Загрузка контроллера
-      // Выполняется после полной трансформации узлов экрана
-      var syncFun = function(data){
-        if(data === object.get('transformNode')){
-          Y.PJS.services.Transformer.detach('PJS.services.Transformer:renderComplete', syncFun, object);
+        // 3 Загрузка вложенных экранов
+        this.once('PJS.widgets.Screen:DOMTransform', function(){
+          this._loadComponents();
+        });
 
-          // Загрузка контроллера
-          if(object.get('hasController')){
-            object._loadController();
+        // 4.b Инициализация контроллера после загрузки и инициализации контроллеров вложенных экранов и собственного контроллера
+        this.once('PJS.widgets.Screen:ComponentsControllersInit', function(){
+          if(context.get('_isControllerCreate')){
+            context._initController();
           }
-        }
-      };
-      Y.PJS.services.Transformer.on('PJS.services.Transformer:renderComplete', syncFun, this);
+        });
 
-      // Загрузка стиля
-      if(this.get('hasCSS')){
-        this._loadCSS();
+        this.once('PJS.widgets.Screen:ControllerCreate', function(){
+          if(context.get('_isComponentsControllersCreate')){
+            context._initController();
+          }
+        });
       }
+
+      // 3 Загрузка контроллера после трансформации DOM
+      this.once('PJS.widgets.Screen:DOMTransform', function(){
+        context._loadController();
+      });
+
+      // 2 Трансформация DOM после загрузки
+      this.once('PJS.widgets.Screen:DOMReady', function(){
+        // Предварительное формирование обрабатываемых узлов
+        var filling = [],
+          handlingNodes = this.get('boundingBox').all('[dHandling]'),
+          context = this;
+
+        // Формирование списка обрабатываемых узлов
+        handlingNodes.each(function(node){
+          var properties = node.getAttribute('dHandling').split(';');
+          for(var i in properties){
+            var property = properties[i].split(':');
+            node.setData('PJS.handling.' + property[0].trim(), property[1].trim());
+          }
+
+          // Формирование списка внедренных узлов
+          var fillingName = node.getData('PJS.handling.filling');
+          if(fillingName){
+            filling[fillingName] = node;
+          }
+        });
+
+        this.set('handling', handlingNodes);
+        this.set('filling', filling);
+
+        context._transformDOM();
+      });
+
+      // 1 Загрузка DOM
+      this._loadDOM();
+
+      // 1 Загрузка стиля
+      this._loadCSS();
     }
   });
 
   Y.namespace('PJS.widgets').Screen = Screen;
-}, '1.0', {requires: ['widget', 'node', 'node-load', 'get', 'PJS.classes.Controller', 'PJS.services.Transformer', 'event']});
+}, '1.0', {requires: ['widget', 'node', 'event',  'node-load', 'get', 'PJS.classes.Controller', 'PJS.services.Transformer', 'PJS.services.User']});

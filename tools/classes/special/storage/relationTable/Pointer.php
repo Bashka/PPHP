@@ -10,11 +10,13 @@ class Pointer{
    * @var integer
    */
   private $startPoint;
+
   /**
    * Текущая позиция.
    * @var integer
    */
   private $position;
+
   /**
    * Длина шага.
    * @var integer
@@ -37,7 +39,6 @@ class Pointer{
     $this->position = $startPoint;
     $this->delta = $delta;
   }
-
 
   /**
    * Устанавливает указатель на заданный элемент.
@@ -70,6 +71,7 @@ class Pointer{
    */
   public function nextPosition(){
     $this->position += $this->delta;
+
     return true;
   }
 
@@ -80,6 +82,7 @@ class Pointer{
   public function prevPosition(){
     if($this->position - $this->delta >= $this->startPoint){
       $this->position -= $this->delta;
+
       return true;
     }
     else{

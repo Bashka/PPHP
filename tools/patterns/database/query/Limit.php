@@ -1,7 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use PPHP\tools\patterns\interpreter\Restorable;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Ограничитель выборки. Платформо-зависимый компонент.
@@ -21,7 +21,7 @@ class Limit extends ComponentQuery{
    * @return string[]
    */
   public static function getMasks($driver = null){
-    return ['LIMIT '.self::getPatterns()['value']];
+    return ['LIMIT ' . self::getPatterns()['value']];
   }
 
   /**
@@ -39,13 +39,13 @@ class Limit extends ComponentQuery{
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
    * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return static Результирующий объект.
+   * @return Limit Результирующий объект.
    */
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
     parent::reestablish($string);
-
     $components = explode(' ', $string);
+
     // Выброс исключений невозможен.
     return new static((int) $components[1]);
   }
@@ -62,27 +62,24 @@ class Limit extends ComponentQuery{
 
   /**
    * Метод возвращает представление элемента в виде части SQL запроса.
-   *
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return string Результат интерпретации.
    */
-  public function interpretation($driver=null){
+  public function interpretation($driver = null){
     exceptions\InvalidArgumentException::verifyType($driver, 'Sn');
-
     switch($driver){
       case 'sqlsrv': // MS SQL Server
-        return 'TOP '.$this->countRow;
+        return 'TOP ' . $this->countRow;
       case 'firebird': // Firebird
-        return 'FIRST '.$this->countRow;
+        return 'FIRST ' . $this->countRow;
       case 'oci': // Oracle
-        return 'ROWNUM <= '.$this->countRow;
+        return 'ROWNUM <= ' . $this->countRow;
       case 'mysql': // MySQL
       case 'pgsql': // PostgreSQL
-        return 'LIMIT '.$this->countRow;
+        return 'LIMIT ' . $this->countRow;
       case 'ibm': // DB2
-        return 'FETCH FIRST '.$this->countRow.' ROWS ONLY';
+        return 'FETCH FIRST ' . $this->countRow . ' ROWS ONLY';
       default:
         throw exceptions\InvalidArgumentException::getValidException('sqlsrv|firebird|oci|mysql|pgsql|ibm', $driver);
     }

@@ -3,7 +3,6 @@ YUI.add('PJS.screens.Console.browse.Controller', function(Y){
     Controller.superclass.constructor.apply(this, arguments);
   }
 
-  Controller.NAME = 'controller';
   Y.extend(Controller, Y.PJS.classes.Controller, {
     initScreen: function(){
       this._initComplete();
@@ -31,6 +30,12 @@ YUI.add('PJS.screens.Console.browse.Controller', function(Y){
         ci.setAction(data.request.PJS_command.action);
         ci.emptyArguments();
         ci.addArguments(data.request.PJS_command.args);
+      });
+      // Обработка просмотра ответа
+      node.widget.on('PJS.screens.Console.browse:clickAnswer', function(data){
+        if(data.answer.PJS_answer != undefined){
+          alert(data.answer.PJS_answer);
+        }
       });
     },
 
@@ -100,8 +105,18 @@ YUI.add('PJS.screens.Console.browse.Controller', function(Y){
       node.widget.on("uploadcomplete", function(event){
         context.get('filling')['consoleOut'].widget.addAnswer(Y.JSON.parse(event.data).answer);
       });
+    },
+
+    menuListen: function(node){
+      node.widget.on('selectMenu', function(data){
+        alert(data.name)
+      });
+
+      node.widget.on('selectMenuItem', function(data){
+        alert(data.name)
+      });
     }
   });
 
   Y.namespace('PJS.screens.Console.browse').Controller = Controller;
-}, '1.0', {requires: ['node', 'base', 'PJS.services.Query', 'uploader']});
+}, '1.0', {requires: ['node', 'base', 'uploader', 'PJS.services.User']});

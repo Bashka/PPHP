@@ -1,11 +1,11 @@
 <?php
 namespace PPHP\tools\classes\standard\network\socket;
+
 use \PPHP\tools\patterns\io as io;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет двунаправленный поток, используемый при сокетном соединении.
- *
  * Объекты данного класса могут быть использованы как входной и выходной поток к удаленному сокету.
  * Класс является фассадным и делегирует свои полномочия входному и выходному потоку в отдельности.
  * Закрытие либого из потоков (входного или выходного) приведет к закрытию парного потока (выходного и входного соответственно).
@@ -18,6 +18,7 @@ class Stream implements io\Closed, io\Reader, io\Writer{
    * @var InStream
    */
   protected $in;
+
   /**
    * Выходной поток к удаленному сокету.
    * @var OutStream
@@ -60,7 +61,6 @@ class Stream implements io\Closed, io\Reader, io\Writer{
     if($this->isClose()){
       throw new io\IOException('Невозможно выполнить чтение из закрытого потока.');
     }
-
     try{
       return $this->in->read();
     }
@@ -71,9 +71,7 @@ class Stream implements io\Closed, io\Reader, io\Writer{
 
   /**
    * Метод считывает указанное количество байт из потока.
-   *
    * @param integer $length Количество считываемых байт.
-   *
    * @throws exceptions\InvalidArgumentException  Выбрасывается в случае возникновения ошибки при чтении из потока.
    * @throws io\IOException  Выбрасывается в случае возникновения ошибки при чтении из потока.
    * @return string Прочитанная строка или пустая строка - если достигнут конец потока.
@@ -82,7 +80,6 @@ class Stream implements io\Closed, io\Reader, io\Writer{
     if($this->isClose()){
       throw new io\IOException('Невозможно выполнить чтение из закрытого потока.');
     }
-
     try{
       return $this->in->readString($length);
     }
@@ -96,9 +93,7 @@ class Stream implements io\Closed, io\Reader, io\Writer{
 
   /**
    * Метод считывает строку от текущей позиции до символа конца строки EOL.
-   *
    * @param string $EOLSymbol [optional] Символ, принимаемый за EOL при данном вызове метода.
-   *
    * @throws io\IOException Выбрасывается в случае возникновения ошибки при чтении из потока.
    * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    * @return string Прочитанная строка или пустая строка, если достигнут конец потока или символ EOL.
@@ -107,7 +102,6 @@ class Stream implements io\Closed, io\Reader, io\Writer{
     if($this->isClose()){
       throw new io\IOException('Невозможно выполнить чтение из закрытого потока.');
     }
-
     try{
       return $this->in->readLine();
     }
@@ -128,7 +122,6 @@ class Stream implements io\Closed, io\Reader, io\Writer{
     if($this->isClose()){
       throw new io\IOException('Невозможно выполнить чтение из закрытого потока.');
     }
-
     try{
       return $this->in->readAll();
     }
@@ -139,9 +132,7 @@ class Stream implements io\Closed, io\Reader, io\Writer{
 
   /**
    * Метод записывает строку в поток.
-   *
    * @param string $data Записываемая строка.
-   *
    * @throws io\IOException Выбрасывается в случае возникновения ошибки при записи в поток.
    * @return integer Число реально записанных байт.
    */
@@ -149,7 +140,6 @@ class Stream implements io\Closed, io\Reader, io\Writer{
     if($this->isClose()){
       throw new io\IOException('Невозможно выполнить запись в закрытый поток.');
     }
-
     try{
       return $this->out->write($data);
     }
@@ -182,7 +172,6 @@ class Stream implements io\Closed, io\Reader, io\Writer{
     if($this->isClose()){
       throw new io\IOException('Невозможно установить время блокировки для закрытого потока.');
     }
-
     $this->in->setReadTimeout($readTimeout);
   }
 

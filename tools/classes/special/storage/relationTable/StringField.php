@@ -30,6 +30,7 @@ class StringField extends Field{
     if($this->isRequired() && (is_null($data) || $data == '')){
       return false;
     }
+
     return true;
   }
 
@@ -53,6 +54,7 @@ class StringField extends Field{
     if(is_null($data)){
       return '';
     }
+
     return $data;
   }
 
@@ -66,6 +68,7 @@ class StringField extends Field{
     if(!is_string($serializeData)){
       throw new \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException('string', $serializeData);
     }
+
     return trim($serializeData);
   }
 
@@ -78,10 +81,10 @@ class StringField extends Field{
   }
 
   /**
-   * @param $name Имя поля.
+   * @param string $name Имя поля.
    * @param bool $required Обязательность заполнения поля.
    * @param string|null $default Значение поля по умолчанию.
-   * @param $maxLength Максимальная длина строки.
+   * @param integer $maxLength Максимальная длина строки.
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если в качестве аргумента передано значение, отличное от string типа.
    */
   function __construct($name, $maxLength, $required = false, $default = null){

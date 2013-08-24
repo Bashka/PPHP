@@ -1,6 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\metadata\reflection;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Классическая реализация интерфейса Reflect.
@@ -15,6 +16,7 @@ trait TReflect{
    * @var ReflectionClass[]
    */
   static protected $reflectionClass = [];
+
   /**
    * Множество отражений свойств класса.
    * Свойство включает отражения свойств классов во всей иерархии наследования данного класса.
@@ -22,6 +24,7 @@ trait TReflect{
    * @var ReflectionProperty[][]
    */
   static protected $reflectionProperties = [];
+
   /**
    * Множество отражений методов класса.
    * Свойство включает отражения методов классов во всей иерархии наследования данного класса.
@@ -33,16 +36,16 @@ trait TReflect{
   /**
    * Метод возвращает отражение свойства вызываемого класса в том числе, если свойство относится к родительскому классу.
    * @static
-   *
    * @param string $propertyName Имя свойства.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @throws exceptions\ComponentClassException Выбрасывается при запросе отражения не определенного члена.
    * @return ReflectionProperty Отражение свойства класса.
    */
   static public function &getReflectionProperty($propertyName){
     exceptions\InvalidArgumentException::verifyType($propertyName, 'S');
-
+    /**
+     * @var Reflect $class
+     */
     $class = get_called_class();
     while(!property_exists($class, $propertyName)){
       $parentClass = $class::getReflectionClass()->getParentClass();
@@ -52,32 +55,31 @@ trait TReflect{
       $class = $parentClass->getName();
     }
     $reflectionProperty = new ReflectionProperty($class, $propertyName);
-
     // Проверка отношения получаемого отражения к классам в иерархии наследования
     $ownerClassName = $reflectionProperty->getDeclaringClass()->getName();
     if(!array_key_exists($ownerClassName, self::$reflectionProperties)){
       self::$reflectionProperties[$ownerClassName] = [];
     }
-
     if(!array_key_exists($propertyName, self::$reflectionProperties[$ownerClassName])){
       self::$reflectionProperties[$ownerClassName][$propertyName] = $reflectionProperty;
     }
+
     return self::$reflectionProperties[$ownerClassName][$propertyName];
   }
 
   /**
    * Метод возвращает отражение метода вызываемого класса в том числе, если метод относится к родительскому классу.
    * @static
-   *
    * @param string $methodName Имя метода.
-   *
    * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @throws exceptions\ComponentClassException Выбрасывается при запросе отражения не определенного члена.
    * @return ReflectionMethod Отражение метода класса.
    */
   static public function &getReflectionMethod($methodName){
     exceptions\InvalidArgumentException::verifyType($methodName, 'S');
-
+    /**
+     * @var Reflect $class
+     */
     $class = get_called_class();
     while(!method_exists($class, $methodName)){
       $parentClass = $class::getReflectionClass()->getParentClass();
@@ -87,16 +89,15 @@ trait TReflect{
       $class = $parentClass->getName();
     }
     $reflectionMethod = new ReflectionMethod($class, $methodName);
-
     // Проверка отношения получаемого отражения к классам в иерархии наследования
     $ownerClassName = $reflectionMethod->getDeclaringClass()->getName();
     if(!array_key_exists($ownerClassName, self::$reflectionMethods)){
       self::$reflectionMethods[$ownerClassName] = [];
     }
-
     if(!array_key_exists($methodName, self::$reflectionMethods[$ownerClassName])){
       self::$reflectionMethods[$ownerClassName][$methodName] = $reflectionMethod;
     }
+
     return self::$reflectionMethods[$ownerClassName][$methodName];
   }
 
@@ -109,6 +110,7 @@ trait TReflect{
     if(!isset(self::$reflectionClass[get_called_class()])){
       self::$reflectionClass[get_called_class()] = new ReflectionClass(get_called_class());
     }
+
     return static::$reflectionClass[get_called_class()];
   }
 
@@ -129,20 +131,29 @@ trait TReflect{
     if(!isset(self::$reflectionClass[$parentClass])){
       self::$reflectionClass[$parentClass] = new ReflectionClass($parentClass);
     }
+
     return static::$reflectionClass[$parentClass];
   }
 
   /**
    * Метод возвращает отражения всех свойств вызываемого класса и его родителей.
-   *
    * @static
    * @return ReflectionProperty[] Отражение всех свойств класса в виде ассоциативного массива, ключами которого являются имена, а значениями отражения свойств класса.
    */
   static public function getAllReflectionProperties(){
     $reflectionProperties = [];
-    $class = get_called_class();
-    $class = $class::getReflectionClass();
+    /**
+     * @var Reflect $className
+     */
+    $className = get_called_class();
+    /**
+     * @var ReflectionClass $class
+     */
+    $class = $className::getReflectionClass();
     do{
+      /**
+       * @var ReflectionProperty[] $properties
+       */
       $properties = $class->getProperties();
       foreach($properties as $property){
         if(array_key_exists($property->getName(), $reflectionProperties)){
@@ -152,21 +163,30 @@ trait TReflect{
         $reflectionProperties[$property->getName()] = $className::getReflectionProperty($property->getName());
       }
       $class = $class->getParentClass();
-    }while($class !== false);
+    } while($class !== false);
+
     return $reflectionProperties;
   }
 
   /**
    * Метод возвращает отражения всех методов вызываемого класса и его родителей.
-   *
    * @static
    * @return ReflectionMethod[] Отражение всех методов класса в виде ассоциативного массива, ключами которого являются имена, а значениями отражения методов класса
    */
   static public function getAllReflectionMethods(){
     $reflectionMethods = [];
-    $class = get_called_class();
-    $class = $class::getReflectionClass();
+    /**
+     * @var Reflect $className
+     */
+    $className = get_called_class();
+    /**
+     * @var ReflectionClass $class
+     */
+    $class = $className::getReflectionClass();
     do{
+      /**
+       * @var ReflectionMethod[] $methods
+       */
       $methods = $class->getMethods();
       foreach($methods as $method){
         if(array_key_exists($method->getName(), $reflectionMethods)){
@@ -176,7 +196,8 @@ trait TReflect{
         $reflectionMethods[$method->getName()] = $className::getReflectionMethod($method->getName());;
       }
       $class = $class->getParentClass();
-    }while($class !== false);
+    } while($class !== false);
+
     return $reflectionMethods;
   }
 }

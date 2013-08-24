@@ -1,8 +1,10 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\baseType;
+
 use \PPHP\tools\classes\standard\baseType\String;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-spl_autoload_register(function($className){
+
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
@@ -16,7 +18,6 @@ class StringTest extends \PHPUnit_Framework_TestCase{
    * Строка для теста.
    */
   const testString = 'Test string тестовая строка +/\\#`'; // 33 символа
-
   protected function setUp(){
     $this->object = new String(self::testString);
   }
@@ -28,7 +29,6 @@ class StringTest extends \PHPUnit_Framework_TestCase{
     new String('');
     new String('1');
     new String('Hello');
-
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
     new String(1);
   }
@@ -39,10 +39,8 @@ class StringTest extends \PHPUnit_Framework_TestCase{
   public function testReestablish(){
     $o = String::reestablish('1.0');
     $this->assertEquals('1.0', $o->getVal());
-
     $o = String::reestablish('');
     $this->assertEquals('', $o->getVal());
-
     $o = String::reestablish('Hello');
     $this->assertEquals('Hello', $o->getVal());
   }
@@ -97,7 +95,6 @@ class StringTest extends \PHPUnit_Framework_TestCase{
    * @covers String::key
    * @covers String::valid
    * @covers String::rewind
-   *
    */
   public function testIterator(){
     $i = 0;
@@ -110,7 +107,6 @@ class StringTest extends \PHPUnit_Framework_TestCase{
       $val .= $v;
       $i++;
     }
-
     $this->assertEquals('01234567891011121314151617181920212223242526272829303132', $key);
     $this->assertEquals('Test string тестовая строка +/\\#`', $val);
     $this->assertEquals(33, $i);
@@ -134,12 +130,12 @@ class StringTest extends \PHPUnit_Framework_TestCase{
    * @covers String::sub
    */
   public function testSub(){
-    $this->assertEquals('est', $this->object->sub(1,3)->getVal());
+    $this->assertEquals('est', $this->object->sub(1, 3)->getVal());
     $this->assertEquals('string тестовая строка +/\\#`', $this->object->sub(5)->getVal());
-    $this->assertEquals('string те', $this->object->sub(5,9)->getVal());
+    $this->assertEquals('string те', $this->object->sub(5, 9)->getVal());
     $this->object->setPoint(2);
-    $this->assertEquals('st', $this->object->sub(null,2)->getVal());
-    $this->assertEquals('Te', $this->object->sub(null,-3)->getVal());
+    $this->assertEquals('st', $this->object->sub(null, 2)->getVal());
+    $this->assertEquals('Te', $this->object->sub(null, -3)->getVal());
   }
 
   /**
@@ -200,7 +196,7 @@ class StringTest extends \PHPUnit_Framework_TestCase{
    * @covers String::explode
    */
   public function testExplode(){
-    $this->assertEquals(['Test','string','тестовая','строка','+/\\#`'], $this->object->explode(' '));
+    $this->assertEquals(['Test', 'string', 'тестовая', 'строка', '+/\\#`'], $this->object->explode(' '));
   }
 
   /**
@@ -223,7 +219,7 @@ class StringTest extends \PHPUnit_Framework_TestCase{
   public function testVerify(){
     $this->assertTrue($this->object->verify('== 33'));
     $this->assertTrue($this->object->verify('!= 32'));
-    $this->assertTrue($this->object->verify('eq '.self::testString));
+    $this->assertTrue($this->object->verify('eq ' . self::testString));
     $this->assertTrue($this->object->verify('!eq test'));
     $this->assertTrue($this->object->verify('# a-zA-Zа-яА-ЯёЁ+/\#` '));
     $this->assertTrue($this->object->verify('> 32'));
@@ -232,11 +228,10 @@ class StringTest extends \PHPUnit_Framework_TestCase{
     $this->assertTrue($this->object->verify('<= 33'));
     $this->assertTrue($this->object->verify('[] 0 33'));
     $this->assertTrue($this->object->verify('() 0 34'));
-
     $this->assertFalse($this->object->verify('== 32'));
     $this->assertFalse($this->object->verify('!= 33'));
     $this->assertFalse($this->object->verify('eq test'));
-    $this->assertFalse($this->object->verify('!eq '.self::testString));
+    $this->assertFalse($this->object->verify('!eq ' . self::testString));
     $this->assertFalse($this->object->verify('# A-Zа-яА-ЯёЁ+/\#` '));
     $this->assertFalse($this->object->verify('> 34'));
     $this->assertFalse($this->object->verify('>= 34'));
@@ -250,11 +245,11 @@ class StringTest extends \PHPUnit_Framework_TestCase{
    * @covers String::prevent
    */
   public function testPrevent(){
-    $this->assertEquals('Test string тестовая строка +/\\#`', $this->object->prevent(0,33, '')->getVal());
-    $this->assertEquals('  Test string тестовая строка +/\\#`', $this->object->prevent(35,50, '')->getVal());
-    $this->assertEquals('Test string тестовая строка +/', $this->object->prevent(0,30, '')->getVal());
-    $this->assertEquals('Tes sring тестовая строка +/`', $this->object->prevent(0,33, '\t#')->getVal());
-    $this->assertEquals('Test string тестовая строка +', $this->object->prevent(0,30, '\/')->getVal());
+    $this->assertEquals('Test string тестовая строка +/\\#`', $this->object->prevent(0, 33, '')->getVal());
+    $this->assertEquals('  Test string тестовая строка +/\\#`', $this->object->prevent(35, 50, '')->getVal());
+    $this->assertEquals('Test string тестовая строка +/', $this->object->prevent(0, 30, '')->getVal());
+    $this->assertEquals('Tes sring тестовая строка +/`', $this->object->prevent(0, 33, '\t#')->getVal());
+    $this->assertEquals('Test string тестовая строка +', $this->object->prevent(0, 30, '\/')->getVal());
   }
 
   /**

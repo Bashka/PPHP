@@ -10,14 +10,12 @@ namespace PPHP\tools\patterns\memento;
  */
 class Memento{
   /**
-   * Ассоциативный массив значений хранимых полей.
-   * @var mixed[]
+   * @var mixed[] Ассоциативный массив значений хранимых полей.
    */
   private $properties;
 
   /**
-   * Хозяин хранителя.
-   * @var Originator
+   * @var Originator Хозяин хранителя.
    */
   private $originator;
 
@@ -32,9 +30,7 @@ class Memento{
 
   /**
    * Метод возвращает хранимые значения свойств хранителю.
-   *
    * @param Originator $originator Хозяин хранителя. Метод вернет значения полей только если в данном аргументе передан истинный хозяин хранителя.
-   *
    * @throws AccessException Выбрасывается в случае, если в качестве хозяина передан не истинный хозяин хранителя.
    * @return mixed[] Ассоциативный массив значений полей хозяина.
    */
@@ -42,6 +38,7 @@ class Memento{
     if($this->originator !== $originator){
       throw new AccessException('Доступ к хранимому состоянию запрещен.');
     }
+
     return $this->properties;
   }
 }

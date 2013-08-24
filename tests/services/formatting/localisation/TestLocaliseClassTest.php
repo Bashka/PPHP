@@ -3,7 +3,7 @@ namespace PPHP\tests\services\formatting\localisation;
 
 use PPHP\services\formatting\localisation\LocalisationManager;
 
-spl_autoload_register(function($className){
+spl_autoload_register(function ($className){
   require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
 });
 $_SERVER['DOCUMENT_ROOT'] = '/var/www';
@@ -13,12 +13,10 @@ class TestLocaliseClassTest extends \PHPUnit_Framework_TestCase{
    */
   protected $object;
 
-
   /**
    * @var TestLocaliseClass
    */
   protected $localiseClass;
-
 
   protected function setUp(){
     $this->object = LocalisationManager::getInstance();
@@ -31,7 +29,6 @@ class TestLocaliseClassTest extends \PHPUnit_Framework_TestCase{
    */
   public function testLocaliseClass(){
     $this->assertEquals('Тестовый класс', $this->object->localiseClass($this->localiseClass->getReflectionClass()));
-
     $this->assertEquals('NotLocaliseClassMock', $this->object->localiseClass(NotLocaliseClassMock::getReflectionClass()));
   }
 
@@ -40,7 +37,6 @@ class TestLocaliseClassTest extends \PHPUnit_Framework_TestCase{
    */
   public function testLocaliseProperty(){
     $this->assertEquals('Сообщение', $this->object->localiseProperty($this->localiseClass->getReflectionClass(), $this->localiseClass->getReflectionProperty('message')));
-
     $this->assertEquals('message', $this->object->localiseProperty(NotLocaliseClassMock::getReflectionClass(), NotLocaliseClassMock::getReflectionProperty('message')));
   }
 

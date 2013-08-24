@@ -151,7 +151,3 @@ YUI.add('PJS.services.Query', function(Y){
   Y.augment(Query, Y.EventTarget);
   Y.namespace('PJS.services').Query = Query;
 }, '1.0', {requires: ['io-base', 'json-parse', 'json-stringify', 'event', 'node', 'oop']});
-
-/*
- Y.PJS.services.Query.query('Console', 'test', {});
-*/
