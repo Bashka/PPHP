@@ -86,6 +86,7 @@ abstract class InStream implements Reader{
         $result .= $portion;
       }
     }
+
     return '';
   }
 

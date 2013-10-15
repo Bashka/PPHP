@@ -13,33 +13,29 @@ use PPHP\tools\patterns\io as io;
  */
 class FileINI{
   /**
-   * Обрабатываемый файл
-   * @var File
+   * @var \PPHP\tools\classes\standard\fileSystem\File Обрабатываемый файл.
    */
   protected $file;
 
   /**
-   * Буфер содержимого файла
-   * @var array
+   * @var array Буфер содержимого файла.
    */
   protected $content;
 
   /**
-   * Является ли ini файл секционным
-   * @var boolean
+   * @var boolean Является ли ini файл секционным.
    */
   protected $isSection = false;
 
   /**
-   * Изменен ли ini файл
-   * @var boolean
+   * @var boolean Изменен ли ini файл.
    */
   protected $isSet = false;
 
   /**
    * Метод выполняет парсинг ini файла, если это небыло произведено ранее.
-   * @throws LockException Выбрасывается в случае, если невозможно получить доступ к потоку из-за блокировки.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
+   * @throws \PPHP\tools\classes\standard\fileSystem\LockException Выбрасывается в случае, если невозможно получить доступ к потоку из-за блокировки.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
    */
   protected function conditParse(){
     if(!is_array($this->content)){
@@ -57,8 +53,8 @@ class FileINI{
 
   /**
    * Метод получает содержимое ini файла в буфер
-   * @throws LockException Выбрасывается в случае, если невозможно получить доступ к потоку из-за блокировки.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
+   * @throws \PPHP\tools\classes\standard\fileSystem\LockException Выбрасывается в случае, если невозможно получить доступ к потоку из-за блокировки.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
    */
   protected function parse(){
     try{
@@ -75,12 +71,35 @@ class FileINI{
   }
 
   /**
-   * @param File $file INI файл
-   * @param boolean $isSection [optional] true - если файл разделен на секции, иначе - false
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае, если значение аргумента имеет неверный тип.
-   * @throws NotExistsException Выбрасывается в случае отсутствия целевого файла.
+   * Метод преобразует ссылку на ключ конфигурации в команду.
+   * Разделителем секции и ключа (если файл разделен на секции) является первый символ подчеркивания (_).
+   * @param string $varName Ссылка на ключ конфигурации.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @return \stdClass Команда имеющая следующие свойства: section - секция конфигурации или null - если файл не разделен на секции; key - ключ конфигурации.
    */
-  function __construct(File $file, $isSection = false){
+  protected function parseVarName($varName){
+    exceptions\InvalidArgumentException::verifyType($varName, 'S');
+    $result = new \stdClass();
+    if(!$this->isSection){
+      $result->section = null;
+      $result->key = $varName;
+    }
+    else{
+      $positionDelimiter = strpos($varName, '_');
+      $result->section = substr($varName, 0, $positionDelimiter);
+      $result->key = substr($varName, $positionDelimiter + 1);
+    }
+
+    return $result;
+  }
+
+  /**
+   * @param \PPHP\tools\classes\standard\fileSystem\File $file INI файл
+   * @param boolean $isSection [optional] true - если файл разделен на секции, иначе - false
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае, если значение аргумента имеет неверный тип.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае отсутствия целевого файла.
+   */
+  public function __construct(File $file, $isSection = false){
     if(!$file->isExists()){
       throw new NotExistsException('Требуемый компонент не найден в файловой системе.');
     }
@@ -91,11 +110,11 @@ class FileINI{
 
   /**
    * Метод возвращает значение ini файла.
-   * @param string $section [optional] Имя целевой секции.
    * @param string $key Ключ значения.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
-   * @throws LockException Выбрасывается в случае, если невозможно получить доступ к потоку из-за блокировки.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
+   * @param string $section [optional] Имя целевой секции.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @throws \PPHP\tools\classes\standard\fileSystem\LockException Выбрасывается в случае, если невозможно получить доступ к потоку из-за блокировки.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
    * @return string|null Значение ini файла или null, если данное значение не установленно.
    */
   public function get($key, $section = null){
@@ -119,16 +138,16 @@ class FileINI{
   /**
    * Метод возвращает все содержимое указанной секции.
    * @param string $section Имя целевой секции.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
-   * @throws LockException Выбрасывается в случае, если невозможно получить доступ к потоку из-за блокировки.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @return array|boolean Массив значений секции или false - если файл не разделен на секции или заданной секции не существует.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @throws \PPHP\tools\classes\standard\fileSystem\LockException Выбрасывается в случае, если невозможно получить доступ к потоку из-за блокировки.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
+   * @return array Массив значений секции или пустой массив - если файл не разделен на секции или заданной секции не существует.
    */
   public function getSection($section){
     exceptions\InvalidArgumentException::verifyType($section, 'S');
     $this->conditParse(); // Используется сквозной выброс исключений
     if(!$this->isSection || !isset($this->content[$section])){
-      return false;
+      return [];
     }
 
     return $this->content[$section];
@@ -140,9 +159,9 @@ class FileINI{
    * @param string $section [optional] Имя целевой секции.
    * @param string $key Ключ значения.
    * @param string $value Значение.
-   * @throws LockException Выбрасывается в случае, если невозможно получить доступ к потоку из-за блокировки.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @throws \PPHP\tools\classes\standard\fileSystem\LockException Выбрасывается в случае, если невозможно получить доступ к потоку из-за блокировки.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    */
   public function set($key, $value, $section = null){
     exceptions\InvalidArgumentException::verifyType($key, 'S');
@@ -165,9 +184,9 @@ class FileINI{
    * Метод удаляет значение из ini файла.
    * @param string $key Ключ удаляемого значения.
    * @param string $section [optional] Имя целевой секции.
-   * @throws LockException Выбрасывается в случае, если невозможно получить доступ к потоку из-за блокировки.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @throws \PPHP\tools\classes\standard\fileSystem\LockException Выбрасывается в случае, если невозможно получить доступ к потоку из-за блокировки.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return boolean true - если значение было успешно удалено, false - если значение не присутствовало в ini файле.
    */
   public function remove($key, $section = null){
@@ -196,9 +215,9 @@ class FileINI{
 
   /**
    * Метод записывает изменения в ini файл.
-   * @throws NotExistsException Выбрасывается в случае, если в момент записи требуемый ini файл не был найден по прежнему адресу.
-   * @throws LockException Выбрасывается в случае, если требуемый ini файл заблокирован.
-   * @throws io\IOException Выбрасывается в случае возникновения ошибки при записи в файл.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если в момент записи требуемый ini файл не был найден по прежнему адресу.
+   * @throws \PPHP\tools\classes\standard\fileSystem\LockException Выбрасывается в случае, если требуемый ini файл заблокирован.
+   * @throws \PPHP\tools\patterns\io\IOException Выбрасывается в случае возникновения ошибки при записи в файл.
    */
   public function rewrite(){
     if($this->isSet){
@@ -240,9 +259,9 @@ class FileINI{
   /**
    * Метод определяет, имеется ли в ini файле данная секция.
    * @param string $section Проверяемая секция.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
-   * @throws LockException Выбрасывается в случае, если невозможно получить доступ к потоку из-за блокировки.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @throws \PPHP\tools\classes\standard\fileSystem\LockException Выбрасывается в случае, если невозможно получить доступ к потоку из-за блокировки.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
    * @return boolean true - если секция определена, иначе - false
    */
   public function isSectionExists($section){
@@ -260,8 +279,8 @@ class FileINI{
    * Метод определяет, имеется ли в ini файле заданные данные.
    * @param string $key Проверяемые данные.
    * @param string $section Проверяемая секция.
-   * @throws LockException Выбрасывается в случае, если невозможно получить доступ к потоку из-за блокировки.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
+   * @throws \PPHP\tools\classes\standard\fileSystem\LockException Выбрасывается в случае, если невозможно получить доступ к потоку из-за блокировки.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
    * @return boolean true - если данные определены, иначе - false
    */
   public function isDataExists($key, $section = null){
@@ -274,49 +293,24 @@ class FileINI{
     }
   }
 
-  /**
-   * Метод преобразует ссылку на ключ конфигурации в команду.
-   * Разделителем секции и ключа (если файл разделен на секции) является первый символ подчеркивания (_).
-   * @param string $varName Ссылка на ключ конфигурации.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
-   * @return \stdClass Команда имеющая следующие свойства:
-   * - section - секция конфигурации или null - если файл не разделен на секции;
-   * - key - ключ конфигурации.
-   */
-  protected function parseVarName($varName){
-    exceptions\InvalidArgumentException::verifyType($varName, 'S');
-    $result = new \stdClass();
-    if(!$this->isSection){
-      $result->section = null;
-      $result->key = $varName;
-    }
-    else{
-      $positionDelimiter = strpos($varName, '_');
-      $result->section = substr($varName, 0, $positionDelimiter);
-      $result->key = substr($varName, $positionDelimiter + 1);
-    }
-
-    return $result;
-  }
-
-  function __get($name){
+  public function __get($name){
     $name = $this->parseVarName($name);
 
     return $this->get($name->key, $name->section);
   }
 
-  function __set($name, $value){
+  public function __set($name, $value){
     $name = $this->parseVarName($name);
     $this->set($name->key, $value, $name->section);
   }
 
-  function __isset($name){
+  public function __isset($name){
     $name = $this->parseVarName($name);
 
     return $this->isDataExists($name->key, $name->section);
   }
 
-  function __unset($name){
+  public function __unset($name){
     $name = $this->parseVarName($name);
     $this->remove($name->key, $name->section);
   }

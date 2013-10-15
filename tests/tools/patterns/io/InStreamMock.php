@@ -1,27 +1,25 @@
 <?php
 namespace PPHP\tests\tools\patterns\io;
 
-use PPHP\tools\patterns\io as io;
+use PPHP\tools\patterns\io\InStream;
 
-class InStreamMock extends io\InStream{
-  private $descriptor;
+class InStreamMock extends InStream{
+  const LENGTH = 52;
 
-  function __construct($descriptor){
-    $this->descriptor = $descriptor;
-  }
+  private $content = "First string\r\nВторая строка\r\nLast string";
 
-  /**
-   * Метод считывает один байт из потока.
-   * @throws io\IOException Выбрасывается в случае возникновения ошибки при чтении из потока.
-   * @return string Возвращает текущий байт из потока или пустую строку, если поток закончет.
-   */
+  private $point = 0;
+
   public function read(){
-    $char = fgetc($this->descriptor);
-    if($char === false){
+    if(!isset($this->content[$this->point])){
       return '';
     }
     else{
-      return $char;
+      return $this->content[$this->point++];
     }
+  }
+
+  public function setPoint($point){
+    $this->point = $point;
   }
 }

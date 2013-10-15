@@ -2,7 +2,7 @@
 namespace PPHP\tools\classes\standard\storage\database\ORM;
 
 use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use PPHP\tools\patterns\database\LongObject;
+use PPHP\tools\patterns\database\persistent\LongObject;
 use PPHP\tools\patterns\database\query as query;
 use PPHP\tools\patterns\interpreter\Metamorphosis;
 use PPHP\tools\patterns\metadata\reflection\ReflectionClass;
@@ -73,8 +73,8 @@ class Select extends query\Select implements Metamorphosis{
    * @return query\Select Результирующий объект.
    */
   public static function metamorphose($object, $driver = null){
-    if(!is_a($object, '\PPHP\tools\patterns\database\LongObject')){
-      throw exceptions\InvalidArgumentException::getTypeException('\PPHP\tools\patterns\database\LongObject', get_class($object));
+    if(!is_a($object, '\PPHP\tools\patterns\database\persistent\LongObject')){
+      throw exceptions\InvalidArgumentException::getTypeException('\PPHP\tools\patterns\database\persistent\LongObject', get_class($object));
     }
     if(!$object->isOID()){
       throw new exceptions\NotFoundDataException('Исходный объект не идентифицирован.');

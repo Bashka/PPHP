@@ -13,21 +13,17 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 class InStream extends io\InStream implements io\Closed{
   /**
-   * Флаг готовности потока.
-   * @var boolean true - если поток открыт, false - если закрыт.
+   * @var boolean Флаг готовности потока. true - если поток открыт, false - если закрыт.
    */
   protected $isClose = false;
 
   /**
-   * Таймаут ожидания при чтении данных (сек).
-   * @var integer [optional]
+   * @var integer|null Таймаут ожидания при чтении данных (сек).
    */
   protected $readTimeout = 1;
 
   /**
-   * Метод закрывает поток.
-   * @throws io\IOException Выбрасывается в случае невозможности закрытия сокетного потока из за ошибки.
-   * @return boolean true - если поток удачно закрыт, иначе - false.
+   * @prototype \PPHP\tools\patterns\io\Closed
    */
   public function close(){
     if($this->isClose()){
@@ -49,19 +45,16 @@ class InStream extends io\InStream implements io\Closed{
   }
 
   /**
-   * Метод проверяет, закрыт ли поток.
-   * @return boolean true - если поток закрыт, иначе - false.
+   * @prototype \PPHP\tools\patterns\io\Closed
    */
   public function isClose(){
     return $this->isClose;
   }
 
   /**
-   * Метод считывает один байт из потока.
    * Учитывайте то, что данный метод использует задержку для определения окончания передачи текущего байта.
    * Используйте заранее известные пакеты данных и метод readPackage чтобы избежать потери данных при передаче.
-   * @throws io\IOException Выбрасывается в случае невозможности считывания данных из потока.
-   * @return string Возвращает текущий байт из потока или пустую строку, если поток закончет.
+   * @prototype \PPHP\tools\patterns\io\Reader
    */
   public function read(){
     socket_set_option($this->resource, SOL_SOCKET, SO_RCVTIMEO, ['sec' => $this->readTimeout, 'usec' => 1]);
@@ -84,8 +77,8 @@ class InStream extends io\InStream implements io\Closed{
    * Метод выполняет блокирующее чтение пакета указанной длины.
    * Если в потоке недостаточно данных для чтения, процесс ожидает получения этих данных.
    * @param integer $length Размер пакета в байтах.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
-   * @throws io\IOException Выбрасывается в случае возникновения ошибки при чтении из поток.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @throws \PPHP\tools\patterns\io\IOException Выбрасывается в случае возникновения ошибки при чтении из поток.
    * @return string Прочитанная строка или пустая строка если нет данных для чтения.
    */
   public function readPackage($length){
@@ -102,10 +95,18 @@ class InStream extends io\InStream implements io\Closed{
     }
   }
 
+  /**
+   * Метод устанавливает время ожидания данных при чтении.
+   * @param integer $readTimeout Время ожидания данных в секундах.
+   */
   public function setReadTimeout($readTimeout){
     $this->readTimeout = $readTimeout;
   }
 
+  /**
+   * Метод возвращает время ожидания данных при чтении.
+   * @return integer|null Время ожидания данных в секундах или null - если блокировка не выполняется.
+   */
   public function getReadTimeout(){
     return $this->readTimeout;
   }

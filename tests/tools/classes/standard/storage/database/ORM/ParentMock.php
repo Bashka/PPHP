@@ -2,7 +2,7 @@
 namespace PPHP\tests\tools\classes\standard\storage\database\ORM;
 
 // Сущности класса записываются в таблицу ParentTable и проецируют свойство OID на поле OID
-use PPHP\tools\patterns\database\LongObject;
+use PPHP\tools\patterns\database\persistent\LongObject;
 
 /**
  * @ORM\Table ParentTable

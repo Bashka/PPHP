@@ -1,8 +1,8 @@
 <?php
 namespace PPHP\tools\classes\standard\fileSystem\io;
 
-use \PPHP\tools\patterns\io as io;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\patterns\io as io;
 
 /**
  * Класс представляет выходной поток в файл.
@@ -13,12 +13,7 @@ class FileWriter extends io\OutStream implements io\SeekIO, io\Closed{
   use FileClosed, FileSeekIO;
 
   /**
-   * Метод записывает байт или строку в поток.
-   * @abstract
-   * @param string $data Записываемая строка.
-   * @throws io\IOException Выбрасывается в случае возникновения ошибки при записи в поток.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return integer Число реально записанных байт.
+   * @prototype \PPHP\tools\patterns\io\Writer
    */
   public function write($data){
     exceptions\InvalidArgumentException::verifyType($data, 'S');
@@ -31,8 +26,8 @@ class FileWriter extends io\OutStream implements io\SeekIO, io\Closed{
   }
 
   /**
-   * Метод отчищает файл.
-   * @return bool true - в случае устеха, иначе - false.
+   * Метод отчищает содержимое потока (файл).
+   * @return boolean true - в случае устеха, иначе - false.
    */
   public function clean(){
     if(!ftruncate($this->resource, 0)){

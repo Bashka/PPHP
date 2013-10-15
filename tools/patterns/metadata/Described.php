@@ -5,51 +5,50 @@ use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс, реализующий данный интерфейс может быть описан с использованием метаданных.
- * Реализация данного интерфейса свидетельствует о возможности аннотирования класса.
  * Если объекты класса имеют устойчивое состояние, то аннотации могут быть сохранены между обращениями к объектам.
  * @author  Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\metadata
  */
 interface Described{
   /**
-   * Метод возвращает все метаданные данного объекта.
+   * Метод возвращает все метаданные вызываемого объекта.
    * @abstract
-   * @return \ArrayAccess
+   * @return string[]
    */
   public function getAllMetadata();
 
   /**
-   * Метод возвращает значение конкретных метаданных элемента.
+   * Метод возвращает значение конкретных метаданных вызываемого объекта.
    * @abstract
-   * @param string $metadataName Имя метаданных.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @param string $name Имя метаданных.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    * @return string|null Метод возвращает значение метаданных или null, если метаданные не установлены.
    */
-  public function getMetadata($metadataName);
+  public function getMetadata($name);
 
   /**
-   * Метод устанавливает значение метаданных.
+   * Метод устанавливает значение метаданных вызываемому объекту.
    * @abstract
-   * @param string $metadataName  Имя метаданных.
-   * @param string $metadataValue Значение метаданных.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @param string $name  Имя метаданных.
+   * @param string $value Значение метаданных.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
-  public function setMetadata($metadataName, $metadataValue);
+  public function setMetadata($name, $value);
 
   /**
-   * Метод проверяет, существуют ли заданные метаданные в вызываемом представлении.
+   * Метод проверяет, установлены ли метаданные в вызываемом объекте.
    * @abstract
-   * @param string $metadataName Имя метаданных.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
-   * @return boolean true - если метаданные существуют, иначе - false.
+   * @param string $name Имя метаданных.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @return boolean true - если метаданные установлены, иначе - false.
    */
-  public function isMetadataExists($metadataName);
+  public function isMetadataExists($name);
 
   /**
-   * Метод удаляет метаданные из класса.
+   * Метод удаляет метаданные у вызываемого объекта.
    * @abstract
-   * @param string $metadataName Удаляемые метаданные.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @param string $name Удаляемые метаданные.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
-  public function removeMetadata($metadataName);
+  public function removeMetadata($name);
 }

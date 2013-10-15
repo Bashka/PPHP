@@ -12,15 +12,12 @@ use \PPHP\tools\patterns\io as io;
  */
 class OutStream extends io\OutStream implements io\Closed{
   /**
-   * Флаг готовности потока.
-   * @var boolean true - если поток открыт, false - если закрыт.
+   * @var boolean Флаг готовности потока. true - если поток открыт, false - если закрыт.
    */
   protected $isClose;
 
   /**
-   * Метод закрывает поток.
-   * @throws io\IOException Выбрасывается в случае невозможности закрытия сокетного потока вызванного ошибкой.
-   * @return boolean true - если поток удачно закрыт, иначе - false.
+   * @prototype \PPHP\tools\patterns\io\Closed
    */
   public function close(){
     if($this->isClose()){
@@ -42,18 +39,14 @@ class OutStream extends io\OutStream implements io\Closed{
   }
 
   /**
-   * Метод проверяет, закрыт ли поток.
-   * @return boolean true - если поток закрыт, иначе - false.
+   * @prototype \PPHP\tools\patterns\io\Closed
    */
   public function isClose(){
     return $this->isClose;
   }
 
   /**
-   * Метод записывает строку в поток.
-   * @param string $data Записываемая строка.
-   * @throws io\IOException Выбрасывается в случае возникновения ошибки при записи в поток.
-   * @return integer Число реально записанных байт.
+   * @prototype \PPHP\tools\patterns\io\Writer
    */
   public function write($data){
     $result = socket_write($this->resource, $data);

@@ -67,25 +67,4 @@ class Cache implements Singleton{
 
     return $conf->Cache_Driver != 'NullAdapter';
   }
-
-  /**
-   * Метод конфигурирует службу.
-   * @static
-   * @param string $attributeName Свойство конфигурации. Доступными свойствами являются: Driver - имя адапрета; Server - кэш-сервер.
-   * @param string $value Значение конфигурации.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае, если недопустимый параметр или значения переданных параметров имеют неверный тип.
-   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если не удалось инициализировать кэш-систему.
-   */
-  public static function setAttribute($attributeName, $value){
-    exceptions\InvalidArgumentException::verifyType($attributeName, 'S');
-    exceptions\InvalidArgumentException::verifyType($value, 'S');
-    exceptions\InvalidArgumentException::verifyVal($attributeName, 's # Driver|Server');
-    try{
-      $conf = Configurator::getInstance();
-    }
-    catch(NotExistsException $e){
-      throw new exceptions\NotFoundDataException('Не удалось получить доступ к конфигурации системы.', 1, $e);
-    }
-    $conf->set('Cache', $attributeName, $value);
-  }
 }

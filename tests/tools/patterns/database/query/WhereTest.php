@@ -1,40 +1,62 @@
 <?php
 namespace PPHP\tests\tools\patterns\database\query;
 
-use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use PPHP\tools\patterns\database\query as query;
+use PPHP\tools\patterns\database\query\Field;
+use PPHP\tools\patterns\database\query\LogicOperation;
+use PPHP\tools\patterns\database\query\Where;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')) . 'PPHP/dev/autoload/autoload.php';
 class WhereTest extends \PHPUnit_Framework_TestCase{
   /**
-   * @covers query\Where::interpretation
+   * Должен определять логическое выражение.
+   * @covers \PPHP\tools\patterns\database\query\Where::__construct
    */
-  public function testInterpretation(){
-    $w = new query\Where(new query\LogicOperation(new query\Field('a'), '=', 'a'));
+  public function testShouldSetCondition(){
+    $c = new LogicOperation(new Field('fieldA'), '=', new Field('fieldB'));
+    $w = new Where($c);
+    $this->assertEquals($c, $w->getCondition());
+  }
+
+  /**
+   * Должен возвращать строку вида: WHERE условие.
+   * @covers \PPHP\tools\patterns\database\query\Where::interpretation
+   */
+  public function testShouldInterpretation(){
+    $w = new Where(new LogicOperation(new Field('a'), '=', 'a'));
     $this->assertEquals('WHERE (`a` = "a")', $w->interpretation());
   }
 
   /**
-   * @covers query\Where::isReestablish
+   * Должен восстанавливаться из строки вида: WHERE условие.
+   * @covers \PPHP\tools\patterns\database\query\Where::reestablish
    */
-  public function testIsReestablish(){
-    $this->assertTrue(query\Where::isReestablish('WHERE (`field` = "0")'));
-    $this->assertTrue(query\Where::isReestablish('WHERE ((`fieldA` = "0")
-                                                         AND (`fieldB` = "0"))'));
-    $this->assertTrue(query\Where::isReestablish('WHERE (table.field = "0")'));
-    $this->assertFalse(query\Where::isReestablish('(`field` = "0")'));
-    $this->assertFalse(query\Where::isReestablish('WHERE `field` = "0"'));
-    $this->assertFalse(query\Where::isReestablish('WHERE ()'));
+  public function testShouldRestorableForString(){
+    $r = Where::reestablish('WHERE (`field` = "0")');
+    /**
+     * @var \PPHP\tools\patterns\database\query\LogicOperation $c
+     */
+    $c = $r->getCondition();
+    $this->assertEquals('0', $c->getValue());
   }
 
   /**
-   * @covers query\Where::reestablish
+   * Допустимой строкой является строка вида: WHERE условие.
+   * @covers \PPHP\tools\patterns\database\query\Where::isReestablish
    */
-  public function testReestablish(){
-    $r = query\Where::reestablish('WHERE (`field` = "0")');
-    $this->assertEquals('0', $r->getCondition()->getValue());
+  public function testGoodString(){
+    $this->assertTrue(Where::isReestablish('WHERE (`field` = "0")'));
+    $this->assertTrue(Where::isReestablish('WHERE ((`fieldA` = "0")
+                                                         AND (`fieldB` = "0"))'));
+  }
+
+  /**
+   * Должен возвращать false при недопустимой структуре строки.
+   * @covers \PPHP\tools\patterns\database\query\Where::isReestablish
+   */
+  public function testBedString(){
+    $this->assertTrue(Where::isReestablish('WHERE (table.field = "0")'));
+    $this->assertFalse(Where::isReestablish('(`field` = "0")'));
+    $this->assertFalse(Where::isReestablish('WHERE `field` = "0"'));
+    $this->assertFalse(Where::isReestablish('WHERE ()'));
   }
 }

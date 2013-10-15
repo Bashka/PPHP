@@ -10,42 +10,41 @@ use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 class OrderBy extends ComponentQuery{
   /**
-   * Используемые в сортировке поля.
-   * @var Field[]
+   * Маркер для сортировки по возрастанию.
+   */
+  const ASC = 'ASC';
+
+  /**
+   * Маркер для сортировки по убыванию.
+   */
+  const DESC = 'DESC';
+
+  /**
+   * @var \PPHP\tools\patterns\database\query\Field[] Используемые в сортировке поля.
    */
   private $fields;
 
   /**
-   * Способ сортировки.
-   * @var string
+   * @var string Способ сортировки.
    */
   private $sortedType;
 
   /**
-   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getMasks($driver = null){
     return ['ORDER BY (?:(?:' . Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1] . '))(?:, ?(?:(?:' . Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1] . ')))* ' . self::getPatterns()['types']];
   }
 
   /**
-   * Метод возвращает массив шаблонов, описывающих различные компоненты шаблонов верификации.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getPatterns($driver = null){
     return ['types' => '(?:ASC|DESC)'];
   }
 
   /**
-   * Метод восстанавливает объект из строки.
-   * @param string $string Исходная строка.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return OrderBy Результирующий объект.
+   * @prototype \PPHP\tools\patterns\interpreter\Restorable
    */
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
@@ -71,9 +70,9 @@ class OrderBy extends ComponentQuery{
 
   /**
    * @param string $sortedType [ASC] Способ сортировки.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
-  function __construct($sortedType = 'ASC'){
+  function __construct($sortedType = self::ASC){
     exceptions\InvalidArgumentException::verifyVal($sortedType, 's # ASC|DESC');
     $this->fields = [];
     $this->sortedType = $sortedType;
@@ -81,18 +80,14 @@ class OrderBy extends ComponentQuery{
 
   /**
    * Метод добавляет поле для сортировки.
-   * @param Field $field Поле для сортировки.
+   * @param \PPHP\tools\patterns\database\query\Field $field Поле для сортировки.
    */
   public function addField(Field $field){
     $this->fields[] = $field;
   }
 
   /**
-   * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return string Результат интерпретации.
+   * @prototype \PPHP\tools\patterns\interpreter\Interpreter
    */
   public function interpretation($driver = null){
     exceptions\InvalidArgumentException::verifyType($driver, 'Sn');
@@ -108,7 +103,7 @@ class OrderBy extends ComponentQuery{
   }
 
   /**
-   * @return \SplObjectStorage
+   * @return \PPHP\tools\patterns\database\query\Field[]
    */
   public function getFields(){
     return $this->fields;

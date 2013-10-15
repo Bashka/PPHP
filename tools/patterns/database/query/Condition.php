@@ -1,7 +1,7 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
 
-use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\classes\standard\baseType\exceptions\StructureException;
 
 /**
  * Дочерние классы данного класса являются представлением логической конструкции.
@@ -10,9 +10,7 @@ use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 abstract class Condition extends ComponentQuery{
   /**
-   * Метод возвращает массив шаблонов, описывающих различные компоненты шаблонов верификации.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getPatterns($driver = null){
     return ['condition' => ' ?\(.+\) ?'];
@@ -23,9 +21,9 @@ abstract class Condition extends ComponentQuery{
    * Метод автоматически определяет класс восстанавливаемого объекта на основании анализа структуры исходной строки.
    * @param string $string Исходная строка.
    * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return self Результирующий объект.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @return \PPHP\tools\patterns\database\query\Condition Результирующий объект.
    */
   public static function reestablishCondition($string, $driver = null){
     if(LogicOperation::isReestablish($string)){
@@ -44,7 +42,7 @@ abstract class Condition extends ComponentQuery{
       return OrMultiCondition::reestablish($string);
     }
     else{
-      throw new exceptions\StructureException('Недопустимая структура исходной строки. Невозможно определить условие.');
+      throw new StructureException('Недопустимая структура исходной строки. Невозможно определить условие.');
     }
   }
 }

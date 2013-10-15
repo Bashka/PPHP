@@ -1,59 +1,114 @@
 <?php
 namespace PPHP\tests\tools\patterns\database\query;
 
-use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use PPHP\tools\patterns\database\query as query;
+use PPHP\tools\patterns\database\query\Field;
+use PPHP\tools\patterns\database\query\LogicOperation;
+use PPHP\tools\patterns\database\query\MultiCondition;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')) . 'PPHP/dev/autoload/autoload.php';
 class MultiConditionTest extends \PHPUnit_Framework_TestCase{
   /**
-   * @covers query\MultiCondition::__construct
+   * Должен определять все компоненты логического выражения.
+   * @covers PPHP\tools\patterns\database\query\MultiCondition::__construct
    */
-  public function testConstruct(){
-    $l = new query\LogicOperation(new query\Field('a'), '=', 'a');
-    $r = new query\LogicOperation(new query\Field('b'), '=', 'b');
-    $m = new query\MultiCondition($l, 'AND', $r);
-    new query\MultiCondition($m, 'OR', new query\LogicOperation(new query\Field('c'), '=', 'c'));
+  public function testShouldSetAllConditionAndOperator(){
+    $loName = new LogicOperation(new Field('name'), '=', 'ivan');
+    $loOID = new LogicOperation(new Field('OID'), '<', '10');
+    $o = new MultiCondition($loName, 'AND', $loOID);
+    $this->assertEquals($loName, $o->getLeftOperand());
+    $this->assertEquals($loOID, $o->getRightOperand());
+    $this->assertEquals('AND', $o->getLogicOperator());
+  }
+
+  /**
+   * В качестве оператора может выступать только одно из следующих значений: AND или OR.
+   * @covers PPHP\tools\patterns\database\query\MultiCondition::__construct
+   */
+  public function testOperatorShouldBeANDorOR(){
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
-    new query\MultiCondition($l, 'x', $r);
+    new MultiCondition(new LogicOperation(new Field('name'), '=', 'ivan'), 'TEST', new LogicOperation(new Field('OID'), '<', '10'));
   }
 
   /**
-   * @covers query\MultiCondition::interpretation
+   * Должен возвращать строку вида: ((условие) оператор (условие)).
+   * @covers PPHP\tools\patterns\database\query\MultiCondition::interpretation
    */
-  public function testInterpretation(){
-    $l = new query\LogicOperation(new query\Field('a'), '=', 'a');
-    $r = new query\LogicOperation(new query\Field('b'), '=', 'b');
-    $m = new query\MultiCondition($l, 'AND', $r);
-    $this->assertEquals('((`a` = "a") AND (`b` = "b"))', $m->interpretation());
-    $m = new query\MultiCondition($m, 'OR', new query\LogicOperation(new query\Field('c'), '=', 'c'));
-    $this->assertEquals('(((`a` = "a") AND (`b` = "b")) OR (`c` = "c"))', $m->interpretation());
+  public function testShouldInterpretation(){
+    $loName = new LogicOperation(new Field('name'), '=', 'ivan');
+    $loOID = new LogicOperation(new Field('OID'), '<', '10');
+    $o = new MultiCondition($loName, 'AND', $loOID);
+    $this->assertEquals('((`name` = "ivan") AND (`OID` < "10"))', $o->interpretation());
+    $o = new MultiCondition($o, 'OR', new LogicOperation(new Field('c'), '=', 'c'));
+    $this->assertEquals('(((`name` = "ivan") AND (`OID` < "10")) OR (`c` = "c"))', $o->interpretation());
   }
 
   /**
-   * @covers query\MultiCondition::reestablish
+   * Должен восстанавливаться из строки вида: ((условие) оператор (условие)).
+   * @covers PPHP\tools\patterns\database\query\MultiCondition::reestablish
    */
-  public function testReestablish(){
-    $m = query\MultiCondition::reestablish('(((`fieldA` = "1") AND (`fieldB` = "2")) OR (`fieldC` = "3"))');
-    $this->assertEquals('OR', $m->getLogicOperator());
-    $this->assertEquals('fieldC', $m->getRightOperand()->getField()->getName());
-    $this->assertEquals('1', $m->getLeftOperand()->getLeftOperand()->getValue());
+  public function testShouldRestorableForString(){
+    /**
+     * @var \PPHP\tools\patterns\database\query\MultiCondition $o
+     */
+    $o = MultiCondition::reestablish('((`a` = "a") AND (`b` = "b"))');
+    /**
+     * @var \PPHP\tools\patterns\database\query\LogicOperation $c
+     */
+    $c = $o->getLeftOperand();
+    $this->assertEquals('a', $c->getValue());
+    $this->assertEquals('=', $c->getOperator());
+    $this->assertEquals('AND', $o->getLogicOperator());
+    /**
+     * @var \PPHP\tools\patterns\database\query\MultiCondition $o
+     */
+    $o = MultiCondition::reestablish('((`a` = "a") OR (`b` = "b"))');
+    /**
+     * @var \PPHP\tools\patterns\database\query\LogicOperation $c
+     */
+    $c = $o->getLeftOperand();
+    $this->assertEquals('a', $c->getValue());
+    $this->assertEquals('=', $c->getOperator());
+    $this->assertEquals('OR', $o->getLogicOperator());
+    /**
+     * @var \PPHP\tools\patterns\database\query\MultiCondition $o
+     */
+    $o = MultiCondition::reestablish('(((`fieldA` = "1") AND (`fieldB` = "2")) OR (`fieldC` = "3"))');
+    $this->assertEquals('OR', $o->getLogicOperator());
+    /**
+     * @var \PPHP\tools\patterns\database\query\LogicOperation $c
+     */
+    $c = $o->getRightOperand();
+    $this->assertEquals('fieldC', $c->getField()->getName());
+    /**
+     * @var \PPHP\tools\patterns\database\query\MultiCondition $c
+     */
+    $c = $o->getLeftOperand();
+    $c = $c->getLeftOperand();
+    /**
+     * @var \PPHP\tools\patterns\database\query\LogicOperation $c
+     */
+    $this->assertEquals('1', $c->getValue());
   }
 
   /**
-   * @covers query\MultiCondition::isReestablish
+   * Допустимой строкой является строка вида: ((условие) оператор (условие)).
+   * @covers PPHP\tools\patterns\database\query\MultiCondition::isReestablish
    */
-  public function testIsReestablish(){
-    $this->assertTrue(query\MultiCondition::isReestablish('((`fieldA` = "1") AND (`fieldB` = "2"))'));
-    $this->assertTrue(query\MultiCondition::isReestablish('(((`fieldA` = "1") AND (`fieldB` = "2")) OR (`fieldC` = "3"))'));
-    $this->assertTrue(query\MultiCondition::isReestablish('((table.fieldA = "1")
+  public function testGoodString(){
+    $this->assertTrue(MultiCondition::isReestablish('((`fieldA` = "1") AND (`fieldB` = "2"))'));
+    $this->assertTrue(MultiCondition::isReestablish('(((`fieldA` = "1") AND (`fieldB` = "2")) OR (`fieldC` = "3"))'));
+    $this->assertTrue(MultiCondition::isReestablish('((table.fieldA = "1")
                                                             AND (`fieldB` = "2"))'));
-    $this->assertFalse(query\MultiCondition::isReestablish('((`fieldA` = "1"))'));
-    $this->assertFalse(query\MultiCondition::isReestablish('((`fieldA` = "1") (`fieldB` = "2"))'));
-    $this->assertFalse(query\MultiCondition::isReestablish('((`fieldA` = "1") AND `fieldB` = "2")'));
-    $this->assertFalse(query\MultiCondition::isReestablish('(`fieldA` = "1") AND (`fieldB` = "2")'));
+  }
+
+  /**
+   * Должен возвращать false при недопустимой структуре строки.
+   * @covers PPHP\tools\patterns\database\query\MultiCondition::isReestablish
+   */
+  public function testBedString(){
+    $this->assertFalse(MultiCondition::isReestablish('((`fieldA` = "1"))'));
+    $this->assertFalse(MultiCondition::isReestablish('((`fieldA` = "1") (`fieldB` = "2"))'));
+    $this->assertFalse(MultiCondition::isReestablish('((`fieldA` = "1") AND `fieldB` = "2")'));
+    $this->assertFalse(MultiCondition::isReestablish('(`fieldA` = "1") AND (`fieldB` = "2")'));
   }
 }

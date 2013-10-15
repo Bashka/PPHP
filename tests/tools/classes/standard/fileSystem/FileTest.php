@@ -1,248 +1,201 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\fileSystem;
 
-use PPHP\tools\classes\standard\fileSystem as fileSystem;
+use PPHP\tools\classes\standard\fileSystem\File;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')).'PPHP/dev/autoload/autoload.php';
+
 class FileTest extends \PHPUnit_Framework_TestCase{
   /**
-   * @var fileSystem\File
+   * @var File
    */
-  protected $object;
-
-  /**
-   * Имя тестируемого файла в текущем каталоге.
-   */
-  const testFileName = 'testFile.txt';
-
-  /**
-   * Имя каталога, необходимого для целей тестирования.
-   */
-  const assistanceDir = 'testAssistanceDir';
-
-  public static function setUpBeforeClass(){
-    if(!file_exists(self::assistanceDir) || !is_dir(self::assistanceDir)){
-      mkdir(self::assistanceDir);
-    }
-  }
-
-  public static function tearDownAfterClass(){
-    self::clearAssistanceDir();
-    rmdir(self::assistanceDir);
-  }
+  private $object;
 
   protected function setUp(){
-    $this->object = fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::testFileName);
-  }
-
-  protected function tearDown(){
-    if(file_exists(self::testFileName) && is_file(self::testFileName)){
-      unlink(self::testFileName);
-    }
-    if(file_exists('rename_' . self::testFileName) && is_file('rename_' . self::testFileName)){
-      unlink('rename_' . self::testFileName);
-    }
-    self::clearAssistanceDir();
+    $this->object = new File('PPHP/tests/tools/classes/standard/fileSystem/file');
   }
 
   /**
-   * @static
-   * Метод отчищает ассистирующую директорию от содержимого.
+   * Компонента с данным именем в родительском каталоге не должно существовать.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::rename
    */
-  private static function clearAssistanceDir(){
-    $iterator = new \DirectoryIterator(self::assistanceDir);
-    foreach($iterator as $component){
-      if($component != '.' && $component != '..'){
-        unlink(self::assistanceDir . '/' . $component);
-      }
-    }
+  public function testShouldPreventDuplicationOfRename(){
+    $this->setExpectedException('PPHP\tools\classes\standard\baseType\exceptions\DuplicationException');
+    $this->object->rename('assistant.txt');
   }
 
   /**
-   * @covers fileSystem\File::getReader
+   * В аргументе не должно присутствовать символа слеша.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::rename
    */
-  public function testUpdateReader(){
-    fclose(fopen(self::testFileName, 'a+'));
-    $reader = $this->object->getReader();
-    $reader->close();
-    $this->assertTrue($reader !== ($newReader = $this->object->getReader()));
-    $newReader->close();
+  public function testShouldThrowExceptionIfNewNameIsAddress(){
+    $this->setExpectedException('PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
+    $this->object->rename('dir/assistant');
   }
 
   /**
-   * @covers fileSystem\File::getWriter
+   * Должен выполнять копирование файла вместе с содержимым.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::copyPaste
    */
-  public function testUpdateWriter(){
-    fclose(fopen(self::testFileName, 'a+'));
-    $writer = $this->object->getWriter();
-    $writer->close();
-    $this->assertTrue($writer !== ($newWriter = $this->object->getWriter()));
-    $newWriter->close();
+  public function testShouldCopyFile(){
+    $dir = $this->object->getLocation()->getDir('assistant');
+    $copy = $this->object->copyPaste($dir);
+    $newAddress = $_SERVER['DOCUMENT_ROOT'].'/PPHP/tests/tools/classes/standard/fileSystem/assistant/file';
+    $this->assertTrue(file_exists($newAddress) && is_file($newAddress));
+    $this->assertEquals('', file_get_contents($newAddress));
+    $copy->delete();
   }
 
   /**
-   * @covers fileSystem\File::create
+   * Должен возвращать представление созданной копии.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::copyPaste
    */
-  public function testCreate(){
-    $this->assertTrue($this->object->create());
-    $this->assertTrue((file_exists(self::testFileName) && is_file(self::testFileName)));
+  public function testShouldReturnCopy(){
+    $dir = $this->object->getLocation()->getDir('assistant');
+    $copy = $this->object->copyPaste($dir);
+    $this->assertInstanceOf('PPHP\tools\classes\standard\fileSystem\File', $copy);
+    $copy->delete();
   }
 
   /**
-   * @covers fileSystem\File::create
+   * Должен выбрасывать исключение если вызываемого файла нет в файловой системе.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::copyPaste
    */
-  public function testCreateIfFileExists(){
-    fclose(fopen(self::testFileName, 'a+'));
-    $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\DuplicationException');
+  public function testShouldThrowExceptionIfFileNotExists(){
+    $this->setExpectedException('PPHP\tools\classes\standard\fileSystem\NotExistsException');
+    $file = new File('PPHP/tests/tools/classes/standard/fileSystem/notExistsFile');
+    $file->copyPaste($this->object->getLocation());
+  }
+
+  /**
+   * Должен предотвращать дублирование.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::copyPaste
+   */
+  public function testShouldPreventDuplicationOfCopy(){
+    $this->setExpectedException('PPHP\tools\classes\standard\baseType\exceptions\DuplicationException');
+    $this->object->copyPaste($this->object->getLocation());
+  }
+
+  /**
+   * Должен возвращать размер файла.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::getSize
+   */
+  public function testShouldReturnAllSize(){
+    $w = $this->object->getWriter();
+    $w->write('Hello');
+    $this->assertEquals(5, $this->object->getSize());
+    $w->clean();
+    $this->assertEquals(0, $this->object->getSize());
+    $w->close();
+  }
+
+  /**
+   * Должен вырасывать исключение, если вызываемый файл отсутствует в файловой системе.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::getSize
+   */
+  public function testShouldThrowExceptionIfFileNotExists2(){
+    $this->setExpectedException('PPHP\tools\classes\standard\fileSystem\NotExistsException');
+    $file = new File('PPHP/tests/tools/classes/standard/fileSystem/notExistsFile');
+    $file->getSize();
+  }
+
+  /**
+   * Должен возвращать true если вызываемый файл существует в файловой системе, иначе - false.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::isExists
+   */
+  public function testShouldReturnTrueIfFileExists(){
+    $this->assertTrue($this->object->isExists());
+    $file = new File('PPHP/tests/tools/classes/standard/fileSystem/notExistsFile');
+    $this->assertFalse($file->isExists());
+  }
+
+  /**
+   * Должен выбрасывать исключение если родительского каталога не существует.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::isExists
+   */
+  public function testShouldThrowExceptionIfNotExistsParentDir(){
+    $this->setExpectedException('PPHP\tools\classes\standard\fileSystem\NotExistsException');
+    $file = new File('PPHP/tests/tools/classes/standard/fileSystem/notExistsDir/notExistsFile');
+    $file->isExists();
+  }
+
+  /**
+   * Должен создавать файл с указанной маской доступа.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::create
+   */
+  public function testShouldCreateFile(){
+    $file = new File('PPHP/tests/tools/classes/standard/fileSystem/assistant/file');
+    $file->create();
+    $newAddress = $_SERVER['DOCUMENT_ROOT'].'/PPHP/tests/tools/classes/standard/fileSystem/assistant/file';
+    $this->assertTrue(file_exists($newAddress) && is_file($newAddress));
+    $file->delete();
+  }
+
+  /**
+   * Должен предотавращать дублирование.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::create
+   */
+  public function testShouldPreventDuplicationOfCreate(){
+    $this->setExpectedException('PPHP\tools\classes\standard\baseType\exceptions\DuplicationException');
+    $file = new File('PPHP/tests/tools/classes/standard/fileSystem/file');
+    $file->create();
+  }
+
+  /**
+   * Должен удалять файл.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::delete
+   */
+  public function testShouldRemoveFile(){
+    $this->object->delete();
+    $address = $_SERVER['DOCUMENT_ROOT'].'/PPHP/tests/tools/classes/standard/fileSystem/file';
+    $this->assertTrue(!file_exists($address) || !is_file($address));
     $this->object->create();
   }
 
   /**
-   * @covers fileSystem\File::rename
+   * Должен выбрасывать исключение если вызываемого файла нет в файловой системе.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::delete
    */
-  public function testRename(){
-    fclose(fopen(self::testFileName, 'a+'));
-    $this->assertTrue($this->object->rename('rename_' . self::testFileName));
-    $this->assertTrue((file_exists('rename_' . self::testFileName) && is_file('rename_' . self::testFileName)));
-    $this->assertEquals('rename_' . self::testFileName, $this->object->getName());
+  public function testShouldThrowExceptionIfFileNotExists3(){
+    $this->setExpectedException('PPHP\tools\classes\standard\fileSystem\NotExistsException');
+    $file = new File('PPHP/tests/tools/classes/standard/fileSystem/notExistsFile');
+    $file->delete();
   }
 
   /**
-   * @covers fileSystem\File::rename
+   * Должен возвращать расширение файла.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::getType
    */
-  public function testRenameForDuplication(){
-    fclose(fopen(self::testFileName, 'a+'));
-    $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\DuplicationException');
-    $this->object->rename(self::testFileName);
+  public function testShouldReturnFileType(){
+    $file = new File('PPHP/tests/tools/classes/standard/fileSystem/assistant.txt');
+    $this->assertEquals('txt', $file->getType());
   }
 
   /**
-   * @covers fileSystem\File::move
+   * Должен возвращать пустую строку, если у файла нет расширения.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::getType
    */
-  public function testMove(){
-    fclose(fopen(self::testFileName, 'a+'));
-    $assDir = fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::assistanceDir);
-    $this->assertTrue($this->object->move($assDir));
-    $this->assertTrue((!file_exists(self::testFileName) || !is_file(self::testFileName)));
-    $this->assertTrue((file_exists(self::assistanceDir . '/' . self::testFileName) && is_file(self::assistanceDir . '/' . self::testFileName)));
-    $this->assertEquals($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::assistanceDir . '/' . self::testFileName, $this->object->getAddress());
+  public function testShouldReturnEmptyStringIfFileNotType(){
+    $this->assertEquals('', $this->object->getType());
   }
 
   /**
-   * @covers fileSystem\File::move
+   * Должен возвращать файловый поток ввода.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::getReader
    */
-  public function testMoveForDuplication(){
-    fclose(fopen(self::testFileName, 'a+'));
-    fclose(fopen(self::assistanceDir . '/' . self::testFileName, 'a+'));
-    $assDir = fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::assistanceDir);
-    $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\DuplicationException');
-    $this->object->move($assDir);
+  public function testShouldReturnFileInStream(){
+    $r = $this->object->getReader();
+    $this->assertInstanceOf('PPHP\tools\classes\standard\fileSystem\io\BlockingFileReader', $r);
+    $r->close();
   }
 
   /**
-   * @covers fileSystem\File::copyPaste
+   * Должен возвращать файловый поток вывода.
+   * @covers PPHP\tools\classes\standard\fileSystem\File::getWriter
    */
-  public function testCopyPaste(){
-    fclose(fopen(self::testFileName, 'a+'));
-    $assDir = fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::assistanceDir);
-    $this->assertTrue($this->object->copyPaste($assDir));
-    $this->assertTrue((file_exists(self::testFileName) && is_file(self::testFileName)));
-    $this->assertTrue((file_exists(self::assistanceDir . '/' . self::testFileName) && is_file(self::assistanceDir . '/' . self::testFileName)));
-  }
-
-  /**
-   * @covers fileSystem\File::copyPaste
-   */
-  public function testCopyPasteForDuplication(){
-    fclose(fopen(self::testFileName, 'a+'));
-    fclose(fopen(self::assistanceDir . '/' . self::testFileName, 'a+'));
-    $assDir = fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::assistanceDir);
-    $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\DuplicationException');
-    $this->object->copyPaste($assDir);
-  }
-
-  /**
-   * @covers fileSystem\File::getSize
-   */
-  public function testGetSizeForEmpty(){
-    fclose(fopen(self::testFileName, 'a+'));
-    $this->assertEquals(0, $this->object->getSize());
-  }
-
-  /**
-   * @covers fileSystem\File::getSize
-   */
-  public function testGetSizeForNonEmpty(){
-    $fileDescriptor = fopen(self::testFileName, 'a+');
-    fwrite($fileDescriptor, 'test');
-    fclose($fileDescriptor);
-    $this->assertEquals(4, $this->object->getSize());
-  }
-
-  /**
-   * @covers fileSystem\File::isExists
-   */
-  public function testIsExists(){
-    $this->assertFalse($this->object->isExists());
-    fclose(fopen(self::testFileName, 'a+'));
-    $this->assertTrue($this->object->isExists());
-  }
-
-  /**
-   * @covers fileSystem\File::getReader
-   */
-  public function testGetReader(){
-    fclose(fopen(self::testFileName, 'a+'));
-    $reader = $this->object->getReader();
-    $this->assertInstanceOf('\PPHP\tools\classes\standard\fileSystem\io\BlockingFileReader', $reader);
-    $reader->close();
-  }
-
-  /**
-   * @covers fileSystem\File::getWriter
-   */
-  public function testGetWriter(){
-    fclose(fopen(self::testFileName, 'a+'));
-    $writer = $this->object->getWriter();
-    $this->assertInstanceOf('\PPHP\tools\classes\standard\fileSystem\io\BlockingFileWriter', $writer);
-    $writer->close();
-  }
-
-  /**
-   * @covers fileSystem\File::getReader
-   * @covers fileSystem\File::getWriter
-   */
-  public function testDoubleGetIO(){
-    fclose(fopen(self::testFileName, 'a+'));
-    $reader = $this->object->getReader();
-    $this->assertEquals($reader, ($newReader = $this->object->getReader()));
-    $reader->close();
-  }
-
-  /**
-   * @covers fileSystem\File::delete
-   */
-  public function testDelete(){
-    fclose(fopen(self::testFileName, 'a+'));
-    $this->assertTrue($this->object->delete());
-    $this->assertTrue((!file_exists(self::testFileName) || !is_file(self::testFileName)));
-  }
-
-  /**
-   * @covers fileSystem\File::delete
-   */
-  public function testDeleteIfFileNonExists(){
-    $this->setExpectedException('\PPHP\tools\classes\standard\fileSystem\NotExistsException');
-    $this->object->delete();
-  }
-
-  /**
-   * @covers fileSystem\File::getType
-   */
-  public function testGetType(){
-    $this->assertEquals('txt', $this->object->getType());
+  public function testShouldReturnFileOutStream(){
+    $r = $this->object->getWriter();
+    $this->assertInstanceOf('PPHP\tools\classes\standard\fileSystem\io\BlockingFileWriter', $r);
+    $r->close();
   }
 }

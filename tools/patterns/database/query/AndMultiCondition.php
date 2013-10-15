@@ -8,9 +8,9 @@ namespace PPHP\tools\patterns\database\query;
  */
 class AndMultiCondition extends QueryCondition{
   /**
-   * Метод должен возвращать объединяющий логический оператор И.
+   * Метод возвращает объединяющий логический оператор И.
    * @static
-   * @return string Представление элемента в виде части SQL запроса.
+   * @return string Строка AND.
    */
   protected static function getOperator(){
     return 'AND';

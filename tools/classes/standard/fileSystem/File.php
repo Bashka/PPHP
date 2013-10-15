@@ -4,32 +4,26 @@ namespace PPHP\tools\classes\standard\fileSystem;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
- * Класс представляет файл файловой системы и предоставляет входные выходные потоки для работы с содержимым.
+ * Класс представляет файл файловой системы и предоставляет входные/выходные потоки для работы с содержимым.
  * @author  Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\fileSystem
  */
 class File extends ComponentFileSystem implements \SplObserver{
   /**
-   * Текущий входной поток данного файла.
-   * @var io\BlockingFileReader
+   * @var \PPHP\tools\classes\standard\fileSystem\io\BlockingFileReader Текущий входной поток данного файла.
    */
   protected $reader;
 
   /**
-   * Текущий выходной поток данного файла.
-   * @var io\BlockingFileWriter
+   * @var \PPHP\tools\classes\standard\fileSystem\io\BlockingFileWriter Текущий выходной поток данного файла.
    */
   protected $writer;
 
   /**
    * Метод снимает блокировку файла при закрытии потока. Метод реагирует только в том случае, если он был вызван текущим блокирующим потоком.
-   * (PHP 5 &gt;= 5.1.0)<br/>
    * Receive update from subject
    * @link http://php.net/manual/en/splobserver.update.php
-   * @param \SplSubject $subject <p>
-   * The <b>SplSubject</b> notifying the longObject of an update.
-   * </p>
-   * @return void
+   * @param \SplSubject $subject The SplSubject notifying the longObject of an update.
    */
   public function update(\SplSubject $subject){
     if(isset($this->reader) && $subject === $this->reader && $this->reader->isClose()){
@@ -41,14 +35,12 @@ class File extends ComponentFileSystem implements \SplObserver{
   }
 
   /**
-   * Метод изменяет имя компонента на заданное, если это возможно.
-   * @param string $newName Новое имя компонента.
-   * @throws exceptions\DuplicationException Выбрасывается в случае, если переименование компонента приведет к дублированию.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @return boolean true - в случае успешного завершения операции, иначе - false.
+   * @prototype \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem
    */
   public function rename($newName){
+    if(strpos($newName, '/') > -1){
+      throw exceptions\InvalidArgumentException::getValidException('[^/]', $newName);
+    }
     if($this->getLocation()->isFileExists($newName)){
       throw new exceptions\DuplicationException('Невозможно выполнить действие. Компонент с данным именем уже существует.');
     }
@@ -57,12 +49,7 @@ class File extends ComponentFileSystem implements \SplObserver{
   }
 
   /**
-   * Метод перемещает компонент в данный каталог.
-   * @param Directory $location Целевой каталог.
-   * @throws exceptions\DuplicationException Выбрасывается в случае, если целевой каталог уже содержит компонент с тем же именем, что и перемещаемый.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @throws exceptions\RuntimeException Выбрасывается в случае нарушения логики работы файловой системы путем перемещения компонента в себя.
-   * @return boolean true - в случае успешного завершения операции, иначе - false.
+   * @prototype \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem
    */
   public function move(Directory $location){
     if($location->isFileExists($this->getName())){
@@ -73,11 +60,7 @@ class File extends ComponentFileSystem implements \SplObserver{
   }
 
   /**
-   * Метод копирует компонента в данный каталог.
-   * @param Directory $location Целевой каталог.
-   * @throws exceptions\DuplicationException Выбрасывается в случае, если целевой каталог уже содержит копируемый компонент.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @return boolean true - в случае успешного завершения операции, иначе - false.
+   * @prototype \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem
    */
   public function copyPaste(Directory $location){
     if(!$this->isExists()){
@@ -86,14 +69,16 @@ class File extends ComponentFileSystem implements \SplObserver{
     if($location->isFileExists($this->getName())){
       throw new exceptions\DuplicationException('Невозможно выполнить действие. Компонент с данным именем уже существует.');
     }
-
-    return copy($this->getAddress(), $location->getAddress() . '/' . $this->getName());
+    if(!copy($this->getAddress(), $location->getAddress() . '/' . $this->getName())){
+      return false;
+    }
+    else{
+      return new File($this->getName(), $location);
+    }
   }
 
   /**
-   * Метод возвращает размер в байтах данного компонента.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @return integer Размер компонента в байтах.
+   * @prototype \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem
    */
   public function getSize(){
     if(!$this->isExists()){
@@ -104,9 +89,7 @@ class File extends ComponentFileSystem implements \SplObserver{
   }
 
   /**
-   * Метод определяет, существует ли вызывающий компонент на момент вызова метода.
-   * @throws NotExistsException Выбрасывается в случае, если родительского каталога не существует.
-   * @return boolean true - если компонент на момент вызова метода существует в файловой системе, иначе - false.
+   * @prototype \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem
    */
   public function isExists(){
     try{
@@ -119,9 +102,24 @@ class File extends ComponentFileSystem implements \SplObserver{
   }
 
   /**
-   * Метод пытается создать вызывающий файл в файловой системе.
-   * @throws exceptions\DuplicationException Выбрасывается в случае, если создание компонента приведет к дублированию.
-   * @return bool true - в случае успеха, иначе - false.
+   * @prototype \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem
+   */
+  public function delete(){
+    if(!$this->isExists()){
+      throw new NotExistsException('Невозможно выполнить действие. Компонента не существует.');
+    }
+    if(!empty($this->reader) || !empty($this->writer)){
+      throw new LockException('Доступ к данному компоненту запрещен.');
+    }
+
+    return unlink($this->getAddress());
+  }
+
+  /**
+   * Метод пытается создать вызываемый файл в файловой системе.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\DuplicationException Выбрасывается в случае, если создание компонента приведет к дублированию.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывает в случае, если в качестве маски доступа передано значение не integer типа.
+   * @return boolean true - в случае успеха, иначе - false.
    */
   public function create(){
     if($this->isExists()){
@@ -134,9 +132,9 @@ class File extends ComponentFileSystem implements \SplObserver{
 
   /**
    * Метод возвращает входной поток для данного файла и блокирует его разделяемой блокировкой. В сдучае, если полученный поток будет закрыт, блокировка снимется автоматически.
-   * @throws LockException Выбрасывается в случае, если невозможно вернуть поток из за того, что уже был открыт выходной поток.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @return io\BlockingFileReader
+   * @throws \PPHP\tools\classes\standard\fileSystem\LockException Выбрасывается в случае, если невозможно вернуть поток из за того, что уже был открыт выходной поток.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
+   * @return \PPHP\tools\classes\standard\fileSystem\io\BlockingFileReader Файловый поток ввода.
    */
   public function getReader(){
     if(!empty($this->reader)){
@@ -158,9 +156,9 @@ class File extends ComponentFileSystem implements \SplObserver{
 
   /**
    * Метод возвращает выходной поток для данного файла и блокирует его исключительной блокировкой. В сдучае, если полученный поток будет закрыт, блокировка снимется автоматически.
-   * @throws LockException Выбрасывается в случае, если невозможно вернуть поток из за того, что уже был открыт выходной поток.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @return io\BlockingFileWriter
+   * @throws \PPHP\tools\classes\standard\fileSystem\LockException Выбрасывается в случае, если невозможно вернуть поток из за того, что уже был открыт выходной поток.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
+   * @return \PPHP\tools\classes\standard\fileSystem\io\BlockingFileWriter Файловый поток вывода.
    */
   public function getWriter(){
     if(!empty($this->writer)){
@@ -181,24 +179,6 @@ class File extends ComponentFileSystem implements \SplObserver{
   }
 
   /**
-   * Метод удаляет текущий компонент из файловой системы.
-   * @abstract
-   * @throws LockException Выбрасывается в случае запрета доступа к компоненту.
-   * @throws NotExistsException Выбрасывается в случае, если удаляемого компонента не существует.
-   * @return boolean true - в случае успешного завершения операции, иначе - false.
-   */
-  public function delete(){
-    if(!$this->isExists()){
-      throw new NotExistsException('Невозможно выполнить действие. Компонента не существует.');
-    }
-    if(!empty($this->reader) || !empty($this->writer)){
-      throw new LockException('Доступ к данному компоненту запрещен.');
-    }
-
-    return unlink($this->getAddress());
-  }
-
-  /**
    * Метод возвращает расришение файла.
    * @return string Расширение файла.
    */
@@ -207,7 +187,12 @@ class File extends ComponentFileSystem implements \SplObserver{
      * @var string Полное имя файла.
      */
     $name = $this->getName();
-
-    return substr($name, stripos($name, '.') + 1);
+    $p = stripos($name, '.');
+    if($p !== false){
+      return substr($name, $p + 1);
+    }
+    else{
+      return '';
+    }
   }
 }

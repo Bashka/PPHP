@@ -2,7 +2,6 @@
 namespace PPHP\tools\classes\standard\network\protocols\applied\http;
 
 use \PPHP\tools\patterns\interpreter as interpreter;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет заголовок HTTP запроса.
@@ -11,15 +10,13 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 class Header extends interpreter\RestorableAdapter implements interpreter\Interpreter{
   /**
-   * Используемые в заголовке параметры.
-   * @var Parameter[]
+   *
+   * @var \PPHP\tools\classes\standard\network\protocols\applied\http\Parameter[] Используемые в заголовке параметры.
    */
   protected $parameters = [];
 
   /**
-   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getMasks($driver = null){
     if(is_null($driver)){
@@ -30,12 +27,7 @@ class Header extends interpreter\RestorableAdapter implements interpreter\Interp
   }
 
   /**
-   * Метод восстанавливает объект из строки.
-   * @param string $string Исходная строка.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return static Результирующий объект.
+   * @prototype \PPHP\tools\patterns\interpreter\Restorable
    */
   public static function reestablish($string, $driver = null){
     if(is_null($driver)){
@@ -57,7 +49,7 @@ class Header extends interpreter\RestorableAdapter implements interpreter\Interp
 
   /**
    * Метод добавляет указанный параметр в заголовок.
-   * @param Parameter $component Добавляемый параметр.
+   * @param \PPHP\tools\classes\standard\network\protocols\applied\http\Parameter $component Добавляемый параметр.
    */
   public function addParameter(Parameter $component){
     $this->parameters[$component->getName()] = $component;
@@ -82,10 +74,7 @@ class Header extends interpreter\RestorableAdapter implements interpreter\Interp
   }
 
   /**
-   * Метод возвращает строку, полученную при интерпретации объекта.
-   * @abstract
-   * @param mixed $driver [optional] Разделитель компонентов заголовка. По умолчанию \r\n.
-   * @return string Результат интерпретации.
+   * @prototype \PPHP\tools\patterns\interpreter\Interpreter
    */
   public function interpretation($driver = null){
     if(is_null($driver)){
@@ -104,7 +93,7 @@ class Header extends interpreter\RestorableAdapter implements interpreter\Interp
 
   /**
    * Метод возрващает все указанные в данном заголовке параметры.
-   * @return Parameter[]
+   * @return \PPHP\tools\classes\standard\network\protocols\applied\http\Parameter[]
    */
   public function getParameters(){
     return $this->parameters;
@@ -113,11 +102,11 @@ class Header extends interpreter\RestorableAdapter implements interpreter\Interp
   /**
    * Метод возвращает указанный параметр заголовка, если он задан.
    * @param string $name Имя целевого параметра.
-   * @return boolean|Parameter Запрашиваемый параметр или false - если он не был задан.
+   * @return null|\PPHP\tools\classes\standard\network\protocols\applied\http\Parameter Запрашиваемый параметр или null - если он не был задан.
    */
   public function getParameter($name){
     if(!$this->hasParameter($name)){
-      return false;
+      return null;
     }
 
     return $this->parameters[$name];
@@ -126,11 +115,11 @@ class Header extends interpreter\RestorableAdapter implements interpreter\Interp
   /**
    * Метод возвращает значение указанного параметра заголовка.
    * @param string $name Целевой параметр.
-   * @return boolean|string Значение целевого параметра заголовка или false - если он не был задан.
+   * @return null|string Значение целевого параметра заголовка или null - если он не был задан.
    */
   public function getParameterValue($name){
     $parameter = $this->getParameter($name);
 
-    return ($parameter)? $parameter->getValue() : false;
+    return ($parameter)? $parameter->getValue() : null;
   }
 }

@@ -3,29 +3,62 @@ namespace PPHP\tests\tools\patterns\interpreter;
 
 use PPHP\tests\tools\patterns\interpreter\TRestorableMock;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')) . 'PPHP/dev/autoload/autoload.php';
 class TRestorableTest extends \PHPUnit_Framework_TestCase{
   /**
-   * @covers TRestorable::reestablish
+   * Должен возвращать массив найденных лексем.
+   * @covers \PPHP\tools\patterns\interpreter\TRestorable::reestablish
    */
-  public function testReestablish(){
-    $obj = TRestorableMock::reestablish('a:1');
-    $this->assertEquals(1, $obj->getVar('a'));
+  public function testShouldReturnFoundTokensArray(){
+    $tokens = TRestorableMock::reestablish('a:1');
+    $this->assertEquals('a:1', $tokens[0]);
+    $this->assertEquals('a', $tokens[1]);
+    $this->assertEquals('1', $tokens[2]);
+  }
+
+  /**
+   * Элемент в массиве лексем с ключем key должен содержать индекс подходящего шаблона верификации.
+   * @covers \PPHP\tools\patterns\interpreter\TRestorable::reestablish
+   */
+  public function testElementKeyIndexMustContainTemplateIndex(){
+    $tokens = TRestorableMock::reestablish('a:1');
+    $this->assertEquals(0, $tokens['key']);
+    $tokens = TRestorableMock::reestablish('a 1');
+    $this->assertEquals(1, $tokens['key']);
+  }
+
+  /**
+   * Должен выбрасывать исключение при отсутствии подходящего шаблона верификации.
+   * @covers \PPHP\tools\patterns\interpreter\TRestorable::reestablish
+   */
+  public function testShouldThrowExceptionIfNotFoundTemplate(){
     $this->setExpectedException('PPHP\tools\classes\standard\baseType\exceptions\StructureException');
     TRestorableMock::reestablish('a');
   }
 
   /**
-   * @covers TRestorable::isReestablish
+   * Должен применять метод updateString перед поиском.
+   * @covers \PPHP\tools\patterns\interpreter\TRestorable::reestablish
    */
-  public function testisReestablish(){
+  public function testShouldCallUpdateStringMethodBeforeSearching(){
+    $tokens = TRestorableMock::reestablish('a*1');
+    $this->assertEquals(0, $tokens['key']);
+  }
+
+  /**
+   * Должен возвращать true для тех строк, для которых найден хотя бы один шаблон верификации.
+   * @covers \PPHP\tools\patterns\interpreter\TRestorable::isReestablish
+   */
+  public function testShouldReturnTrueForSuitableString(){
     $this->assertTrue(TRestorableMock::isReestablish('a:1'));
-    $this->assertFalse(TRestorableMock::isReestablish('a:'));
-    $this->assertFalse(TRestorableMock::isReestablish(':1'));
-    $this->assertFalse(TRestorableMock::isReestablish('a'));
-    $this->assertFalse(TRestorableMock::isReestablish(''));
+    $this->assertTrue(TRestorableMock::isReestablish('a 1'));
+  }
+
+  /**
+   * Должен возвращать false для тех строк, для которых не найдено ни одного шаблона верификации.
+   * @covers \PPHP\tools\patterns\interpreter\TRestorable::isReestablish
+   */
+  public function testShouldReturnFalseForNoSuitableString(){
+    $this->assertFalse(TRestorableMock::isReestablish('a-1'));
   }
 }

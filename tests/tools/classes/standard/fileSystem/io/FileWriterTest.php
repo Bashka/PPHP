@@ -1,72 +1,64 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\fileSystem\io;
 
-use PPHP\tools\classes\standard\fileSystem\io as io;
+use PPHP\tools\classes\standard\fileSystem\io\FileWriter;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')) . 'PPHP/dev/autoload/autoload.php';
 class FileWriterTest extends \PHPUnit_Framework_TestCase{
   /**
-   * @var io\FileWriter
+   * @var FileWriter
    */
   protected $object;
 
   /**
-   * Имя тестируемого файла в текущем каталоге.
+   * @var resource Дескриптор файла для теста.
    */
-  const testFileName = 'testFile.txt';
-
-  /**
-   * Дескриптор тестируемого файла.
-   * @var resource
-   */
-  static $descriptor;
-
-  public static function setUpBeforeClass(){
-    fclose(fopen(self::testFileName, 'a+'));
-    self::$descriptor = fopen(self::testFileName, 'r+');
-  }
-
-  public static function tearDownAfterClass(){
-    fclose(self::$descriptor);
-    unlink(self::testFileName);
-  }
+  protected $descriptor;
 
   protected function setUp(){
-    $this->object = new io\FileWriter(self::$descriptor);
-    ftruncate(self::$descriptor, 0);
-    fseek(self::$descriptor, 0);
-    fwrite(self::$descriptor, "First test line\nSecond test line\n");
-    fseek(self::$descriptor, 0);
+    $this->descriptor = fopen('file', 'r+b');
+    $this->object = new FileWriter($this->descriptor);
   }
 
   protected function tearDown(){
+    fclose($this->descriptor);
+    $d = fopen('file', 'w');
+    fwrite($d, 'Test data' . "\n" . 'Тестовые данные');
+    fclose($d);
   }
 
   /**
-   * @covers io\FileWriter::write
+   * Должен записывать указанный пакет байт в поток.
+   * @covers PPHP\tools\classes\standard\fileSystem\io\FileWriter::write
    */
-  public function testRewrite(){
-    $this->assertEquals(5, $this->object->write('Rewri'));
-    $this->assertEquals("Rewri test line\nSecond test line\n", file_get_contents(self::testFileName));
+  public function testShouldWritePackageByte(){
+    $this->object->write('Hello');
+    $this->assertEquals('Hellodata' . "\n" . 'Тестовые данные', file_get_contents('file'));
   }
 
   /**
-   * @covers io\FileWriter::write
+   * Должен возвращать число записанных байт.
+   * @covers PPHP\tools\classes\standard\fileSystem\io\FileWriter::write
    */
-  public function testWrite(){
-    $this->object->setPosition(33);
-    $this->assertEquals(3, $this->object->write('End'));
-    $this->assertEquals("First test line\nSecond test line\nEnd", file_get_contents(self::testFileName));
+  public function testShouldReturnRecordedByte(){
+    $this->assertEquals(5, $this->object->write('Hello'));
   }
 
   /**
-   * @covers io\FileWriter::clean
+   * В качестве пакета байт может выступать только тип string.
+   * @covers PPHP\tools\classes\standard\fileSystem\io\FileWriter::write
    */
-  public function testClean(){
+  public function testPackageByteShouldBeString(){
+    $this->setExpectedException('PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
+    $this->object->write(1);
+  }
+
+  /**
+   * Должен удалять все содержимое потока.
+   * @covers PPHP\tools\classes\standard\fileSystem\io\FileWriter::clear
+   */
+  public function testShouldClearStream(){
     $this->assertTrue($this->object->clean());
-    $this->assertEquals('', file_get_contents(self::testFileName));
+    $this->assertEquals('', file_get_contents('file'));
   }
 }

@@ -4,7 +4,7 @@ namespace PPHP\services\formatting\localisation;
 use PPHP\services\configuration\Configurator;
 use PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
 use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
-use PPHP\tools\patterns\database\LongObject;
+use PPHP\tools\patterns\database\persistent\LongObject;
 use PPHP\tools\patterns\metadata\reflection\ReflectionClass;
 use PPHP\tools\patterns\metadata\reflection\ReflectionProperty;
 use PPHP\tools\patterns\singleton as singleton;

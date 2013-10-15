@@ -1,101 +1,117 @@
 <?php
 namespace PPHP\tests\tools\patterns\io;
 
-use \PPHP\tools\patterns\io as io;
+use PPHP\tools\patterns\io as io;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')) . 'PPHP/dev/autoload/autoload.php';
 class InStreamTest extends \PHPUnit_Framework_TestCase{
-  /**
-   * Имя файла, служащего входным потоком.
-   */
-  const fileName = 'file';
-
   /**
    * @var InStreamMock
    */
   protected $object;
 
-  /**
-   * Указатель входного потока.
-   * @var
-   */
-  protected $fileDescriptor;
-
-  /**
-   * Метод устанавливает указанную строку в качестве входного потока и перемещает указатель на его начало.
-   * @param $content Устанавливаемая строка.
-   */
-  protected function setFileContent($content){
-    $this->tearDown();
-    $this->fileDescriptor = fopen(self::fileName, 'w+');
-    fwrite($this->fileDescriptor, $content);
-    fseek($this->fileDescriptor, 0);
-    $this->object = new InStreamMock($this->fileDescriptor);
-  }
-
   protected function setUp(){
-    $this->setFileContent('First string' . PHP_EOL . 'Вторая строка' . PHP_EOL . 'Last string');
-  }
-
-  protected function tearDown(){
-    if(file_exists(self::fileName)){
-      if($this->fileDescriptor !== null){
-        fclose($this->fileDescriptor);
-      }
-      unlink(self::fileName);
-    }
+    $this->object = new InStreamMock(null);
   }
 
   /**
-   * @covers io\Reader::read
-   * @covers InStreamMock::read
+   * Должен возвращать текущий байт из потока.
+   * @covers \PPHP\tests\tools\patterns\io\InStreamMock::read
    */
-  public function testRead(){
+  public function testShouldReturnByte(){
     $this->assertEquals('F', $this->object->read());
-    $this->assertEquals('i', $this->object->read());
-    $this->setFileContent('');
+    $this->object->setPoint(InStreamMock::LENGTH - 1);
+    $this->assertEquals('g', $this->object->read());
+  }
+
+  /**
+   * Должен возвращать пустую строку когда поток закончен.
+   * @covers \PPHP\tests\tools\patterns\io\InStreamMock::read
+   */
+  public function testShouldReturnEmptyStringForEndStream(){
+    $this->object->setPoint(InStreamMock::LENGTH);
     $this->assertEquals('', $this->object->read());
-    $this->setFileContent("\n");
-    $this->assertEquals("\n", $this->object->read());
   }
 
   /**
-   * @covers io\Reader::readString
-   * @covers io\InStream::readString
+   * Должен считывать указанное число байт.
+   * @covers \PPHP\tools\patterns\io\InStream::readString
    */
-  public function testReadString(){
+  public function testShouldReadString(){
     $this->assertEquals('First', $this->object->readString(5));
-    $this->setFileContent("Test\ntest");
-    $this->assertEquals("Test\ntest", $this->object->readString(9));
-    $this->setFileContent('');
-    $this->assertEquals('', $this->object->readString(2));
-    $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
-    $this->object->readString(0);
   }
 
   /**
-   * @covers io\Reader::readLine
-   * @covers io\InStream::readLine
+   * Должен продолжать чтение от текущей позиции.
+   * @covers \PPHP\tools\patterns\io\InStream::readString
    */
-  public function testReadLine(){
-    $this->assertEquals('First string', $this->object->readLine());
-    $this->assertEquals('Вторая строка', $this->object->readLine());
-    $this->assertEquals('Last string', $this->object->readLine());
-    $this->setFileContent('');
+  public function testShouldContinueRead(){
+    $this->assertEquals('First', $this->object->readString(5));
+    $this->assertEquals(" string\r\nВ", $this->object->readString(11));
+  }
+
+  /**
+   * Должен считывать оставшиеся байты, если в потоке не хватает строки запрошенной длины.
+   * @covers \PPHP\tools\patterns\io\InStream::readString
+   */
+  public function testShouldReadTailForSmallStream(){
+    $this->assertEquals("First string\r\nВторая строка\r\nLast string", $this->object->readString(InStreamMock::LENGTH + 5));
+  }
+
+  /**
+   * Должен возвращать пустую строку, если производится попытка читать законченный поток.
+   * @covers \PPHP\tools\patterns\io\InStream::readString
+   */
+  public function testShouldReturnEmptyStringIfStreamFinished(){
+    $this->object->setPoint(InStreamMock::LENGTH);
+    $this->assertEquals('', $this->object->readString(5));
+  }
+
+  /** Должен считывать строку до первого вхождения символа перевода строки (разделителя).
+   * @covers \PPHP\tools\patterns\io\InStream::readLine
+   */
+  public function testShouldReadLine(){
+    $this->assertEquals('First string', $this->object->readLine("\r\n"));
+    $this->assertEquals('Вторая строка' . "\r", $this->object->readLine("\n"));
+  }
+
+  /** При достижении конца потока, должен возвращать считанную строку.
+   * @covers \PPHP\tools\patterns\io\InStream::readLine
+   */
+  public function testShouldReturnTailForSmallStream(){
+    $this->object->setPoint(InStreamMock::LENGTH - 6);
+    $this->assertEquals('string', $this->object->readLine());
+  }
+
+  /** Должен возвращать пустую строку, если производится попытка читать законченный поток.
+   * @covers \PPHP\tools\patterns\io\InStream::readLine
+   */
+  public function testShouldReturnEmptyLineIfStreamFinished(){
+    $this->object->setPoint(InStreamMock::LENGTH);
     $this->assertEquals('', $this->object->readLine());
-    $this->setFileContent("\n");
-    $this->assertEquals(false, $this->object->readLine());
   }
 
-  /**
-   * @covers io\Reader::readAll
-   * @covers io\InStream::readAll
+  /** Должен возвращать пустую строку, если текущим символом в потоке является разделитель строк.
+   * @covers \PPHP\tools\patterns\io\InStream::readLine
    */
-  public function testReadAll(){
-    $this->assertEquals('First string' . PHP_EOL . 'Вторая строка' . PHP_EOL . 'Last string', $this->object->readAll());
+  public function testShouldReturnEmptyLineIfCurrentSymbolEOL(){
+    $this->object->setPoint(12);
+    $this->assertEquals('', $this->object->readLine("\r\n"));
+  }
+
+  /** Должен возвращать оставшееся содержимое потока.
+   * @covers \PPHP\tools\patterns\io\InStream::readAll
+   */
+  public function testShouldReturnTailStream(){
+    $this->object->setPoint(5);
+    $this->assertEquals(" string\r\nВторая строка\r\nLast string", $this->object->readAll());
+  }
+
+  /** Должен возвращать пустую строку, если производится попытка читать законченный поток.
+   * @covers \PPHP\tools\patterns\io\InStream::readAll
+   */
+  public function testShouldReturnEmptyIfStreamFinished(){
+    $this->object->setPoint(InStreamMock::LENGTH);
     $this->assertEquals('', $this->object->readAll());
   }
 }

@@ -10,7 +10,7 @@ use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 trait TReflect{
   /**
-   * Отражение класса.
+   * Отражения классов.
    * Свойство включает отражения классов во всей иерархии наследования данного класса.
    * В качестве ключа массива используется имя класса, а в качестве значения, его отражение.
    * @var ReflectionClass[]
@@ -18,7 +18,7 @@ trait TReflect{
   static protected $reflectionClass = [];
 
   /**
-   * Множество отражений свойств класса.
+   * Множество отражений свойств классов.
    * Свойство включает отражения свойств классов во всей иерархии наследования данного класса.
    * В качестве ключа массива используется имя класса, в котором декларировано свойство, а в качестве значения, его отражение.
    * @var ReflectionProperty[][]
@@ -26,7 +26,7 @@ trait TReflect{
   static protected $reflectionProperties = [];
 
   /**
-   * Множество отражений методов класса.
+   * Множество отражений методов классов.
    * Свойство включает отражения методов классов во всей иерархии наследования данного класса.
    * В качестве ключа массива используется имя класса, в котором декларирован метод, а в качестве значения, его отражение.
    * @var ReflectionMethod[][]
@@ -34,77 +34,65 @@ trait TReflect{
   static protected $reflectionMethods = [];
 
   /**
-   * Метод возвращает отражение свойства вызываемого класса в том числе, если свойство относится к родительскому классу.
-   * @static
-   * @param string $propertyName Имя свойства.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
-   * @throws exceptions\ComponentClassException Выбрасывается при запросе отражения не определенного члена.
-   * @return ReflectionProperty Отражение свойства класса.
+   * @prototype \PPHP\tools\patterns\metadata\reflection\Reflect
    */
-  static public function &getReflectionProperty($propertyName){
-    exceptions\InvalidArgumentException::verifyType($propertyName, 'S');
+  static public function &getReflectionProperty($name){
+    exceptions\InvalidArgumentException::verifyType($name, 'S');
     /**
      * @var Reflect $class
      */
     $class = get_called_class();
-    while(!property_exists($class, $propertyName)){
+    while(!property_exists($class, $name)){
       $parentClass = $class::getReflectionClass()->getParentClass();
       if($parentClass === false){
-        throw new exceptions\ComponentClassException('Указанное свойство [' . $propertyName . '] отсутствует в вызываемом классе и его надклассах.');
+        throw new exceptions\ComponentClassException('Указанное свойство [' . $name . '] отсутствует в вызываемом классе и его надклассах.');
       }
       $class = $parentClass->getName();
     }
-    $reflectionProperty = new ReflectionProperty($class, $propertyName);
+    $reflectionProperty = new ReflectionProperty($class, $name);
     // Проверка отношения получаемого отражения к классам в иерархии наследования
     $ownerClassName = $reflectionProperty->getDeclaringClass()->getName();
     if(!array_key_exists($ownerClassName, self::$reflectionProperties)){
       self::$reflectionProperties[$ownerClassName] = [];
     }
-    if(!array_key_exists($propertyName, self::$reflectionProperties[$ownerClassName])){
-      self::$reflectionProperties[$ownerClassName][$propertyName] = $reflectionProperty;
+    if(!array_key_exists($name, self::$reflectionProperties[$ownerClassName])){
+      self::$reflectionProperties[$ownerClassName][$name] = $reflectionProperty;
     }
 
-    return self::$reflectionProperties[$ownerClassName][$propertyName];
+    return self::$reflectionProperties[$ownerClassName][$name];
   }
 
   /**
-   * Метод возвращает отражение метода вызываемого класса в том числе, если метод относится к родительскому классу.
-   * @static
-   * @param string $methodName Имя метода.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
-   * @throws exceptions\ComponentClassException Выбрасывается при запросе отражения не определенного члена.
-   * @return ReflectionMethod Отражение метода класса.
+   * @prototype \PPHP\tools\patterns\metadata\reflection\Reflect
    */
-  static public function &getReflectionMethod($methodName){
-    exceptions\InvalidArgumentException::verifyType($methodName, 'S');
+  static public function &getReflectionMethod($name){
+    exceptions\InvalidArgumentException::verifyType($name, 'S');
     /**
      * @var Reflect $class
      */
     $class = get_called_class();
-    while(!method_exists($class, $methodName)){
+    while(!method_exists($class, $name)){
       $parentClass = $class::getReflectionClass()->getParentClass();
       if($parentClass === false){
-        throw new exceptions\ComponentClassException('Указанный метод [' . $methodName . '] отсутствует в вызываемом классе и его надклассах.');
+        throw new exceptions\ComponentClassException('Указанный метод [' . $name . '] отсутствует в вызываемом классе и его надклассах.');
       }
       $class = $parentClass->getName();
     }
-    $reflectionMethod = new ReflectionMethod($class, $methodName);
+    $reflectionMethod = new ReflectionMethod($class, $name);
     // Проверка отношения получаемого отражения к классам в иерархии наследования
     $ownerClassName = $reflectionMethod->getDeclaringClass()->getName();
     if(!array_key_exists($ownerClassName, self::$reflectionMethods)){
       self::$reflectionMethods[$ownerClassName] = [];
     }
-    if(!array_key_exists($methodName, self::$reflectionMethods[$ownerClassName])){
-      self::$reflectionMethods[$ownerClassName][$methodName] = $reflectionMethod;
+    if(!array_key_exists($name, self::$reflectionMethods[$ownerClassName])){
+      self::$reflectionMethods[$ownerClassName][$name] = $reflectionMethod;
     }
 
-    return self::$reflectionMethods[$ownerClassName][$methodName];
+    return self::$reflectionMethods[$ownerClassName][$name];
   }
 
   /**
-   * Метод возвращает отражение вызываемого класса.
-   * @static
-   * @return ReflectionClass Отражение класса.
+   * @prototype \PPHP\tools\patterns\metadata\reflection\Reflect
    */
   static public function &getReflectionClass(){
     if(!isset(self::$reflectionClass[get_called_class()])){
@@ -115,9 +103,7 @@ trait TReflect{
   }
 
   /**
-   * Метод возвращает отражение родительского класса.
-   * @static
-   * @return ReflectionClass|null Отражение родительского класса или null - если данный класс является вершиной иерархии наследования.
+   * @prototype \PPHP\tools\patterns\metadata\reflection\Reflect
    */
   static public function getParentReflectionClass(){
     $parentClass = static::getReflectionClass()->getParentClass();
@@ -136,9 +122,7 @@ trait TReflect{
   }
 
   /**
-   * Метод возвращает отражения всех свойств вызываемого класса и его родителей.
-   * @static
-   * @return ReflectionProperty[] Отражение всех свойств класса в виде ассоциативного массива, ключами которого являются имена, а значениями отражения свойств класса.
+   * @prototype \PPHP\tools\patterns\metadata\reflection\Reflect
    */
   static public function getAllReflectionProperties(){
     $reflectionProperties = [];
@@ -169,9 +153,7 @@ trait TReflect{
   }
 
   /**
-   * Метод возвращает отражения всех методов вызываемого класса и его родителей.
-   * @static
-   * @return ReflectionMethod[] Отражение всех методов класса в виде ассоциативного массива, ключами которого являются имена, а значениями отражения методов класса
+   * @prototype \PPHP\tools\patterns\metadata\reflection\Reflect
    */
   static public function getAllReflectionMethods(){
     $reflectionMethods = [];

@@ -5,8 +5,6 @@ use PPHP\tools\patterns\metadata as metadata;
 
 /**
  * Отражение класса, расширенное возможностью добавления метаданных.
- * Данный класс является отображением класса с устойчивым состоянием и возможностью аннотирования.
- * Класс наследует все возможности своего родителя, что позволяет использовать его в контексте родительского класса.
  * @author  Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\metadata\reflection
  */
@@ -14,7 +12,7 @@ class ReflectionClass extends \ReflectionClass implements metadata\Described{
   use metadata\TDescribed;
 
   /**
-   * Данная реализация позволяет добавлять аннотации в объект из PHPDoc.
+   * Данная реализация позволяет добавлять аннотации объекту из его PHPDoc.
    * @param mixed $argument
    */
   public function __construct($argument){
@@ -37,7 +35,7 @@ class ReflectionClass extends \ReflectionClass implements metadata\Described{
 
   /**
    * Метод возвращает документацию компонента.
-   * @return ReflectionDoc Документация компонента.
+   * @return \PPHP\tools\patterns\metadata\reflection\ReflectionDoc Документация компонента.
    */
   public function getDoc(){
     return new ReflectionDoc($this->getDocComment());

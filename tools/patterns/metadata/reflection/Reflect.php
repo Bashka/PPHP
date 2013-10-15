@@ -4,9 +4,8 @@ namespace PPHP\tools\patterns\metadata\reflection;
 use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
- * Класс, реализующий данный интерфейс, способен возвращать отображения своих членов.
- * Данный интерфейс свидетельствует о возможности класса возвращать свое отражение, и отображения своих членов с устойчивым состоянием.
- * Возвращаемые отображения являются уникальными для каждого класса и члена, что означает использование одного объекта отражения для одного класса или члена.
+ * Класс, реализующий данный интерфейс, способен возвращать отражение себя и своих членов с устойчивыми состояниями и возможностью аннотирования.
+ * Возвращаемые отражения являются неповторимыми для каждого класса и члена, это означает, что при повторном запросе отражения класса или члена, возвращается запрошенное ранее отражение.
  * @author  Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\metadata\reflection
  */
@@ -15,23 +14,23 @@ interface Reflect{
    * Метод возвращает отражение свойства вызываемого класса в том числе, если свойство относится к родительскому классу.
    * @static
    * @abstract
-   * @param string $propertyName Имя свойства.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
-   * @throws exceptions\ComponentClassException Выбрасывается при запросе отражения не определенного члена.
+   * @param string $name Имя свойства.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\ComponentClassException Выбрасывается при запросе отражения не определенного члена.
    * @return ReflectionProperty Отражение свойства класса.
    */
-  static public function &getReflectionProperty($propertyName);
+  static public function &getReflectionProperty($name);
 
   /**
    * Метод возвращает отражение метода вызываемого класса в том числе, если метод относится к родительскому классу.
    * @static
    * @abstract
-   * @param string $methodName Имя метода.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
-   * @throws exceptions\ComponentClassException Выбрасывается при запросе отражения не определенного члена.
+   * @param string $name Имя метода.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\ComponentClassException Выбрасывается при запросе отражения не определенного члена.
    * @return ReflectionMethod Отражение метода класса.
    */
-  static public function &getReflectionMethod($methodName);
+  static public function &getReflectionMethod($name);
 
   /**
    * Метод возвращает отражение вызываемого класса.

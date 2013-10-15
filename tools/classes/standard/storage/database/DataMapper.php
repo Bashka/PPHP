@@ -6,8 +6,8 @@ use PPHP\tools\classes\standard\storage\cache\Cache;
 use PPHP\tools\classes\standard\storage\cache\Synchronizer;
 use PPHP\tools\classes\standard\storage\database\ORM as ORM;
 use PPHP\tools\classes\standard\storage\database\ORM\Field;
-use PPHP\tools\patterns\database\associations\LongAssociation;
-use PPHP\tools\patterns\database\LongObject;
+use PPHP\tools\patterns\database\persistent\LongAssociation;
+use PPHP\tools\patterns\database\persistent\LongObject;
 use PPHP\tools\patterns\memento\Memento;
 use PPHP\tools\patterns\metadata\reflection\ReflectionClass;
 

@@ -1,0 +1,110 @@
+h1: Терминология
+- Отражение - объект, позволяющий получить информацию о некоторой программной сущности (классе, свойстве, методе, аргументе и т.д.).
+
+h1: Работа с отражениями
+Когда скрипту требуется получить данные о классе или его членах, используются объекты-отражения. Эти объекты хранят всю доступную информацию о классе или его членах и позволяют оперировать ей для работы.
+Стандартная библиотека языка PHP включает несколько классов-отражений (см. http://www.php.net/manual/ru/book.reflection.php), вот несколько из них:
+- ReflectionClass - отражение класса;
+- ReflectionMethod - отражение метода;
+- ReflectionParameter - отражение аргумента;
+- ReflectionProperty - отражение свойства класса.
+Все эти классы могут быть использованы для получения информации о других классах системы, но с некоторыми ограничениями, в частности отсутствует возможность аннотирования классов и получения этих метаданных в дальнейшем (см. PPHP/tools/patterns/metadata).
+Данный пакет включает расширения стандартных отражений, но с возможностью аннотирования и устойчивыми состояниями. Пакет включает следующие классы:
+- ReflectionClass - отражение класса;
+- ReflectionMethod - отражение метода;
+- ReflectionParameter - отражение аргумента;
+- ReflectionProperty - отражение свойства класса;
+- ReflectionDoc - документация класса или его члена.
+
+h1: Работа с отражениями
+Рассмотрим работу с классами данного пакета на примере. В качестве базового класса используем следующий класс:
+code: php 180
+class MyClass implements Reflect{
+use TReflect;
+  protected $prop;
+
+  /**
+   * Описание метода
+   * @return boolean
+   */
+  public function method(){
+    ...
+  }
+}
+code: end
+Для того, чтобы можно было получить отражение класса или его членов, класс должен реализовать интерфейс Reflect данного пакета. TReflect включает полную реализацию этого интерфейса и может быть использован вместе с ним.
+Продемонстрируем работу с отражениями:
+code: php 140
+$rc = MyClass::getReflectionClass();
+echo $rc->getName(); // MyClass - получение имени класса.
+$rp = MyClass::getReflectionProperty('prop');
+echo $rp->getName(); // prop - получение имени свойства.
+$rm = MyClass::getReflectionMethod('method');
+echo $rm->getName(); // method - получение имени метода.
+$rd = $rm->getDoc();
+echo $rd->getDescription(); // Описание метода - получение документации метода.
+code: end
+В примере показан процесс получение различных отражений класса. Объекты отражений включают гораздо больше методов для получения информации о классе, чем приведено в примере, для ознакомления со всеми, обращайтесь к официальной документации PHP (см. http://www.php.net/manual/ru/book.reflection.php), классы-отражений данного пакета полностью соответствуют этой документации.
+Следует обратить внимание на то, что классы данного пакета используют объекты с устойчивыми состояниями, это можно видеть на следующем примере:
+code: php 60
+$rcA = MyClass::getReflectionClass();
+$rcB = MyClass::getReflectionClass();
+echo $rcA === $rcB; // true - один и тот же объект.
+code: end
+
+h1: Получение аннотаций через отражения
+В платформе Delphinum метаданные реализуются через использование отражений. Все классы данного пакета реализуют интерфейс Described с использованием TDescribed (см. PPHP/tools/patterns/metadata), что позволяет аннотировать их. Другими словами метаданные записываются не в объекты класса, а в его отражения.
+Приведем пример работы с метаданными:
+code: php 40
+MyClass::getReflectionClass()->setMetadata('metadata', 'value'); // Установка метаданных классу.
+echo MyClass::getReflectionClass()->getMetadata('metadata'); // value - получение установленных метаданных.
+code: end
+Как можно видеть, для установки и получения метаданных сначала необходимо получить отражение класса или его членов, а уже потом установить или получить от них метаданные.
+Ниже показан аннотированный класс:
+code: php 220
+class MyClass implements Reflect{
+use TReflect;
+  protected $prop;
+
+  /**
+   * Описание метода
+   * @return boolean
+   */
+  public function method(){
+    ...
+  }
+}
+
+MyClass::getReflectionClass()->setMetadata('metadata', 'value');
+MyClass::getReflectionProperty('prop')->setMetadata('metadataProp', 'value');
+MyClass::getReflectionMethod('method')->setMetadata('metadataMethod', 'value');
+code: end
+Так как алгоритм установки метаданных располагается в том же файле, что и объявление класса, класс всегда будет аннотирован этими метаданными к моменту использования. Это один из вожможных вариантов аннотирования классов. Другой вариант использует блок документации для аннотирования:
+code: php 280
+/**
+ * @metadata value
+ */
+class MyClass implements Reflect{
+use TReflect;
+  /**
+   * @metadataProp value
+   */
+  protected $prop;
+
+  /**
+   * Описание метода
+   * @return boolean
+   * @metadataMethod value
+   */
+  public function method(){
+    ...
+  }
+}
+code: end
+Этот подход более удобен и понятен, поэтому применяется гораздо чаще первого. Теперь приведем пример получения метаданных от аннотированного класса:
+code: php 60
+echo MyClass::getReflectionClass()->getMetadata('metadata'); // value - аннотация класса.
+echo MyClass::getReflectionProperty('prop')->getMetadata('metadataProp'); // value - аннотация свойства.
+echo MyClass::getReflectionMethod('method')->getMetadata('metadataMethod'); // value - аннотация метода.
+code: end
+Можно заметить, что получение метаданных выполняется через отражения класса и его членов.

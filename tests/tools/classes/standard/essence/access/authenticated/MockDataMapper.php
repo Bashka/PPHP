@@ -6,7 +6,7 @@ class MockDataMapper extends \PPHP\tools\classes\standard\storage\database\DataM
 
   protected $pass = 'pass';
 
-  public function recoverFinding(\PPHP\tools\patterns\database\LongObject $object, array $conditions){
+  public function recoverFinding(\PPHP\tools\patterns\database\persistent\LongObject $object, array $conditions){
     $OID = $conditions['OID'];
     $pass = $conditions['password'];
     if(!($this->OID === $OID && $pass === $this->pass)){

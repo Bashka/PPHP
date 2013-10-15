@@ -1,50 +1,75 @@
 <?php
 namespace PPHP\tests\tools\patterns\database\query;
 
-use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use PPHP\tools\patterns\database\query as query;
+use PPHP\tools\patterns\database\query\Table;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')) . 'PPHP/dev/autoload/autoload.php';
 class TableTest extends \PHPUnit_Framework_TestCase{
   /**
-   * @covers query\Table::__construct
+   * Должен идентифицировать объект именем таблицы.
+   * @covers PPHP\tools\patterns\database\query\Table::__construct
    */
-  public function testConstruct(){
-    $t = new query\Table('test');
-    $this->assertEquals('test', $t->getTableName());
-    $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
-    new query\Table('');
-    new query\Table(1);
+  public function testShouldInitObjectTableName(){
+    $o = new Table('people');
+    $this->assertEquals('people', $o->getTableName());
   }
 
   /**
-   * @covers query\Table::interpretation
+   * Именем таблицы может быть только строка.
+   * @covers PPHP\tools\patterns\database\query\Table::__construct
    */
-  public function testInterpretation(){
-    $t = new query\Table('test');
-    $this->assertEquals('test', $t->interpretation());
+  public function testTableNameStringIs(){
+    $this->setExpectedException('PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
+    new Table(1);
   }
 
   /**
-   * @covers query\Table::isReestablish
+   * Должен возвращать имя таблицы.
+   * @covers PPHP\tools\patterns\database\query\Table::getTableName
    */
-  public function testIsReestablish(){
-    $this->assertTrue(query\Table::isReestablish('table'));
-    $this->assertTrue(query\Table::isReestablish('table5'));
-    $this->assertTrue(query\Table::isReestablish('table_test'));
-    $this->assertTrue(query\Table::isReestablish('_table'));
-    $this->assertFalse(query\Table::isReestablish('1table'));
-    $this->assertFalse(query\Table::isReestablish('test+'));
+  public function testShouldReturnTableName(){
+    $o = new Table('people');
+    $this->assertEquals('people', $o->getTableName());
   }
 
   /**
-   * @covers query\Table::reestablish
+   * Должен возвращать строку вида: имяТаблицы.
+   * @covers PPHP\tools\patterns\database\query\Table::interpretation
    */
-  public function testReestablish(){
-    $t = query\Table::reestablish('test');
-    $this->assertEquals('test', $t->getTableName());
+  public function testShouldInterpretationTableName(){
+    $o = new Table('people');
+    $this->assertEquals('people', $o->interpretation());
+  }
+
+  /**
+   * Должен восстанавливаться из строки вида: имяТаблицы.
+   * @covers PPHP\tools\patterns\database\query\Table::reestablish
+   */
+  public function testShouldRestorableForString(){
+    /**
+     * @var \PPHP\tools\patterns\database\query\Table $o
+     */
+    $o = Table::reestablish('people');
+    $this->assertEquals('people', $o->interpretation());
+  }
+
+  /**
+   * Допустимой строкой является строка вида: имяТаблицы.
+   * @covers PPHP\tools\patterns\database\query\Table::isReestablish
+   */
+  public function testGoodString(){
+    $this->assertTrue(Table::isReestablish('table'));
+    $this->assertTrue(Table::isReestablish('table5'));
+    $this->assertTrue(Table::isReestablish('table_test'));
+  }
+
+  /**
+   * Должен возвращать false при недопустимой структуре строки.
+   * @covers PPHP\tools\patterns\database\query\Table::isReestablish
+   */
+  public function testBedString(){
+    $this->assertFalse(Table::isReestablish('1table'));
+    $this->assertFalse(Table::isReestablish('tab le'));
+    $this->assertFalse(Table::isReestablish('test+'));
   }
 }

@@ -1,136 +1,52 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\fileSystem\io;
 
-use PPHP\tools\classes\standard\fileSystem\io as io;
+use PPHP\tools\classes\standard\fileSystem\io\FileReader;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')) . 'PPHP/dev/autoload/autoload.php';
 class FileReaderTest extends \PHPUnit_Framework_TestCase{
   /**
-   * @var io\FileReader
+   * @var FileReader
    */
   protected $object;
 
   /**
-   * Имя тестируемого файла в текущем каталоге.
+   * @var resource Дескриптор файла для теста.
    */
-  const testFileName = 'testFile.txt';
-
-  /**
-   * Дескриптор тестируемого файла.
-   * @var resource
-   */
-  static $descriptor;
-
-  public static function setUpBeforeClass(){
-    fclose(fopen(self::testFileName, 'a+'));
-    self::$descriptor = fopen(self::testFileName, 'r+');
-    fwrite(self::$descriptor, 'First test line' . PHP_EOL . 'Second test line' . PHP_EOL);
-  }
-
-  public static function tearDownAfterClass(){
-    fclose(self::$descriptor);
-    unlink(self::testFileName);
-  }
+  protected $descriptor;
 
   protected function setUp(){
-    $this->object = new io\FileReader(self::$descriptor);
-    fseek(self::$descriptor, 0);
+    $this->descriptor = fopen('file', 'rb');
+    $this->object = new FileReader($this->descriptor);
   }
 
   protected function tearDown(){
+    fclose($this->descriptor);
   }
 
   /**
-   * @covers io\FileReader::read
+   * Должен возвращать текущий байт из потока.
+   * @covers PPHP\tools\classes\standard\fileSystem\io\FileReader::read
    */
-  public function testRead(){
+  public function testShouldReturnByte(){
+    $this->assertEquals('T', $this->object->read());
+  }
+
+  /**
+   * Должен сдвигать указатель текущего байта на единицу.
+   * @covers PPHP\tools\classes\standard\fileSystem\io\FileReader::read
+   */
+  public function testShouldSetNextByte(){
     $this->object->read();
-    $this->assertEquals('i', $this->object->read());
+    $this->assertEquals('e', $this->object->read());
   }
 
   /**
-   * @covers io\FileReader::read
+   * Должен возвращать пустую строку, когда достигнут конец потока.
+   * @covers PPHP\tools\classes\standard\fileSystem\io\FileReader::read
    */
-  public function testReadForEndFile(){
-    $length = 31 + 2 * strlen(PHP_EOL);
-    for($i = $length; $i--;){
-      $this->object->read();
-    }
+  public function testShouldReturnEmptyStringForEndStream(){
+    fseek($this->descriptor, 39); // Установка указателя на последний символ.
     $this->assertEquals('', $this->object->read());
-  }
-
-  /**
-   * @covers io\FileReader::readLine
-   */
-  public function testReadLine(){
-    $this->object->read();
-    $this->assertEquals('irst test line', $this->object->readLine());
-  }
-
-  /**
-   * @covers io\FileReader::readLine
-   */
-  public function testReadLineForEndFile(){
-    $length = 31 + 2 * strlen(PHP_EOL);
-    for($i = $length; $i--;){
-      $this->object->read();
-    }
-    $this->assertEquals('', $this->object->readLine());
-  }
-
-  /**
-   * @covers io\FileReader::readString
-   */
-  public function testReadString(){
-    $this->object->read();
-    $this->assertEquals('irst ', $this->object->readString(5));
-  }
-
-  /**
-   * @covers io\FileReader::readAll
-   */
-  public function testReadAll(){
-    $this->object->read();
-    $this->assertEquals('irst test line' . PHP_EOL . 'Second test line' . PHP_EOL, $this->object->readAll());
-  }
-
-  /**
-   * @covers io\FileReader::readString
-   */
-  public function testReadStringForEndFile(){
-    $length = 31 + 2 * strlen(PHP_EOL);
-    for($i = $length; $i--;){
-      $this->object->read();
-    }
-    $this->assertEquals('', $this->object->readString(5));
-  }
-
-  /**
-   * @covers io\FileSeekIO::setPosition
-   */
-  public function testSetPosition(){
-    $this->assertTrue($this->object->setPosition(1));
-    $this->assertEquals('i', $this->object->read());
-  }
-
-  /**
-   * @covers io\FileSeekIO::getPosition
-   */
-  public function testGetPosition(){
-    $this->object->read();
-    $this->assertEquals(1, $this->object->getPosition());
-  }
-
-  /**
-   * @covers io\FileClosed::close
-   * @covers io\FileClosed::isClose
-   */
-  public function testClose(){
-    $this->assertFalse($this->object->isClose());
-    $this->assertTrue($this->object->close());
-    $this->assertTrue($this->object->isClose());
   }
 }

@@ -1,7 +1,7 @@
 <?php
 namespace PPHP\tests\tools\patterns\memento;
 
-use \PPHP\tools\patterns\memento as memento;
+use PPHP\tools\patterns\memento as memento;
 
 class TestOriginator implements memento\Originator{
   use memento\TOriginator;

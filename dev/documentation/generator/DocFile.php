@@ -72,6 +72,11 @@ class DocFile implements Interpreter, Restorable{
               $content = new String(base64_encode(fread(fopen($imgfile, "r"), filesize($imgfile))));
               $endTag = '</encoded_png><rich_text>'."\n".'</rich_text>';
               break;
+            case 'prt:':
+              $startTag = '<rich_text>';
+              $content = new String('    '.htmlspecialchars($line->sub()->getVal())."\n");
+              $endTag = '</rich_text>';
+              break;
             case 'code:':
               $codeOption = $line->sub()->getVal();
               if($codeOption != 'end'){
@@ -93,7 +98,7 @@ class DocFile implements Interpreter, Restorable{
                 $endTag = '</rich_text>';
               }
               else{
-                $content = new String($line->getVal()."\n");
+                $content = new String(htmlspecialchars($line->getVal())."\n");
               }
           }
         }
@@ -104,7 +109,7 @@ class DocFile implements Interpreter, Restorable{
             $endTag = '</rich_text>';
           }
           else{
-            $content = new String($line->getVal()."\n");
+            $content = new String(htmlspecialchars($line->getVal())."\n");
           }
         }
 

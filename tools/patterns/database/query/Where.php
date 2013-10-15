@@ -10,27 +10,19 @@ use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 class Where extends ComponentQuery{
   /**
-   * Логическая операция.
-   * @var Condition
+   * @var \PPHP\tools\patterns\database\query\Condition Логическая операция.
    */
   private $condition;
 
   /**
-   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getMasks($driver = null){
     return ['WHERE (?:' . Condition::getPatterns()['condition'] . ')'];
   }
 
   /**
-   * Метод восстанавливает объект из строки.
-   * @param string $string Исходная строка.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return Where Результирующий объект.
+   * @prototype \PPHP\tools\patterns\interpreter\Restorable
    */
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
@@ -40,18 +32,14 @@ class Where extends ComponentQuery{
   }
 
   /**
-   * @param Condition $condition Логическая операция.
+   * @param \PPHP\tools\patterns\database\query\Condition $condition Логическая операция.
    */
   function __construct(Condition $condition){
     $this->condition = $condition;
   }
 
   /**
-   * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return string Результат интерпретации.
+   * @prototype \PPHP\tools\patterns\interpreter\Interpreter
    */
   public function interpretation($driver = null){
     exceptions\InvalidArgumentException::verifyType($driver, 'Sn');
@@ -67,7 +55,7 @@ class Where extends ComponentQuery{
   }
 
   /**
-   * @return Condition
+   * @return \PPHP\tools\patterns\database\query\Condition
    */
   public function getCondition(){
     return $this->condition;

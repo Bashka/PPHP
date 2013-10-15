@@ -5,20 +5,23 @@ use \PPHP\tools\patterns\singleton as singleton;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
- * Класс предоставляет интерфейс управления сессиями.
+ * Класс представляет интерфейс управления сессиями.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\storage\session
  */
 class SessionProvider implements singleton\Singleton{
   use singleton\TSingleton;
 
+  /**
+   * Имя сессии по умолчанию.
+   */
   const DEFAULT_SESSION_NAME = 'PHPSESSID';
 
   /**
    * Метод открывает сессию.
    * @param string $sessionName [optional] Имя сессии.
    * @param string $id [optional] Идентификатор сессии.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return boolean true - в случае успешного завершения операции, иначе - false.
    */
   public function start($sessionName = self::DEFAULT_SESSION_NAME, $id = null){
@@ -45,11 +48,22 @@ class SessionProvider implements singleton\Singleton{
   }
 
   /**
+   * Метод возвращает имя текущей сессии.
+   * @return string Имя текущей сессии или пустая строк, если сессия не открыта.
+   */
+  public function getName(){
+    if(session_status() != PHP_SESSION_ACTIVE){
+      return '';
+    }
+    return session_name();
+  }
+
+  /**
    * Метод уничтожает сессию.
    * @return boolean true - в случае успешного завершения операции, иначе - false.
    */
   public function destroy(){
-    if(session_status() != PHP_SESSION_NONE){
+    if(session_status() == PHP_SESSION_ACTIVE){
       $_SESSION = [];
       unset($_COOKIE[session_name()]);
 
@@ -63,7 +77,7 @@ class SessionProvider implements singleton\Singleton{
    * Метод записывает данные в сессию.
    * @param string $key Ключ.
    * @param string|number|boolean $value Значение.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    */
   public function set($key, $value){
     exceptions\InvalidArgumentException::verifyType($key, 'S');
@@ -73,7 +87,7 @@ class SessionProvider implements singleton\Singleton{
   /**
    * Метод возвращает данные из сессии.
    * @param string $key Ключ.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return string|null Возвращает значение ключа сессии или null в случае отсутствия данных в сессии.
    */
   public function get($key){
@@ -85,10 +99,10 @@ class SessionProvider implements singleton\Singleton{
   /**
    * Метод удаляет данные из сессии.
    * @param string $key Ключ.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return boolean true - если данные удачно удалены, false - если заданных данных не существует в сессии.
    */
-  public function reset($key){
+  public function remove($key){
     exceptions\InvalidArgumentException::verifyType($key, 'S');
     if(!isset($_SESSION[$key])){
       return false;
@@ -101,12 +115,28 @@ class SessionProvider implements singleton\Singleton{
   /**
    * Метод определяет имеются ли данные под заданным ключем в сессии.
    * @param string $key Ключ.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
    * @return boolean true - если данные имеются, иначе - false.
    */
   public function isExists($key){
     exceptions\InvalidArgumentException::verifyType($key, 'S');
 
     return isset($_SESSION[$key]);
+  }
+
+  public function __get($key){
+    return $this->get($key);
+  }
+
+  public function __set($key, $value){
+    $this->set($key, $value);
+  }
+
+  public function __isset($key){
+    return $this->isExists($key);
+  }
+
+  public function __unset($key){
+    $this->remove($key);
   }
 }

@@ -10,39 +10,29 @@ use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 class INLogicOperation extends Condition{
   /**
-   * Сравниваемое поле.
-   * @var Field
+   * @var \PPHP\tools\patterns\database\query\Field Сравниваемое поле.
    */
   private $field;
 
   /**
-   * Доступные значения string|integer|float|boolean.
-   * @var mixed[]
+   * @var mixed[] Доступные значения (string|integer|float|boolean).
    */
   private $values;
 
   /**
-   * Select запрос, возвращающий искомые данные.
-   * @var Select
+   * @var \PPHP\tools\patterns\database\query\Select Select запрос, возвращающий искомые данные.
    */
   private $selectQuery;
 
   /**
-   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getMasks($driver = null){
     return ['\(((?:' . Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1] . ')) IN \((' . LogicOperation::getPatterns()['stringValue'] . '(, ?' . LogicOperation::getPatterns()['stringValue'] . ')*)\)\)'];
   }
 
   /**
-   * Метод восстанавливает объект из строки.
-   * @param string $string Исходная строка.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return static Результирующий объект.
+   * @prototype \PPHP\tools\patterns\interpreter\Restorable
    */
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
@@ -57,7 +47,7 @@ class INLogicOperation extends Condition{
   }
 
   /**
-   * @param Field $field Проверяемое поле.
+   * @param \PPHP\tools\patterns\database\query\Field $field Проверяемое поле.
    */
   function __construct(Field $field){
     $this->field = $field;
@@ -67,8 +57,8 @@ class INLogicOperation extends Condition{
   /**
    * Метод добавляет значение в список допустимых.
    * @param string|integer|float|boolean $value Добавляемое значение.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
-   * @return $this Метод возвращает вызываемый объект.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @return \PPHP\tools\patterns\database\query\INLogicOperation Метод возвращает вызываемый объект.
    */
   public function addValue($value){
     exceptions\InvalidArgumentException::verifyType($value, 'sifb');
@@ -82,8 +72,8 @@ class INLogicOperation extends Condition{
 
   /**
    * Метод определяет SQL инструкцию, возвращающую список допустимых значений.
-   * @param Select $selectQuery SQL инструкция, возвращающая список допустимых значений.
-   * @return $this Метод возвращает вызываемый объект.
+   * @param \PPHP\tools\patterns\database\query\Select $selectQuery SQL инструкция, возвращающая список допустимых значений.
+   * @return \PPHP\tools\patterns\database\query\INLogicOperation Метод возвращает вызываемый объект.
    */
   public function setSelectQuery(Select $selectQuery){
     $this->selectQuery = $selectQuery;
@@ -92,16 +82,22 @@ class INLogicOperation extends Condition{
   }
 
   /**
-   * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return string Результат интерпретации.
+   * @prototype \PPHP\tools\patterns\interpreter\Interpreter
    */
   public function interpretation($driver = null){
     exceptions\InvalidArgumentException::verifyType($driver, 'Sn');
+    if(empty($this->selectQuery) && count($this->values) == 0){
+      throw new exceptions\NotFoundDataException('Для интерпретации объекта необходимо определить хотя бы одно значение.');
+    }
     try{
-      return '(' . $this->field->interpretation($driver) . ' IN ("' . ((empty($this->selectQuery))? implode('","', $this->values) : $this->selectQuery->interpretation($driver)) . '"))';
+      if(empty($this->selectQuery)){
+        $values = '"' . implode('","', $this->values) . '"';
+      }
+      else{
+        $values = $this->selectQuery->interpretation($driver);
+      }
+
+      return '(' . $this->field->interpretation($driver) . ' IN (' . $values . '))';
     }
     catch(exceptions\NotFoundDataException $exc){
       throw $exc;
@@ -112,14 +108,14 @@ class INLogicOperation extends Condition{
   }
 
   /**
-   * @return Field
+   * @return \PPHP\tools\patterns\database\query\Field
    */
   public function getField(){
     return $this->field;
   }
 
   /**
-   * @return Select
+   * @return \PPHP\tools\patterns\database\query\Select
    */
   public function getSelectQuery(){
     return $this->selectQuery;

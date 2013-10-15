@@ -8,9 +8,9 @@ namespace PPHP\tools\patterns\database\query;
  */
 class OrMultiCondition extends QueryCondition{
   /**
-   * Метод должен возвращать объединяющий логический оператор ИЛИ.
+   * Метод возвращает объединяющий логический оператор ИЛИ.
    * @static
-   * @return string Представление элемента в виде части SQL запроса.
+   * @return string Строка OR.
    */
   protected static function getOperator(){
     return 'OR';

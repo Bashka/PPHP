@@ -2,7 +2,8 @@
 namespace PPHP\tools\classes\standard\fileSystem\io;
 
 /**
- * Класс расширяет выходной поток файла, добавляя ему механизмы регистрации оповещения наблюдателей.
+ * Класс расширяет выходной файловый поток, добавляя ему механизмы регистрации и оповещения наблюдателей.
+ * Использование шаблона "Наблюдатель" необходимо для информирования целевого файла о закрытии использующих его потоков и отключения блокировки.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\fileSystem\io
  */
@@ -10,8 +11,8 @@ class BlockingFileWriter extends FileWriter implements \SplSubject{
   use \PPHP\tools\patterns\observer\TSubject;
 
   /**
-   * Метод дополнен оповещением подписчиков о закрытии потока.
-   * @return boolean true - если компонент был закрыт, иначе - false.
+   * Метод дополнен оповещением наблюдателей о закрытии потока.
+   * @prototype \PPHP\tools\patterns\io\Closed
    */
   public function close(){
     $result = parent::close();

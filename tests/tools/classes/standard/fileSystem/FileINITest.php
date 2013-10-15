@@ -1,183 +1,203 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\fileSystem;
 
-use PPHP\tools\classes\standard\fileSystem as fileSystem;
+use PPHP\tools\classes\standard\fileSystem\File;
+use PPHP\tools\classes\standard\fileSystem\FileINI;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')).'PPHP/dev/autoload/autoload.php';
+
 class FileINITest extends \PHPUnit_Framework_TestCase{
   /**
-   * @var fileSystem\FileINI
+   * @var FileINI
    */
-  protected $object;
+  private $ini;
 
   /**
-   * @var fileSystem\FileINI
+   * @var FileINI
    */
-  protected $objectSection;
-
-  /**
-   * @var fileSystem\File
-   */
-  static protected $file;
-
-  /**
-   * @var fileSystem\File
-   */
-  static protected $fileSection;
-
-  /**
-   * Имя тестируемого файла в текущем каталоге без секций.
-   */
-  const testFileName = 'testFile.ini';
-
-  /**
-   * Имя тестируемого файла в текущем каталоге с секциями.
-   */
-  const testSectionFileName = 'testFileSection.ini';
-
-  public static function setUpBeforeClass(){
-    parent::setUpBeforeClass();
-    fclose(fopen(self::testFileName, 'a+'));
-    self::$file = fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::testFileName);
-    fclose(fopen(self::testSectionFileName, 'a+'));
-    self::$fileSection = fileSystem\ComponentFileSystem::constructFileFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::testSectionFileName);
-  }
-
-  public static function tearDownAfterClass(){
-    parent::tearDownAfterClass();
-    unlink(self::testFileName);
-    unlink(self::testSectionFileName);
-  }
+  private $section;
 
   protected function setUp(){
-    $this->object = new fileSystem\FileINI(self::$file);
-    $this->objectSection = new fileSystem\FileINI(self::$fileSection, true);
-    $d = fopen(self::testFileName, 'w+');
-    fwrite($d, "k1=v1\nk2=v2\nk3=");
-    fclose($d);
-    $d = fopen(self::testSectionFileName, 'w+');
-    fwrite($d, "[section]\nk1=v1\nk2=v2\nk3=");
-    fclose($d);
+    $this->ini = new FileINI(new File('PPHP/tests/tools/classes/standard/fileSystem/file.ini'));
+    $this->section = new FileINI(new File('PPHP/tests/tools/classes/standard/fileSystem/section.ini'), true);
   }
 
   /**
-   * @covers fileSystem\FileINI::get
+   * Должен выбрасывать исключение в случае отсутствия целевого файла.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::__construct
    */
-  public function testGet(){
-    $this->assertEquals('v1', $this->object->get('k1'));
-    $this->assertEquals('', $this->object->get('k3'));
-    $this->assertEquals('v1', $this->objectSection->get('k1', 'section'));
-    $this->assertEquals('', $this->objectSection->get('k3', 'section'));
+  public function testShouldThrowExceptionIfFileNotExists(){
+    $this->setExpectedException('PPHP\tools\classes\standard\fileSystem\NotExistsException');
+    new FileINI(new File('PPHP/tests/tools/classes/standard/fileSystem/notExistsFile'));
   }
 
   /**
-   * @covers fileSystem\FileINI::set
+   * Должен возвращать запрашиваемое значение.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::get
    */
-  public function testSet(){
-    $this->object->set('k1', 'newV1');
-    $this->object->set('k3', 'v3');
-    $this->assertEquals('newV1', $this->object->get('k1'));
-    $this->assertEquals('v3', $this->object->get('k3'));
-    $this->objectSection->set('k1', 'newV1', 'section');
-    $this->objectSection->set('k3', 'v3', 'section');
-    $this->assertEquals('newV1', $this->objectSection->get('k1', 'section'));
-    $this->assertEquals('v3', $this->objectSection->get('k3', 'section'));
+  public function testShouldReturnValue(){
+    $this->assertEquals('ivan', $this->ini->get('name'));
   }
 
   /**
-   * @covers fileSystem\FileINI::remove
+   * Должен возвращать запрашиваемое значение из указанной секции.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::get
    */
-  public function testRemove(){
-    $this->object->remove('k1');
-    $this->assertEquals(null, $this->object->get('k1'));
-    $this->objectSection->remove('k1', 'section');
-    $this->assertEquals(null, $this->objectSection->get('k1', 'section'));
+  public function testShouldReturnSectionValue(){
+    $this->assertEquals('ivan', $this->section->get('name', 'user'));
   }
 
   /**
-   * @covers fileSystem\FileINI::rewrite
+   * Должен возвращать null если запрашиваемое значение отсутствует.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::get
    */
-  public function testRewrite(){
-    $this->object->set('k1', 'newV1');
-    $this->object->set('k3', 'v3');
-    $this->objectSection->set('k1', 'newV1', 'section');
-    $this->objectSection->set('k3', 'v3', 'section2');
-    $this->object->rewrite();
-    $this->objectSection->rewrite();
-    $this->assertEquals("k1=newV1\nk2=v2\nk3=v3\n", file_get_contents(self::testFileName));
-    $this->assertEquals("[section]\nk1=newV1\nk2=v2\nk3=\n[section2]\nk3=v3\n", file_get_contents(self::testSectionFileName));
-    $this->object->remove('k1');
-    $this->object->rewrite();
-    $this->assertEquals("k2=v2\nk3=v3\n", file_get_contents(self::testFileName));
+  public function testShouldReturnNullIfValueNotExists(){
+    $this->assertEquals(null, $this->ini->get('key'));
+    $this->assertEquals(null, $this->section->get('key', 'user'));
   }
 
   /**
-   * @covers fileSystem\FileINI::isSectionExists
+   * Должен возвращать содержимое указанной секции в виде ассоциативного массива.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::getSection
    */
-  public function testIsSectionExists(){
-    $this->assertFalse($this->objectSection->isSectionExists('section3'));
-    $this->assertTrue($this->objectSection->isSectionExists('section'));
+  public function testShouldReturnSection(){
+    $this->assertEquals(['name' => 'ivan', 'age' => '18'], $this->section->getSection('user'));
   }
 
   /**
-   * @covers fileSystem\FileINI::isDataExists
+   * Должен возвращать пустой массив, если запрашиваемой секции нет в файле или если файл не разделен на секции.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::getSection
    */
-  public function testIsDataExists(){
-    $this->assertFalse($this->objectSection->isDataExists('k4', 'section'));
-    $this->assertTrue($this->objectSection->isDataExists('k1', 'section'));
-    $this->assertTrue($this->objectSection->isDataExists('k3', 'section'));
-    $this->assertFalse($this->object->isDataExists('k4'));
-    $this->assertTrue($this->object->isDataExists('k1'));
-    $this->assertTrue($this->object->isDataExists('k3'));
+  public function testShouldReturnEmptyArrayIfSectionNotFound(){
+    $this->assertEquals([], $this->section->getSection('section'));
   }
 
   /**
-   * @covers fileSystem\FileINI::__set
+   * Должен устанавливать значение ключу без изменения файла.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::set
    */
-  public function test__set(){
-    $this->object->k1 = 'newV1';
-    $this->object->k3 = 'v3';
-    $this->assertEquals('newV1', $this->object->get('k1'));
-    $this->assertEquals('v3', $this->object->get('k3'));
-    $this->objectSection->section_k1 = 'newV1';
-    $this->objectSection->section_k3 = 'v3';
-    $this->assertEquals('newV1', $this->objectSection->get('k1', 'section'));
-    $this->assertEquals('v3', $this->objectSection->get('k3', 'section'));
+  public function testShouldSetValue(){
+    $this->ini->set('name', 'petr');
+    $this->assertEquals('petr', $this->ini->get('name'));
+    $this->assertEquals('name=ivan'."\n".'age=18', file_get_contents($_SERVER['DOCUMENT_ROOT'].'/PPHP/tests/tools/classes/standard/fileSystem/file.ini'));
+    $this->ini->set('name', 'ivan');
   }
 
   /**
-   * @covers fileSystem\FileINI::__get
+   * Должен удалять указанный ключ и его значение без изменения файла.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::remove
    */
-  public function test__get(){
-    $this->assertEquals('v1', $this->object->k1);
-    $this->assertEquals('', $this->object->k3);
-    $this->assertEquals('v1', $this->objectSection->section_k1);
-    $this->assertEquals('', $this->objectSection->section_k3);
+  public function testShouldRemoveValue(){
+    $this->ini->remove('name');
+    $this->assertFalse($this->ini->isDataExists('name'));
+    $this->assertEquals('name=ivan'."\n".'age=18', file_get_contents($_SERVER['DOCUMENT_ROOT'].'/PPHP/tests/tools/classes/standard/fileSystem/file.ini'));
+    $this->ini->set('name', 'ivan');
   }
 
   /**
-   * @covers fileSystem\FileINI::__isset
+   * Должен записывать все изменения в файл.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::rewrite
    */
-  public function test__isset(){
-    $this->assertFalse(isset($this->objectSection->section_k4));
-    $this->assertTrue(isset($this->objectSection->section_k1));
-    $this->assertTrue(isset($this->objectSection->section_k3));
-    $this->assertFalse(isset($this->object->k4));
-    $this->assertTrue(isset($this->object->k1));
-    $this->assertTrue(isset($this->object->k3));
+  public function testShouldWriteFile(){
+    $this->ini->set('name', 'petr');
+    $this->ini->remove('age');
+    $this->ini->rewrite();
+    $file = $_SERVER['DOCUMENT_ROOT'].'/PPHP/tests/tools/classes/standard/fileSystem/file.ini';
+    $this->assertEquals('name=petr'."\n", file_get_contents($file));
+    file_put_contents($file, 'name=ivan'."\n".'age=18');
+
   }
 
   /**
-   * @covers fileSystem\FileINI::remove
+   * Должен возвращать true - если в файле имеется указанная секция и false - если секция отсутствует или файл не разделен на секции.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::isSectionExists
    */
-  public function test__unset(){
-    unset($this->object->k1);
-    $this->assertEquals(null, $this->object->get('k1'));
-    unset($this->objectSection->section_k1);
-    $this->assertEquals(null, $this->objectSection->get('k1', 'section'));
+  public function testShouldReturnTrueIfSectionExists(){
+    $this->assertTrue($this->section->isSectionExists('user'));
+    $this->assertFalse($this->section->isSectionExists('section'));
+  }
+
+  /**
+   * Должен возвращать true - если в файле имеется указанный ключ.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::isDataExists
+   */
+  public function testShouldReturnTrueIfKeyExists(){
+    $this->assertTrue($this->ini->isDataExists('name'));
+    $this->assertFalse($this->ini->isDataExists('key'));
+  }
+
+  /**
+   * Должен возвращать значение ключа при вызове вида: имяКлюча.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::__get
+   */
+  public function testShouldReturnValue2(){
+    $this->assertEquals('ivan', $this->ini->name);
+  }
+
+  /**
+   * Должен возвращать значение ключа в секции при вызове вида: имяСекции_имяКлюча.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::__get
+   */
+  public function testShouldReturnSectionValue2(){
+    $this->assertEquals('ivan', $this->section->user_name);
+  }
+
+  /**
+   * Должен устанавливать значение ключа при вызове вида: имяКлюча.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::__set
+   */
+  public function testShouldSetValue2(){
+    $this->ini->name = 'petr';
+    $this->assertEquals('petr', $this->ini->name);
+    $this->ini->name = 'ivan';
+  }
+
+  /**
+   * Должен устанавливать значение ключа в секции при вызове вида: имяСекции_имяКлюча.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::__set
+   */
+  public function testShouldSetSectionValue(){
+    $this->section->user_name = 'petr';
+    $this->assertEquals('petr', $this->section->user_name);
+    $this->section->user_name = 'ivan';
+  }
+
+  /**
+   * Должен определять наличие ключа при вызове вида: имяКлюча.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::__isset
+   */
+  public function testShouldReturnTrueIfKeyExists2(){
+    $this->assertTrue(isset($this->ini->name));
+    $this->assertFalse(isset($this->ini->key));
+  }
+
+  /**
+   * Должен определять наличие ключа в секции при вызове вида: имяСекции_имяКлюча.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::__isset
+   */
+  public function testShouldReturnTrueIfSectionKeyExists(){
+    $this->assertTrue(isset($this->section->user_name));
+    $this->assertFalse(isset($this->section->user_key));
+  }
+
+  /**
+   * Должен удалять ключ при вызове вида: имяКлюча.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::__unset
+   */
+  public function testShouldRemoveKey(){
+    unset($this->ini->name);
+    $this->assertFalse(isset($this->ini->name));
+    $this->ini->name = 'ivan';
+  }
+
+  /**
+   * Должен удалять ключ в секции при вызове вида: имяСекции_имяКлюча.
+   * @covers PPHP\tools\classes\standard\fileSystem\FileINI::__unset
+   */
+  public function testShouldRemoveSectionKey(){
+    unset($this->section->user_name);
+    $this->assertFalse(isset($this->section->user_name));
+    $this->section->user_name = 'ivan';
   }
 }
 

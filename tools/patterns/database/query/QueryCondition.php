@@ -10,36 +10,26 @@ use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 abstract class QueryCondition extends Condition{
   /**
-   * Множество условий, входящих в логическое выражение.
-   * @var Condition[]
+   * @var \PPHP\tools\patterns\database\query\Condition[] Множество условий, входящих в логическое выражение.
    */
   protected $conditions;
 
   /**
-   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getMasks($driver = null){
     return ['\(' . Condition::getPatterns()['condition'] . ' ' . static::getPatterns()['moreCondition'] . '(?: ' . static::getPatterns()['moreCondition'] . ')*\)'];
   }
 
   /**
-   * Метод возвращает массив шаблонов, описывающих различные компоненты шаблонов верификации.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getPatterns($driver = null){
     return ['moreCondition' => static::getOperator() . ' ' . Condition::getPatterns()['condition']];
   }
 
   /**
-   * Метод восстанавливает объект из строки.
-   * @param string $string Исходная строка.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return static Результирующий объект.
+   * @prototype \PPHP\tools\patterns\interpreter\Restorable
    */
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
@@ -71,7 +61,7 @@ abstract class QueryCondition extends Condition{
 
   /**
    * Метод добавляет логическую операцию в выражение.
-   * @param Condition $condition Логический оператор.
+   * @param \PPHP\tools\patterns\database\query\Condition $condition Логический оператор.
    * @return $this Метод возвращает вызываемый объект.
    */
   public function addCondition(Condition $condition){
@@ -81,11 +71,7 @@ abstract class QueryCondition extends Condition{
   }
 
   /**
-   * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return string Результат интерпретации.
+   * @prototype \PPHP\tools\patterns\interpreter\Interpreter
    */
   public function interpretation($driver = null){
     exceptions\InvalidArgumentException::verifyType($driver, 'Sn');

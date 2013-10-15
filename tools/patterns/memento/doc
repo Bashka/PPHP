@@ -1,0 +1,111 @@
+h1: Терминология
+- Состояние объекта - совокупность значений всех свойств объекта;
+- Хранитель - объект, отвечающий за хранение состояния другого объекта. Хранимые данные представляют собой снимок состояния на конкретный момент времени и не изменяются в будущем;
+- Хозяин - объект, чье состояние сохраняется хранителем.
+
+h1: Сохранение и восстановление состояния объекта
+Задачи, требующие получения состояния объекта с целью его последующего восстановления, решаются с использованием данного пакета. Его классы реализуют шаблон проектирования "Memento", позволяя оперировать состояниями объектов, сохранять их и восстанавливать в будущем.
+Данный пакет необходим персистентным объектам (см. PPHP/tools/patterns/database/persistent) для получения их состояния в целях сохранения в базу данных.
+Объекты, позволяющие получить их состояние и восстановить его в будущем, должны реализовывать интерфейс Originator данного пакета. Этот интерфейс включает два метода: createMemento - создает и возвращает хранителя состояния на момент вызова; restoreFromMemento - восстанавливает состояние объекта их хранителя.
+Данный интерфейс частично реализует TOriginator. Trait включает два дополнительных метода, отвечающих за получение и установку состояния объекта: getSavedState и setSavedState соответственно.
+В качестве хранителей используются объекты класса Memento. Их метод getState позволяет хозяину получить хранимое в нем состояние, но при обращении к данному методу другого объекта (не хозяина хранителя), выбрасывается исключение.
+Приведем пример реализации класса хозяина:
+code: php 300
+class MyOriginator implements Originator{
+use TOriginator;
+  private $a;
+
+  protected function getSavedState(){
+    $state = get_object_vars($this);
+    return $state;
+  }
+
+  public function getA(){
+    return $this->a;
+  }
+
+  public function setA($a){
+    $this->a = $a;
+  }
+}
+code: end
+Метод getSavedState объявлен как abstract в TOriginator, потому должен быть реализован в использующих его классах. Данный метод отвечает за получение состояния хозяина хранителем.
+Приведем пример получения и установки состояния класса MyOriginator:
+code: php 120
+$o = new MyOriginator;
+$o->setA(1); // Определяем состояние объекта.
+$m = $o->createMemento(); // Получаем хранителя.
+$o->setA(2); // Изменяем состояние объекта.
+echo $o->getA(); // 2
+$o->restoreFromMemento($m); // Восстанавливаем состояние объекта.
+echo $o->getA(); // 1 - Состояние восстановлено.
+code: end
+
+h1: Проблемы, связанные с иерархией наследования
+При получении и восстановлении состояния объекта необходимо учитывать инкпсуляцию различных уровней наследования. Так, объект дочернего класса не может получить состояние своего родителя, если некоторые свойства объявлены как private, одновременно родительский класс не может установить состояние объекта дочернего класса, если оно объявлено как private:
+code: php 340
+class MyOriginator implements Originator{
+use TOriginator;
+  ...
+
+  protected function getSavedState(){
+    $state = get_object_vars($this); // В данный массив войдут свойства, объявленные как public или protected.
+    return $state;
+  }
+
+  // Данный метод реализован в TOriginator.
+  protected function setSavedState(array $state){ // Данный метод может установить значения свойствам, объявленным как public или protected.
+    foreach($state as $k => $v){
+      if(property_exists(get_called_class(), $k)){
+        $this->$k = $state[$k];
+      }
+    }
+  }
+
+  ...
+}
+code: end
+Для решения этой проблемы, необходимо соответствующим образом (описано в реализации TOriginator) переопределить методы getSavedState и setSavedState:
+code: php 700
+class ParentOriginator implements Originator{
+use TOriginator;
+  ...
+
+  protected function getSavedState(){
+    $state = get_object_vars($this); // Реализация для родительского класса.
+    return $state;
+  }
+
+  protected function setSavedState(array $state){ // Реализация для родительского класса.
+    foreach($state as $k => $v){
+      if(property_exists($this, $k) && $this::getReflectionProperty($k)->getDeclaringClass()->getName() === get_class()){
+        $this->$k = $state[$k];
+      }
+    }
+  }
+
+  ...
+}
+
+class ChildOriginator extends ParentOriginator{
+  ...
+
+  protected function getSavedState(){
+    $state = get_object_vars($this); // Реализация для дочернего класса.
+    $state = $state + parent::getSavedState(); // Добавление private свойств родителя.
+    return $state;
+  }
+
+  protected function setSavedState(array $state){ // Реализация для дочернего класса.
+    parent::setSavedState($state); // Установка private свойств родителя.
+
+    foreach($state as $k => $v){
+      if(property_exists($this, $k) && $this::getReflectionProperty($k)->getDeclaringClass()->getName() === get_class()){
+        $this->$k = $state[$k];
+      }
+    }
+  }
+
+  ...
+}
+code: end

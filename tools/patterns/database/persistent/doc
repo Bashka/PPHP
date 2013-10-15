@@ -1,0 +1,110 @@
+h1: Терминология
+- Сохранение объекта - сохранение состояния объекта на постоянном носителе;
+- Восстановление объекта - установка значений всем свойствам объекта;
+- Персистентный объект - объект, который может быть сохранен и восстановлен;
+- Персистентная ассоциация - множественная ссылка на персистентные объекты.
+
+h1: Требования к персистентному объекту
+Для создания персистентного объекта, его класс должен:
+- Иметь возможность однозначной идентификации состояний его экземпляров;
+- Иметь возможность безопастно получить и установить состояния его экземпляров.
+Это очевидно, так как невозможно сохранить состояние объекта если оно нам не доступно, а так же восстановить объект, если он не позволяет установить значения всем его свойствам. Идентификация объекта нужна для того, чтобы можно было легко найти состояние для восстановления без коллизии.
+
+h1: Постоянный объект
+Данный пакет использует абстрактный класс LongObject, который соответствует всем требованиям класса персистентных объектов, а так же может быть аннотирован (см. PPHP/tools/patterns/metadata).
+Подкласс класса LongObject так же может иметь дочерние классы, уточняющие его, без необходимости реализации какой либо дополнительной логики.
+Для получения и установки состояния персистентного объекта здесь используется интерфейс PPHP\tools\patterns\memento\Originator и trait PPHP\tools\patterns\memento\TOriginator, а для идентификации состояний используется интерфейс PPHP\tools\patterns\database\identification\OID и trait PPHP\tools\patterns\database\identification\TOID. Аннотация реализуется через реализацию интерфейса PPHP\tools\patterns\metadata\reflection\Reflect с помощью trait PPHP\tools\patterns\metadata\reflection\TReflect.
+Класс LongObject так же реализует интерфейс PPHP\tools\patterns\interpreter\Interpreter, что позволяет ему создавать строковые ссылки на персистентные объекты (часто использующиеся в базах данных) вида: $имяКласса:идентификаторОбъекта. Так же класс LongObject является подклассом класса PPHP\tools\patterns\interpreter\RestorableAdapter, что позволяет восстанавливать Proxy объекты из строковых ссылок.
+Для примера создадим два класса персистентных объектов:
+code: php 520
+class People extends LongObject{
+  private $name;
+  private $phone;
+
+  // Метод должен быть реализован по требованию trait TOriginator. Метод возвращает текущее состояние объекта.
+  protected function getSavedState(){
+    return get_object_vars($this);
+  }
+
+  // Метод переопределяет реализацию trait TOriginator для правильной работы в иерархии наследования. Если класс не имеет дочерних классов, то метод можно не переопределять.
+  // Метод устанавливает состояние объекту.
+  protected function setSavedState(array $state){
+    foreach($state as $k => $v){
+      if(property_exists($this, $k) && $this::getReflectionProperty($k)->getDeclaringClass()->getName() === get_class()){
+        $this->$k = $state[$k];
+      }
+    }
+  }
+}
+
+class Student extends People{
+  private $course;
+
+  // Метод переопределен для того, чтобы было возможно получить private свойства родительского класса.
+  protected function getSavedState(){
+    return get_object_vars($this) + parent::getSavedState();
+  }
+
+  // Метод переопределен для того, чтобы можно было установить private свойства родительскому классу.
+  protected function setSavedState(array $state){
+    parent::setSavedState($state);
+    foreach($state as $k => $v){
+      if(property_exists($this, $k) && $this::getReflectionProperty($k)->getDeclaringClass()->getName() === get_class()){
+        $this->$k = $state[$k];
+      }
+    }
+  }
+}
+code: end
+Отметим, что для классов, не имеющих дочерних классов, достаточно реализовать метод getSavedState, а для классов с дочерними методами, необходимо помимо метода getSavedState, так же переопределить метод setSavedState.
+Объекты классов People и Student могут быть сохранены и восстановлены как и любые персистентный объекты. Обратите внимание, что механизмы, отвечающие за сохранение и восстановление персистентных объектов (см. PPHP\tools\classes\standard\storage\database\DataMapper) не являются частью класса LongObject, класс лишь реализует необходимую для этих механизмов семантику.
+
+h1: Множественная ассоциация
+Для сохранения ассоциации вида один-к-одному класс LongObject использует строковые ссылки, но что делать, если необходимо сохранять и восстанавливать ассоциации вида одни-ко-многим или многое-ко-многим? Для этого используются персистентные ассоциации.
+Для восстановление множественной ассоциации необходимо:
+- Знать класс персистентных объектов, на которые ссылается данная ассоциация;
+- Иметь инструкцию для восстановления.
+Класс LongAssociation представляет реализацию персистентной множественной ассоциации в системе. Механизм восстановления экземпляров этого класса не является частью самого класса (см. PPHP\tools\classes\standard\storage\database\DataMapper), класс лишь определяет семантику множественных ассоциаций.
+В качестве примера свяжем объекты класса Student из предыдущего примера с объектами класса Discipline:
+code: php 350
+class Student extends People{
+  ... // Свойства класса из примера выше.
+  private $disciplines; // Множественная ассоциация с дисциплинами, изучаемыми студентом.
+
+  ... // Методы класса из примера выше.
+
+  public function getDisciplines(){
+    return $this->disciplines;
+  }
+}
+
+class Discipline extends LongObject{
+  private $name;
+
+  protected function getSavedState(){
+    return get_object_vars($this);
+  }
+}
+
+// Персистентная ассоциация. Данный класс представляет собой связь между экземплярами классов Student и Discipline.
+class StudentDisciplineLink extends LongObject{
+  private $student;
+  private $discipline;
+
+  protected function getSavedState(){
+    return get_object_vars($this);
+  }
+}
+code: end
+За восстановление свойства disciplines класса Student отвечает сторонний класс, но благодаря персистентным ассоциациям ему доступна вся необходимая для восстановления информация. Приведем пример восстановления:
+code: php 140
+$datamapper = DataMapperManager::getInstance()->getDataMapper();
+$s = Student::getProxy(1);
+$datamapper->recover($s);
+$d = $s->getDisciplines(); // Получаем все связанные с данным студентом дисциплины (объект класса LongAssociation). На данный момент объект d не имеет ссылок на дисциплины, а только содержит информацию для восстановления этих ссылок.
+$datamapper->recoverAssoc($d); // Восстановление ассоциации.
+foreach($d as $discipline){
+  echo $discipline->getOID(); // Получение идентификаторов дисциплин.
+}
+code: end
+Следует заметить, что восстановленная ассоциация содержит только Proxy объекты которые еще необходимо восстановить, но это относится не к самому классу LongAssociation, а к DataMapper (см. \tools\classes\standard\storage\database\DataMapper).

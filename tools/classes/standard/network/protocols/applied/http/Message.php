@@ -1,8 +1,8 @@
 <?php
 namespace PPHP\tools\classes\standard\network\protocols\applied\http;
 
+use PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
 use \PPHP\tools\patterns\interpreter as interpreter;
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
  * Класс представляет HTTP передаваемое или получаемое сообщение.
@@ -11,20 +11,18 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 abstract class Message extends interpreter\RestorableAdapter implements interpreter\Interpreter{
   /**
-   * Заголовок.
-   * @var Header
+   * @var \PPHP\tools\classes\standard\network\protocols\applied\http\Header Заголовок сообщения.
    */
   protected $header;
 
   /**
-   * Тело.
-   * @var string
+   * @var string Тело сообщения.
    */
   protected $body;
 
   /**
-   * @param Header $header [optional] Заголовок запроса.
-   * @param string|array $body [optional] Тело запроса в виде строки или ассоциативного массива параметров, передаваемых в запросе. В случае передачи массива тело формируется следующим образом: <ключ элемента>:<значение элемента>&
+   * @param \PPHP\tools\classes\standard\network\protocols\applied\http\Header $header [optional] Заголовок сообщения.
+   * @param string|array $body [optional] Тело сообщения в виде строки или ассоциативного массива параметров, передаваемых в сообщении. В случае передачи массива тело формируется следующим образом: <ключ элемента>:<значение элемента>&
    */
   function __construct($header = null, $body = null){
     $this->header = ($header !== null)? $header : new Header();
@@ -49,7 +47,7 @@ abstract class Message extends interpreter\RestorableAdapter implements interpre
 
   /**
    * Метод устанавливает указанный заголовок для данного сообщения.
-   * @param Header $header Устанавливаемый заголовок.
+   * @param \PPHP\tools\classes\standard\network\protocols\applied\http\Header $header Устанавливаемый заголовок.
    */
   public function setHeader(Header $header){
     $this->header = $header;
@@ -57,14 +55,14 @@ abstract class Message extends interpreter\RestorableAdapter implements interpre
 
   /**
    * Метод добавляет параметр к заголовку сообщения.
-   * @param Parameter $parameter Добавляемый параметр.
+   * @param \PPHP\tools\classes\standard\network\protocols\applied\http\Parameter $parameter Добавляемый параметр.
    */
   public function addParameterHeader(Parameter $parameter){
     $this->header->addParameter($parameter);
   }
 
   /**
-   * Метод добавляет параметр к заговолку сообщения.
+   * Метод создает параметр из строки и добавляет его к заговолку сообщения.
    * @param string $name Имя параметра.
    * @param string $value Значение параметра.
    */
@@ -73,16 +71,16 @@ abstract class Message extends interpreter\RestorableAdapter implements interpre
   }
 
   /**
-   * Метод устанвливает тело запроса.
+   * Метод устанвливает тело сообщения.
    * Данный метод позволяет так же задать тип и кодировку передаваемых данных в том случае, если они не были заданы заранее.
    * Выполнение метода сопровождается установкой параметров заголовка Content-Length и Content-MD5.
-   * @param string|integer|float $body Тело запроса.
+   * @param string|integer|float $body Тело сообщения.
    * @param string $type [optional] Тип данных тела.
    * @param string $charset [optional] Кодировка данных тела.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения пустого тела запроса.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения пустого тела запроса.
    */
   public function setBody($body, $type = 'application/x-www-form-urlencoded', $charset = 'utf-8'){
-    exceptions\InvalidArgumentException::verifyType($body, 'sif');
+    InvalidArgumentException::verifyType($body, 'sif');
     $body = (string) $body;
     $this->body = $body;
     if(!$this->header->hasParameter('Content-Type')){
@@ -93,14 +91,16 @@ abstract class Message extends interpreter\RestorableAdapter implements interpre
   }
 
   /**
-   * @return null|Header
+   * Возвращает заголовок сообщения.
+   * @return \PPHP\tools\classes\standard\network\protocols\applied\http\Header Заголовок сообщения.
    */
   public function getHeader(){
     return $this->header;
   }
 
   /**
-   * @return null|string
+   * Возвращает тело сообщения.
+   * @return null|string Тело сообщения или null - если тело не установлено.
    */
   public function getBody(){
     return $this->body;

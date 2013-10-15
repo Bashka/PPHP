@@ -9,7 +9,7 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\essence\structures\hierarchical
  */
-abstract class HierarchicalEntity extends database\LongObject{
+abstract class HierarchicalEntity extends database\persistent\LongObject{
   /**
    * Идентификатор родительской сущности. null если сущность является корнем иерархии и целочисленный тип если объект еще не был восстановлен.
    * @var HierarchicalEntity|null|integer
@@ -19,7 +19,7 @@ abstract class HierarchicalEntity extends database\LongObject{
   /**
    * Множество дочерних объектов.
    * Данное свойтсво должно быть аннотированно для множественной, ассоциативной выборки дочерних элементов с использованием ключей AssocClass и KeyAssocTable.
-   * @var database\associations\LongAssociation
+   * @var database\persistent\LongAssociation
    */
   protected $hierarchicalChild;
 
@@ -37,7 +37,7 @@ abstract class HierarchicalEntity extends database\LongObject{
   }
 
   /**
-   * @return database\associations\LongAssociation
+   * @return database\persistent\LongAssociation
    */
   public function &getHierarchicalChild(){
     return $this->hierarchicalChild;

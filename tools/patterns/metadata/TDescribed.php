@@ -10,68 +10,56 @@ use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 trait TDescribed{
   /**
-   * Метаданные элемента.
+   * Метаданные объекта.
    * Ассоциативный массив, ключами которого являются имена метаданных.
    * @var string[]
    */
   protected $metadata = [];
 
   /**
-   * Метод возвращает все метаданные данного объекта.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\metadata\TDescribed
    */
   public function getAllMetadata(){
     return $this->metadata;
   }
 
   /**
-   * Метод возвращает значение конкретных метаданных элемента.
-   * @param string $metadataName Имя метаданных.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
-   * @return string|null Метод возвращает значение метаданных или null, если метаданные не установлены.
+   * @prototype \PPHP\tools\patterns\metadata\TDescribed
    */
-  public function getMetadata($metadataName){
-    exceptions\InvalidArgumentException::verifyType($metadataName, 'S');
-    if(!array_key_exists($metadataName, $this->metadata)){
+  public function getMetadata($name){
+    exceptions\InvalidArgumentException::verifyType($name, 'S');
+    if(!array_key_exists($name, $this->metadata)){
       return null;
     }
 
-    return $this->metadata[$metadataName];
+    return $this->metadata[$name];
   }
 
   /**
-   * Метод устанавливает значение метаданных.
-   * @param string $metadataName  Имя метаданных.
-   * @param string $metadataValue Значение метаданных.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @prototype \PPHP\tools\patterns\metadata\TDescribed
    */
-  public function setMetadata($metadataName, $metadataValue){
-    exceptions\InvalidArgumentException::verifyType($metadataName, 'S');
-    exceptions\InvalidArgumentException::verifyType($metadataValue, 's');
-    $this->metadata[$metadataName] = $metadataValue;
+  public function setMetadata($name, $value){
+    exceptions\InvalidArgumentException::verifyType($name, 'S');
+    exceptions\InvalidArgumentException::verifyType($value, 's');
+    $this->metadata[$name] = $value;
   }
 
   /**
-   * Метод проверяет, существуют ли заданные метаданные в вызываемом представлении.
-   * @param string $metadataName Имя метаданных.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
-   * @return boolean true - если метаданные существуют, иначе - false.
+   * @prototype \PPHP\tools\patterns\metadata\TDescribed
    */
-  public function isMetadataExists($metadataName){
-    exceptions\InvalidArgumentException::verifyType($metadataName, 'S');
+  public function isMetadataExists($name){
+    exceptions\InvalidArgumentException::verifyType($name, 'S');
 
-    return array_key_exists($metadataName, $this->metadata);
+    return array_key_exists($name, $this->metadata);
   }
 
   /**
-   * Метод удаляет метаданные из класса.
-   * @param string $metadataName Удаляемые метаданные.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @prototype \PPHP\tools\patterns\metadata\TDescribed
    */
-  public function removeMetadata($metadataName){
-    exceptions\InvalidArgumentException::verifyType($metadataName, 'S');
-    if(isset($this->metadata[$metadataName])){
-      unset($this->metadata[$metadataName]);
+  public function removeMetadata($name){
+    exceptions\InvalidArgumentException::verifyType($name, 'S');
+    if(isset($this->metadata[$name])){
+      unset($this->metadata[$name]);
     }
   }
 }

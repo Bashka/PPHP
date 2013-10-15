@@ -1,7 +1,7 @@
 <?php
 namespace PPHP\tools\classes\standard\fileSystem\loadingFiles;
 
-use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
 use PPHP\tools\classes\standard\fileSystem as fileSystem;
 
 /**
@@ -11,8 +11,7 @@ use PPHP\tools\classes\standard\fileSystem as fileSystem;
  */
 class LoadedFile extends fileSystem\File{
   /**
-   * MIME-тип файла.
-   * @var string
+   * @var string MIME-тип файла.
    */
   protected $mimeType;
 
@@ -20,15 +19,15 @@ class LoadedFile extends fileSystem\File{
    * Метод получает файл из временного хранилища.
    * @static
    * @param string $fileName Псевдоним получаемого файла.
-   * @throws fileSystem\NotExistsException Выбрасывается в случае, если заданного файла не существует.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
-   * @return LoadedFile Загруженный файл.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если заданного файла не существует.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @return \PPHP\tools\classes\standard\fileSystem\loadingFiles\LoadedFile Загруженный файл.
    */
   public static function getLoadedFile($fileName){
-    exceptions\InvalidArgumentException::verifyType($fileName, 'S');
+    InvalidArgumentException::verifyType($fileName, 'S');
     if($_FILES[$fileName]['error'] == 0 && file_exists($_FILES[$fileName]['tmp_name'])){
       // Перехват исключений не выполняется в связи с невозможностью их появления
-      $tempDir = fileSystem\ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tools/classes/standard/fileSystem/loadingFiles/temp');
+      $tempDir = new fileSystem\Directory('PPHP/tools/classes/standard/fileSystem/loadingFiles/temp');
       if(!copy($_FILES[$fileName]['tmp_name'], $tempDir->getAddress() . '/' . $_FILES[$fileName]['name'])){
         throw new fileSystem\AccessException('Невозможно переместить файл [' . $fileName . '] в файловое хранилище [/PPHP/tools/classes/standard/fileSystem/loadingFiles/temp]. Возможно недостаточно прав для данной операции.');
       }
@@ -43,7 +42,8 @@ class LoadedFile extends fileSystem\File{
   }
 
   /**
-   * @return string
+   * Метод возвращает MIME тип файла.
+   * @return string MIME тип файла.
    */
   public function getMimeType(){
     return $this->mimeType;

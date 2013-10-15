@@ -51,12 +51,8 @@ trait TRestorable{
   }
 
   /**
-   * Метод позволяет определить допустимость восстановления объекта из строки-основания.
    * Метод последовательно применяет доступные шаблоны верификации к строке-основанию для поиска соответствия.
-   * @param string $string Строка-основание.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return boolean true - если интерпретация возможна, иначе - false.
+   * @prototype \PPHP\tools\patterns\interpreter\Restorable
    */
   public static function isReestablish($string, $driver = null){
     exceptions\InvalidArgumentException::verifyType($string, 's');
@@ -70,13 +66,7 @@ trait TRestorable{
   /**
    * Данный метод должен быть переопределен в реализующем классе для уточнения механизма восстановления.
    * Метод определяет подхощящий шаблон верификации и возвращает массив лексем, полученных из строки-основания. В качестве элемента с ключем key этого массива, указывается ключ первого подходящего шаблона верификации.
-   * @abstract
-   * @param string $string Строка-основание.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации строки-основания.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае отсутствия требуемых для восстановления данных.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\StructureException Выбрасывается в случае, если строка-основание не отвечает требования структуры.
-   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return string[]|boolean Массив лексем, созданных первым подходящим шаблоном верификации. В качестве элемента с ключем key хранится ключ соответствующего шаблона верификации. В случае отсутствия подходящего шаблона верификации метод возвращает false.
+   * @prototype \PPHP\tools\patterns\interpreter\Restorable
    */
   public static function reestablish($string, $driver = null){
     exceptions\InvalidArgumentException::verifyType($string, 'S');

@@ -1,8 +1,8 @@
 <?php
 namespace PPHP\tools\classes\standard\network\protocols\applied\http;
 
-use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 use \PPHP\tools\classes\standard\baseType as baseType;
+use PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
 
 /**
  * Класс представляет HTTP ответ сервера.
@@ -11,21 +11,17 @@ use \PPHP\tools\classes\standard\baseType as baseType;
  */
 class Response extends Message{
   /**
-   * Код ответа.
-   * @var string
+   * @var integer|string Код ответа.
    */
   protected $code;
 
   /**
-   * Сообщение ответа.
-   * @var string
+   * @var string Сообщение ответа.
    */
   protected $message;
 
   /**
-   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getMasks($driver = null){
     if(is_null($driver)){
@@ -36,12 +32,7 @@ class Response extends Message{
   }
 
   /**
-   * Метод восстанавливает объект из строки.
-   * @param string $string Исходная строка.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return static Результирующий объект.
+   * @prototype \PPHP\tools\patterns\interpreter\Restorable
    */
   public static function reestablish($string, $driver = null){
     if(is_null($driver)){
@@ -73,23 +64,20 @@ class Response extends Message{
   /**
    * @param integer|string $code Код ответа.
    * @param string $message Сообщение ответа.
-   * @param Header $header [optional] Заголовок запроса.
+   * @param \PPHP\tools\classes\standard\network\protocols\applied\http\Header $header [optional] Заголовок запроса.
    * @param string|array $body [optional] Тело запроса в виде строки или ассоциативного массива параметров, передаваемых в запросе. В случае передачи массива тело формируется следующим образом: <ключ элемента>:<значение элемента>EOL
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
    */
   function __construct($code, $message, $header = null, $body = null){
-    exceptions\InvalidArgumentException::verifyType($code, 'iS');
-    exceptions\InvalidArgumentException::verifyType($message, 'S');
+    InvalidArgumentException::verifyType($code, 'iS');
+    InvalidArgumentException::verifyType($message, 'S');
     parent::__construct($header, $body);
     $this->code = $code;
     $this->message = $message;
   }
 
   /**
-   * Метод возвращает строку, полученную при интерпретации объекта.
-   * @abstract
-   * @param mixed $driver [optional] Разделитель компонентов ответа. По умолчанию PHP_EOL.
-   * @return string Результат интерпретации.
+   * @prototype \PPHP\tools\patterns\interpreter\Interpreter
    */
   public function interpretation($driver = null){
     if(is_null($driver)){
@@ -100,10 +88,18 @@ class Response extends Message{
     return $generalHeader . $driver . $this->header->interpretation($driver) . $driver . $this->body;
   }
 
+  /**
+   * Метод возвращает код ответа.
+   * @return integer|string Код ответа.
+   */
   public function getCode(){
     return $this->code;
   }
 
+  /**
+   * Метод вовзращает сообщение ответа.
+   * @return string Сообщение ответа.
+   */
   public function getMessage(){
     return $this->message;
   }

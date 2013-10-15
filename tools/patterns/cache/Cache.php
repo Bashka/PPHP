@@ -47,12 +47,11 @@ abstract class Cache{
    * Метод служит для запроса данных из ресурса в случае отсутствия их в кэше.
    * Метод должен возвращать данные по их идентификатору. При нахождении данных они автоматически кэшируются вызывающим методом (getData) и могут быть получены в будущем из кэша.
    * Если инициализированные данные необходимо дополнить, передается параметр $arguments.
-   *
    * @abstract
    * @param string $key Идентификатор данных.
    * @param mixed[] $arguments [optional] Дополнительные аргументы, используемые для дополнения идентифицированных данных.
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае невозможности получения данных из ресурса.
-   * @return mixed Связанные с идентификатором данные.
+   * @return mixed|null Связанные с идентификатором данные или null, если для данного идентификатора данных нет.
    */
   protected abstract function getFromSource($key, array $arguments = null);
 
@@ -61,7 +60,6 @@ abstract class Cache{
    * Если данные были записаны в кэш, они будут возвращены из него, иначе они запрашиваются из ресурса с помощью метода getFromSource, кэшируются и затем возвращаются.
    * Метод автоматически удаляет устаревшие данные в ограниченном кэше.
    * Если инициализированные данные необходимо дополнить, может быть использован дополнительный аргумент $arguments, он будет передан в метод getFromSource при запросе.
-   *
    * @param string $key Идентификатор данных.
    * @param mixed[] $arguments [optional] Дополнительные аргументы, используемые для дополнения идентифицированных данных.
    * @throws \PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException Выбрасывается в случае невозможности получения данных из ресурса.
@@ -76,7 +74,7 @@ abstract class Cache{
         return $this->getFromSource($key, $arguments);
       }
       // Кэширование
-      if(!isset($this->cachedData[$key])){
+      if(!array_key_exists($key, $this->cachedData)){
         $this->cachedData[$key] = $this->getFromSource($key, $arguments);
         // Поиск и удаление устаревших данных в ограниченном кэше
         if($this->volume != self::NO_LIMITED){

@@ -1,280 +1,302 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\fileSystem;
 
-use PPHP\tools\classes\standard\fileSystem\ComponentFileSystem;
-use PPHP\tools\classes\standard\fileSystem as fileSystem;
+use PPHP\tools\classes\standard\fileSystem\Directory;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')).'PPHP/dev/autoload/autoload.php';
+
 class DirectoryTest extends \PHPUnit_Framework_TestCase{
   /**
-   * @var fileSystem\Directory
+   * @var Directory
    */
-  protected $object;
-
-  /**
-   * Имя тестируемого каталога в текущем каталоге.
-   */
-  const testDirName = 'testDir';
-
-  /**
-   * Имя каталога, необходимого для целей тестирования.
-   */
-  const assistanceDir = 'testAssistanceDir';
-
-  public static function setUpBeforeClass(){
-    if(!file_exists(self::assistanceDir) || !is_dir(self::assistanceDir)){
-      mkdir(self::assistanceDir);
-    }
-  }
-
-  public static function tearDownAfterClass(){
-    if(file_exists(self::assistanceDir) && is_dir(self::assistanceDir)){
-      self::clearDir(self::assistanceDir);
-      rmdir(self::assistanceDir);
-    }
-  }
+  private $object;
 
   protected function setUp(){
-    $this->object = ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::testDirName);
-  }
-
-  protected function tearDown(){
-    self::clearDir(self::assistanceDir);
-    if(file_exists(self::testDirName) && is_dir(self::testDirName)){
-      self::clearDir(self::testDirName);
-      rmdir(self::testDirName);
-    }
-    if(file_exists('rename_' . self::testDirName) && is_dir('rename_' . self::testDirName)){
-      rmdir('rename_' . self::testDirName);
-    }
+    $this->object = new Directory('PPHP/tests/tools/classes/standard/fileSystem/dir');
   }
 
   /**
-   * @static
-   * Метод отчищает директорию от содержимого.
-   * @param string $dirAddress Адрес отчищаемой директории относительно текущего каталога.
+   * Компонента с данным именем в родительском каталоге не должно существовать.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::rename
    */
-  private static function clearDir($dirAddress){
-    $iterator = new \DirectoryIterator($dirAddress);
-    foreach($iterator as $component){
-      if($component != '.' && $component != '..'){
-        if(is_file($dirAddress . '/' . $component)){
-          unlink($dirAddress . '/' . $component);
-        }
-        else{
-          self::clearDir($dirAddress . '/' . $component);
-          rmdir($dirAddress . '/' . $component);
-        }
-      }
-    }
-  }
-
-  private static function createSubcomponent(){
-    if(!file_exists(self::testDirName) || !is_dir(self::testDirName)){
-      mkdir(self::testDirName);
-    }
-    fclose(fopen(self::testDirName . '/testFile.txt', 'a+'));
-    mkdir(self::testDirName . '/testDir');
-    fclose(fopen(self::testDirName . '/testDir/testFile.txt', 'a+'));
+  public function testShouldPreventDuplicationOfRename(){
+    $this->setExpectedException('PPHP\tools\classes\standard\baseType\exceptions\DuplicationException');
+    $this->object->rename('assistant');
   }
 
   /**
-   * @covers fileSystem\Directory::rename
+   * В аргументе не должно присутствовать символа слеша.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::rename
    */
-  public function testRename(){
-    mkdir(self::testDirName);
-    $this->assertTrue($this->object->rename('rename_' . self::testDirName));
-    $isRename = (file_exists('rename_' . self::testDirName) && is_dir('rename_' . self::testDirName) && !file_exists(self::testDirName));
-    $this->assertTrue($isRename);
+  public function testShouldThrowExceptionIfNewNameIsAddress(){
+    $this->setExpectedException('PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
+    $this->object->rename('dir/assistant');
   }
 
   /**
-   * @covers fileSystem\Directory::rename
+   * Должен возвращать true если вызываемый каталог существует в файловой системе, иначе - false.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::isExists
    */
-  public function testRenameForDuplication(){
-    mkdir(self::testDirName);
-    mkdir('rename_' . self::testDirName);
-    $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\DuplicationException');
-    $this->object->rename('rename_' . self::testDirName);
-  }
-
-  /**
-   * @covers fileSystem\Directory::move
-   */
-  public function testMove(){
-    self::createSubcomponent();
-    $assDir = ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::assistanceDir);
-    $this->assertTrue($this->object->move($assDir));
-    $this->assertTrue((!file_exists(self::testDirName) || !is_dir(self::testDirName)));
-    $this->assertEquals($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::assistanceDir . '/' . self::testDirName, $this->object->getAddress());
-    $newAddress = self::assistanceDir . '/' . self::testDirName;
-    $this->assertTrue((file_exists($newAddress) && is_dir($newAddress)));
-    $isMultiMove = (file_exists($newAddress . '/testFile.txt') && file_exists($newAddress . '/testDir') && file_exists($newAddress . '/testDir/testFile.txt'));
-    $this->assertTrue($isMultiMove);
-  }
-
-  /**
-   * @covers fileSystem\Directory::move
-   */
-  public function testMoveForDuplication(){
-    mkdir(self::testDirName);
-    mkdir(self::assistanceDir . '/' . self::testDirName);
-    $assDir = ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::assistanceDir);
-    $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\DuplicationException');
-    $this->object->move($assDir);
-  }
-
-  /**
-   * @covers fileSystem\Directory::isExists
-   */
-  public function testIsExists(){
-    $this->assertFalse($this->object->isExists());
-    mkdir(self::testDirName);
+  public function testShouldReturnTrueIfDirExists(){
     $this->assertTrue($this->object->isExists());
+
+    $d = new Directory('PPHP/tests/tools/classes/standard/fileSystem/notExistsDir');
+    $this->assertFalse($d->isExists());
   }
 
   /**
-   * @covers fileSystem\Directory::copyPaste
+   * Должен выбрасывать исключение если родительского каталога не существует.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::isExists
    */
-  public function testCopyPaste(){
-    self::createSubcomponent();
-    $assDir = ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::assistanceDir);
-    $this->assertTrue($this->object->copyPaste($assDir));
-    $this->assertTrue((file_exists(self::testDirName) && is_dir(self::testDirName)));
-    $newAddress = self::assistanceDir . '/' . self::testDirName;
-    $this->assertTrue((file_exists($newAddress) && is_dir($newAddress)));
-    $isMultiCopy = (file_exists($newAddress . '/testFile.txt') && file_exists($newAddress . '/testDir') && file_exists($newAddress . '/testDir/testFile.txt'));
-    $this->assertTrue($isMultiCopy);
+  public function testShouldThrowExceptionIfNotExistsParentDir(){
+    $this->setExpectedException('PPHP\tools\classes\standard\fileSystem\NotExistsException');
+    $d = new Directory('PPHP/tests/tools/classes/standard/fileSystem/notExistsDir/dir');
+    $d->isExists();
   }
 
   /**
-   * @covers fileSystem\Directory::copyPaste
+   * Должен выполнять копирование каталога со всеми вложенными файлами.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::copyPaste
    */
-  public function testCopyPasteForDuplication(){
-    mkdir(self::testDirName);
-    mkdir(self::assistanceDir . '/' . self::testDirName);
-    $assDir = ComponentFileSystem::constructDirFromAddress($_SERVER['DOCUMENT_ROOT'] . '/PPHP/tests/tools/classes/standard/fileSystem/' . self::assistanceDir);
-    $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\DuplicationException');
-    $this->object->copyPaste($assDir);
+  public function testShouldCopyDirAndAllChildComponents(){
+    $assDir = new Directory('PPHP/tests/tools/classes/standard/fileSystem/assistant');
+    $copy = $this->object->copyPaste($assDir);
+
+    $this->assertTrue((file_exists('dir') && is_dir('dir')));
+
+    $newAddress = 'PPHP/tests/tools/classes/standard/fileSystem/assistant/dir';
+    $this->assertTrue((file_exists($_SERVER['DOCUMENT_ROOT'].'/'.$newAddress) && is_dir($_SERVER['DOCUMENT_ROOT'].'/'.$newAddress)));
+
+    $this->assertTrue(file_exists($_SERVER['DOCUMENT_ROOT'].'/'.$newAddress . '/fileChild') && file_exists($_SERVER['DOCUMENT_ROOT'].'/'.$newAddress . '/dir'));
+
+    $copy->delete();
   }
 
   /**
-   * @covers fileSystem\Directory::delete
+   * Должен возвращать представление созданной копии.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::copyPaste
    */
-  public function testDelete(){
-    mkdir(self::testDirName);
+  public function testShouldReturnCopy(){
+    $assDir = new Directory('PPHP/tests/tools/classes/standard/fileSystem/assistant');
+    $copy = $this->object->copyPaste($assDir);
+    $this->assertInstanceOf('PPHP\tools\classes\standard\fileSystem\Directory', $copy);
+    $copy->delete();
+  }
+
+  /**
+   * Должен выбрасывать исключение если вызываемого каталога нет в файловой системе.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::copyPaste
+   */
+  public function testShouldThrowExceptionIfDirNotExists(){
+    $this->setExpectedException('PPHP\tools\classes\standard\fileSystem\NotExistsException');
+    $dir = new Directory('PPHP/tests/tools/classes/standard/fileSystem/notExistsDir');
+    $dir->copyPaste($this->object);
+  }
+
+  /**
+   * Должен предотвращать дублирование.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::copyPaste
+   */
+  public function testShouldPreventDuplicationOfCopy(){
+    $this->setExpectedException('PPHP\tools\classes\standard\baseType\exceptions\DuplicationException');
+    $this->object->copyPaste($this->object);
+  }
+
+  /**
+   * Должен удалять каталог и все вложенные компоненты.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::delete
+   */
+  public function testShouldRecursivelyRemoveDir(){
     $this->assertTrue($this->object->delete());
-    $this->assertTrue((!file_exists(self::testDirName) || !is_dir(self::testDirName)));
+    $this->assertTrue((!file_exists('dir') || !is_dir('dir')));
+    $this->assertTrue((!file_exists('dir/dir') || !is_dir('dir/dir')));
+
+    $this->object->create();
+    $this->object->createDir('dir');
+    $f = $this->object->createFile('fileChild');
+    $w = $f->getWriter();
+    $w->write('Test contend');
+    $w->close();
   }
 
   /**
-   * @covers fileSystem\Directory::delete
+   * Должен выбрасывать исключение если вызываемого каталога нет в файловой системе.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::delete
    */
-  public function testDeleteIfDirNonExists(){
-    $this->setExpectedException('\PPHP\tools\classes\standard\fileSystem\NotExistsException');
-    $this->object->delete();
+  public function testShouldThrowExceptionIfDirNotExists2(){
+    $this->setExpectedException('PPHP\tools\classes\standard\fileSystem\NotExistsException');
+    $dir = new Directory('PPHP/tests/tools/classes/standard/fileSystem/notExistsDir');
+    $dir->delete();
   }
 
   /**
-   * @covers fileSystem\Directory::getSize
+   * Должен удалять все компоненты в вызываемом каталоге.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::clear
    */
-  public function testGetSizeForEmpty(){
-    self::createSubcomponent();
-    $this->assertEquals(0, $this->object->getSize());
+  public function testShouldRemoveAllChild(){
+    $this->object->clear();
+    $this->assertTrue((!file_exists('dir/dir') && !file_exists('dir/fileChild')));
+
+    $this->object->createDir('dir');
+    $f = $this->object->createFile('fileChild');
+    $w = $f->getWriter();
+    $w->write('Test contend');
+    $w->close();
   }
 
   /**
-   * @covers fileSystem\Directory::getSize
+   * Должен выбрасывать исключение если вызываемого каталога нет в файловой системе.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::clear
    */
-  public function testGetSizeForNonEmpty(){
-    self::createSubcomponent();
-    $d = fopen(self::testDirName . '/testFile.txt', 'a+');
-    fwrite($d, '1');
-    fclose($d);
-    $d = fopen(self::testDirName . '/testDir/testFile.txt', 'a+');
-    fwrite($d, '1');
-    fclose($d);
-    $this->assertEquals(2, $this->object->getSize());
+  public function testShouldThrowExceptionIfDirNotExists3(){
+    $this->setExpectedException('PPHP\tools\classes\standard\fileSystem\NotExistsException');
+    $dir = new Directory('PPHP/tests/tools/classes/standard/fileSystem/notExistsDir');
+    $dir->clear();
   }
 
   /**
-   * @covers fileSystem\Directory::create
+   * Должен возвращать суммарный размер всех файлов в данном каталоге.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::getSize
    */
-  public function testCreate(){
-    $this->assertTrue($this->object->create());
-    $this->assertTrue((file_exists(self::testDirName) && is_dir(self::testDirName)));
+  public function testShouldReturnAllSize(){
+    $this->assertEquals(12, $this->object->getSize());
   }
 
   /**
-   * @covers fileSystem\Directory::create
+   * Должен возвращать 0 если в каталоге нет ни одного файла.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::getSize
    */
-  public function testCreateIfFileExists(){
-    mkdir(self::testDirName);
-    $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\DuplicationException');
+  public function testShouldReturnZeroIfDirEmpty(){
+    $assDir = new Directory('PPHP/tests/tools/classes/standard/fileSystem/assistant');
+    $this->assertEquals(0, $assDir->getSize());
+  }
+
+  /**
+   * Должен создавать каталог с указанной маской доступа.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::create
+   */
+  public function testShouldCreateDir(){
+    $dir = new Directory('PPHP/tests/tools/classes/standard/fileSystem/notExistsDir');
+    $dir->create();
+    $this->assertTrue((file_exists('notExistsDir') && is_dir('notExistsDir')));
+
+    $dir->delete();
+  }
+
+  /**
+   * Должен предотавращать дублирование.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::create
+   */
+  public function testShouldPreventDuplicationOfCreate(){
+    $this->setExpectedException('PPHP\tools\classes\standard\baseType\exceptions\DuplicationException');
     $this->object->create();
   }
 
   /**
-   * @covers fileSystem\Directory::getDirectoryIterator
+   * Должен создавать вложенный каталог с указанной маской доступа.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::createDir
    */
-  public function testGetDirectoryIterator(){
-    mkdir(self::testDirName);
-    $this->assertInstanceOf('\DirectoryIterator', $this->object->getDirectoryIterator());
+  public function testShouldCreateChildDir(){
+    $c = $this->object->createDir('notExistsDir');
+    $this->assertTrue((file_exists('dir/notExistsDir') && is_dir('dir/notExistsDir')));
+
+    $c->delete();
   }
 
   /**
-   * @covers fileSystem\Directory::getFile
+   * Должен предотавращать дублирование.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::createDir
    */
-  public function testGetFile(){
-    self::createSubcomponent();
-    $this->assertInstanceOf('\PPHP\tools\classes\standard\fileSystem\File', $this->object->getFile('testFile.txt'));
+  public function testShouldPreventDuplicationOfCreate2(){
+    $this->setExpectedException('PPHP\tools\classes\standard\baseType\exceptions\DuplicationException');
+    $this->object->createDir('dir');
   }
 
   /**
-   * @covers fileSystem\Directory::getDir
+   * Должен создавать вложенный файл с указанной маской доступа.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::createFile
    */
-  public function testGetDir(){
-    self::createSubcomponent();
-    $this->assertInstanceOf('\PPHP\tools\classes\standard\fileSystem\Directory', $this->object->getDir('testDir'));
+  public function testShouldCreateChildFile(){
+    $c = $this->object->createFile('notExistsFile');
+    $this->assertTrue((file_exists('dir/notExistsFile') && is_file('dir/notExistsFile')));
+
+    $c->delete();
   }
 
   /**
-   * @covers fileSystem\Directory::getNamesComponents
+   * Должен предотавращать дублирование.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::createFile
    */
-  public function testGetNamesComponents(){
-    self::createSubcomponent();
+  public function testShouldPreventDuplicationOfCreate3(){
+    $this->setExpectedException('PPHP\tools\classes\standard\baseType\exceptions\DuplicationException');
+    $this->object->createFile('fileChild');
+  }
+
+  /**
+   * Должен возвращать файловый итератор.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::getDirectoryIterator
+   */
+  public function testShouldReturnFileIterator(){
+    $this->assertInstanceOf('DirectoryIterator', $this->object->getDirectoryIterator());
+  }
+
+  /**
+   * Должен возвращать представление файла в данном каталоге.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::getFile
+   */
+  public function testShouldReturnFile(){
+    $this->assertInstanceOf('PPHP\tools\classes\standard\fileSystem\File', $this->object->getFile('fileChild'));
+  }
+
+  /**
+   * Должен выбрасывать исключение если требуемого файла нет в вызываемом каталоге.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::getFile
+   */
+  public function testShouldThrowExceptionIfChildFileNotExists(){
+    $this->setExpectedException('PPHP\tools\classes\standard\fileSystem\NotExistsException');
+    $this->object->getFile('notExistsFile');
+  }
+
+  /**
+   * Должен возвращать представление каталога в данном каталоге.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::getDir
+   */
+  public function testShouldReturnDir(){
+    $this->assertInstanceOf('PPHP\tools\classes\standard\fileSystem\Directory', $this->object->getDir('dir'));
+  }
+
+  /**
+   * Должен выбрасывать исключение если требуемого каталога нет в вызываемом каталоге.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::getDir
+   */
+  public function testShouldThrowExceptionIfChildDirNotExists(){
+    $this->setExpectedException('PPHP\tools\classes\standard\fileSystem\NotExistsException');
+    $this->object->getDir('notExistsDir');
+  }
+
+  /**
+   * Должен возвращать массив имен компонентов в данном каталоге согласно маске поиска.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::getNamesComponents
+   */
+  public function testShouldReturnArrayChild(){
     $this->assertTrue(is_array($this->object->getNamesComponents()));
   }
 
   /**
-   * @covers fileSystem\Directory::isFileExists
+   * Должен возвращать true если запрашиваемый файл существует в вызываемом каталоге, иначе - false.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::isFileExists
    */
-  public function testIsFileExists(){
-    mkdir(self::testDirName);
-    $this->assertFalse($this->object->isFileExists('testFile.txt'));
-    self::createSubcomponent();
-    $this->assertTrue($this->object->isFileExists('testFile.txt'));
+  public function testShouldSeekFile(){
+    $this->assertTrue($this->object->isFileExists('fileChild'));
+    $this->assertFalse($this->object->isFileExists('notExistsFile'));
   }
 
   /**
-   * @covers fileSystem\Directory::isDirExists
+   * Должен возвращать true если запрашиваемый каталог существует в вызываемом каталоге, иначе - false.
+   * @covers PPHP\tools\classes\standard\fileSystem\Directory::isDirExists
    */
-  public function testIsDirExists(){
-    mkdir(self::testDirName);
-    $this->assertFalse($this->object->isDirExists('testDir'));
-    self::createSubcomponent();
-    $this->assertTrue($this->object->isDirExists('testDir'));
-  }
-
-  /**
-   * @covers fileSystem\Directory::clear
-   */
-  public function testClear(){
-    self::createSubcomponent();
-    $this->object->clear();
-    $this->assertTrue((!file_exists(self::testDirName . '/testFile.txt') && !file_exists(self::testDirName . '/testDir')));
+  public function testShouldSeekDir(){
+    $this->assertTrue($this->object->isDirExists('dir'));
+    $this->assertFalse($this->object->isDirExists('notExistsDir'));
   }
 }

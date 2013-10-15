@@ -1,68 +1,88 @@
 <?php
 namespace PPHP\tests\tools\classes\standard\network\protocols\applied\http;
 
-use \PPHP\tools\classes\standard\network\protocols\applied\http as http;
+use PPHP\tools\classes\standard\network\protocols\applied\http\Parameter;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')).'PPHP/dev/autoload/autoload.php';
+
 class ParameterTest extends \PHPUnit_Framework_TestCase{
   /**
-   * @var http\Parameter
+   * @var Parameter
    */
   protected $object;
 
   protected function setUp(){
-    $this->object = new http\Parameter('name', 'value');
+    $this->object = new Parameter('name', 'value');
   }
 
   /**
-   * @covers http\Parameter::reestablish
+   * Должен устанавливать имя и значение праметра.
+   * @covers \PPHP\tools\classes\standard\network\protocols\applied\http\Parameter::__construct
    */
-  public function testReestablish(){
-    $param = http\Parameter::reestablish('name:value');
-    $this->assertEquals('name', $param->getName());
-    $this->assertEquals('value', $param->getValue());
-    $param = http\Parameter::reestablish('name:  value');
-    $this->assertEquals('name', $param->getName());
-    $this->assertEquals('value', $param->getValue());
-    $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\StructureException');
-    http\Parameter::reestablish('name');
+  public function testShouldSetNameAndValue(){
+    $p = new Parameter('name', 'value');
+    $this->assertEquals('name', $p->getName());
+    $this->assertEquals('value', $p->getValue());
   }
 
   /**
-   * @covers http\Parameter::isReestablish
+   * Должен возвращать имя параметра.
+   * @covers \PPHP\tools\classes\standard\network\protocols\applied\http\Parameter::getName
    */
-  public function testIsReestablish(){
-    $this->assertTrue(http\Parameter::isReestablish('a:b'));
-    $this->assertTrue(http\Parameter::isReestablish('a:1'));
-    $this->assertTrue(http\Parameter::isReestablish('HEllo:world_'));
-    $this->assertTrue(http\Parameter::isReestablish('a:'));
-    $this->assertFalse(http\Parameter::isReestablish(':b'));
-    $this->assertFalse(http\Parameter::isReestablish('ab'));
-    $this->assertFalse(http\Parameter::isReestablish('a:
-    b'));
-  }
-
-  /**
-   * @covers http\Parameter::interpretation
-   */
-  public function testInterpretation(){
-    $this->assertEquals('name:value', $this->object->interpretation());
-  }
-
-  /**
-   * @covers http\Parameter::getName
-   */
-  public function testGetName(){
+  public function testShouldReturnName(){
     $this->assertEquals('name', $this->object->getName());
   }
 
   /**
-   * @covers http\Parameter::getValue
+   * Должен возвращать значение параметра.
+   * @covers \PPHP\tools\classes\standard\network\protocols\applied\http\Parameter::getValue
    */
-  public function testGetValue(){
+  public function testShouldReturnValue(){
     $this->assertEquals('value', $this->object->getValue());
+  }
+
+  /**
+   * Должен возвращать строку вида: имя:значение.
+   * @covers \PPHP\tools\classes\standard\network\protocols\applied\http\Parameter::interpretation
+   */
+  public function testShouldInterpretation(){
+    $this->assertEquals('name:value', $this->object->interpretation());
+  }
+
+  /**
+   * Может быть восстановлен из сроки вида: имя:значение.
+   * @covers \PPHP\tools\classes\standard\network\protocols\applied\http\Parameter::reestablish
+   */
+  public function testShouldRestorableForString(){
+    $param = Parameter::reestablish('name:value');
+    $this->assertEquals('name', $param->getName());
+    $this->assertEquals('value', $param->getValue());
+
+    $param = Parameter::reestablish('name:  value');
+    $this->assertEquals('name', $param->getName());
+    $this->assertEquals('value', $param->getValue());
+  }
+
+  /**
+   * Допустимой строкой является строка вида: имя:значение.
+   * @covers \PPHP\tools\classes\standard\network\protocols\applied\http\Parameter::isReestablish
+   */
+  public function testGoodString(){
+    $this->assertTrue(Parameter::isReestablish('name:value'));
+    $this->assertTrue(Parameter::isReestablish('name:  value'));
+    $this->assertTrue(Parameter::isReestablish('name:value  '));
+    $this->assertTrue(Parameter::isReestablish('1Na_m-e:v-*a4_lue'));
+    $this->assertTrue(Parameter::isReestablish('name:'));
+  }
+
+  /**
+   * Должен возвращать false при передаче строки недопустимой структуры.
+   * @covers \PPHP\tools\classes\standard\network\protocols\applied\http\Parameter::isReestablish
+   */
+  public function testBedString(){
+    $this->assertFalse(Parameter::isReestablish(':value'));
+    $this->assertFalse(Parameter::isReestablish('namevalue'));
+    $this->assertFalse(Parameter::isReestablish('name  :value'));
+    $this->assertFalse(Parameter::isReestablish('  name:value'));
   }
 }

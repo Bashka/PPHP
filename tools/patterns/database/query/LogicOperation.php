@@ -11,8 +11,7 @@ use PPHP\tools\classes\standard\baseType\String;
  */
 class LogicOperation extends Condition{
   /**
-   * Сравниваемое поле.
-   * @var Field
+   * @var \PPHP\tools\patterns\database\query\Field Сравниваемое поле.
    */
   private $field;
 
@@ -23,36 +22,26 @@ class LogicOperation extends Condition{
   private $operator;
 
   /**
-   * Правый операнд.
-   * @var string|number|boolean|Field
+   * @var string|number|boolean|\PPHP\tools\patterns\database\query\Field Правый операнд.
    */
   private $value;
 
   /**
-   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getMasks($driver = null){
     return ['\((?:(?:' . Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1] . ')) ' . self::getPatterns()['operator'] . ' ' . self::getPatterns()['stringValue'] . '\)', '\((?:(?:' . Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1] . ')) ' . self::getPatterns()['operator'] . ' (?:(?:' . Field::getMasks()[0] . ')|(?:' . Field::getMasks()[1] . '))\)'];
   }
 
   /**
-   * Метод возвращает массив шаблонов, описывающих различные компоненты шаблонов верификации.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getPatterns($driver = null){
     return ['operator' => '(?:=|!=|>=|<=|>|<)', 'stringValue' => '"[^"]*"'];
   }
 
   /**
-   * Метод восстанавливает объект из строки.
-   * @param string $string Исходная строка.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return static Результирующий объект.
+   * @prototype \PPHP\tools\patterns\interpreter\Restorable
    */
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
@@ -76,10 +65,10 @@ class LogicOperation extends Condition{
   }
 
   /**
-   * @param Field $field Сравниваемое поле.
+   * @param \PPHP\tools\patterns\database\query\Field $field Сравниваемое поле.
    * @param string $operator Оператор сравнения. Одно из следующих значений: =, !=, >=, <=, >, <.
-   * @param string|number|boolean|Field $value Правый операнд.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @param string|number|boolean|float|\PPHP\tools\patterns\database\query\Field $value Правый операнд.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct(Field $field, $operator, $value){
     try{
@@ -97,22 +86,21 @@ class LogicOperation extends Condition{
   }
 
   /**
-   * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   * @return string Результат интерпретации.
+   * @prototype \PPHP\tools\patterns\interpreter\Interpreter
    */
   public function interpretation($driver = null){
     if($this->value instanceof Field){
       $value = $this->value->interpretation($driver);
     }
     else{
-      $value = '"'.(string) $this->value.'"';
+      $value = '"' . (string) $this->value . '"';
     }
+
     return '(' . $this->field->interpretation($driver) . ' ' . $this->operator . ' ' . $value . ')';
   }
 
   /**
-   * @return Field
+   * @return \PPHP\tools\patterns\database\query\Field
    */
   public function getField(){
     return $this->field;
@@ -126,7 +114,7 @@ class LogicOperation extends Condition{
   }
 
   /**
-   * @return boolean|number|Field
+   * @return string|number|boolean|\PPHP\tools\patterns\database\query\Field
    */
   public function getValue(){
     return $this->value;

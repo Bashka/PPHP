@@ -11,16 +11,14 @@ use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 trait TStatesContext{
   /**
-   * Текущее состояние объекта.
-   * @var State $currentState
+   * @var \PPHP\tools\patterns\state\State $currentState Текущее состояние объекта.
    */
   protected $currentState;
 
   /**
-   * Буфер, хранящий все инициализированные состояния.
-   * @var StateCache
+   * @var StateCache Кэш-фабрика, хранящая все инициализированные состояния.
    */
-  private $statesBuffer;
+  private $statesFactory;
 
   /**
    * Метод может быть переопределен, для возврата массива ссылок на свойства объекта, доступ к которым разрешен из подсостояний.
@@ -31,21 +29,16 @@ trait TStatesContext{
   }
 
   /**
-   * Метод изменяет состояние объекта на заданное. Изменить состояние объекта может только его подсостояние, передаваемое во втором аргументе. На практике это означает, что нет возможности изменить состояние объекта программно.
-   * Данный метод передает буферу имя требуемого состояния, а так же массив со следующими компонентами:
+   * Данный метод передает кэш-фабрике имя требуемого состояния, а так же массив со следующими компонентами:
    * context - ссылка на контекст;
    * links - null или массив доступных для состояния свойств контекста.
-   * @param string $stateName Устанавливаемое состояние.
-   * @param State|StatesContext $substate Подсостояние, запрашивающее изменение.
-   * @throws exceptions\RuntimeException Исключение выбрасывается при попытке программного изменения состояния.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
-   * @throws exceptions\NotFoundDataException Выбрасывается в случае отсутствия состояния с указанным именем.
+   * @prototype \PPHP\tools\patterns\state\StatesContext
    */
   public function passageState($stateName, $substate){
-    // Контроль типа второго параметра перегружается контролем программного изменения состояния
+    // Контроль типа второго параметра перегружается контролем программного изменения состояния.
     if($this->currentState === $substate || $this === $substate){
       try{
-        $this->currentState = $this->statesBuffer->getState($stateName, $this, $this->getLinksForState());
+        $this->currentState = $this->statesFactory->getState($stateName, $this, $this->getLinksForState());
       }
       catch(exceptions\InvalidArgumentException $e){
         throw $e;
@@ -60,8 +53,7 @@ trait TStatesContext{
   }
 
   /**
-   * Метод возвращает имя текущего состояния объекта.
-   * @return string Имя текущего состояния.
+   * @prototype \PPHP\tools\patterns\state\StatesContext
    */
   public function getNameCurrentState(){
     return get_class($this->currentState);

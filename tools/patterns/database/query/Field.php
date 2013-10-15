@@ -10,42 +10,31 @@ use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 class Field extends ComponentQuery{
   /**
-   * Имя поля.
-   * @var string
+   * @var string Имя поля.
    */
   private $name;
 
   /**
-   * Таблица, к которой относится поле.
-   * @var Table
+   * @var \PPHP\tools\patterns\database\query\Table Таблица, к которой относится поле.
    */
   private $table;
 
   /**
-   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getMasks($driver = null){
     return ['`' . self::getPatterns()['fieldName'] . '`', Table::getPatterns()['tableName'] . '\.' . self::getPatterns()['fieldName']];
   }
 
   /**
-   * Метод возвращает массив шаблонов, описывающих различные компоненты шаблонов верификации.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getPatterns($driver = null){
     return ['fieldName' => '[A-Za-z_][A-Za-z0-9_]*'];
   }
 
   /**
-   * Метод восстанавливает объект из строки.
-   * @param string $string Исходная строка.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return Field Результирующий объект.
+   * @prototype \PPHP\tools\patterns\interpreter\Restorable
    */
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
@@ -68,7 +57,7 @@ class Field extends ComponentQuery{
 
   /**
    * @param string $name Имя поля.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($name){
     exceptions\InvalidArgumentException::verifyType($name, 'S');
@@ -77,8 +66,8 @@ class Field extends ComponentQuery{
 
   /**
    * Метод определяет таблицу, к которой относится данное поле.
-   * @param Table $table Таблица, к которой будет относится поле.
-   * @return $this Метод возвращает вызываемый объект.
+   * @param \PPHP\tools\patterns\database\query\Table $table Таблица, к которой будет относится поле.
+   * @return \PPHP\tools\patterns\database\query\Field Метод возвращает вызываемый объект.
    */
   public function setTable(Table $table){
     $this->table = $table;
@@ -87,9 +76,7 @@ class Field extends ComponentQuery{
   }
 
   /**
-   * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   * @return string Результат интерпретации.
+   * @prototype \PPHP\tools\patterns\interpreter\Interpreter
    */
   public function interpretation($driver = null){
     if(!empty($this->table)){
@@ -101,7 +88,7 @@ class Field extends ComponentQuery{
   }
 
   /**
-   * @return Table
+   * @return \PPHP\tools\patterns\database\query\Table
    */
   public function getTable(){
     return $this->table;

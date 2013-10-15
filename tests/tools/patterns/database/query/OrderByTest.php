@@ -1,64 +1,98 @@
 <?php
 namespace PPHP\tests\tools\patterns\database\query;
 
-use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use PPHP\tools\patterns\database\query as query;
+use PPHP\tools\patterns\database\query\Field;
+use PPHP\tools\patterns\database\query\OrderBy;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')) . 'PPHP/dev/autoload/autoload.php';
 class OrderByTest extends \PHPUnit_Framework_TestCase{
   /**
-   * @covers query\OrderBy::__construct
+   * Должен определять тип сортировки.
+   * @covers PPHP\tools\patterns\database\query\OrderBy::__construct
    */
-  public function testConstruct(){
-    $ob = new query\OrderBy();
+  public function testShouldSetType(){
+    $ob = new OrderBy();
     $this->assertEquals('ASC', $ob->getSortedType());
-    $ob = new query\OrderBy('ASC');
+    $ob = new OrderBy('ASC');
     $this->assertEquals('ASC', $ob->getSortedType());
-    $ob = new query\OrderBy('DESC');
+    $ob = new OrderBy('DESC');
     $this->assertEquals('DESC', $ob->getSortedType());
-    $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
-    new query\OrderBy('TEST');
   }
 
   /**
-   * @covers query\OrderBy::interpretation
+   * Допустимыми типами являются: ASC или DESC.
+   * @covers PPHP\tools\patterns\database\query\OrderBy::__construct
    */
-  public function testInterpretation(){
-    $ob = new query\OrderBy();
-    $ob->addField(new query\Field('testA'));
-    $ob->addField(new query\Field('testB'));
+  public function testTypeShouldBeASCorDESC(){
+    $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
+    new OrderBy('TEST');
+  }
+
+  /**
+   * Должен добавлять поле сортировки.
+   * @covers PPHP\tools\patterns\database\query\OrderBy::addField
+   */
+  public function testShouldAddSortField(){
+    $ob = new OrderBy();
+    $ob->addField(new Field('OID'));
+    $ob->addField(new Field('name'));
+    $this->assertEquals('OID', $ob->getFields()[0]->getName());
+    $this->assertEquals('name', $ob->getFields()[1]->getName());
+  }
+
+  /**
+   * Должен возвращать строку вида: ORDER BY имяПоля[, имяПоля]* (ASC)|(DESC).
+   * @covers PPHP\tools\patterns\database\query\OrderBy::interpretation
+   */
+  public function testShouldInterpretation(){
+    $ob = new OrderBy();
+    $ob->addField(new Field('testA'));
+    $ob->addField(new Field('testB'));
     $this->assertEquals('ORDER BY `testA`,`testB` ASC', $ob->interpretation());
+  }
+
+  /**
+   * Должен выбрасывать исключение в случае отсутствия хотя бы одного поля сортировки.
+   * @covers PPHP\tools\patterns\database\query\OrderBy::interpretation
+   */
+  public function testShouldThrowExceptionIfNotFields(){
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException');
-    $ob = new query\OrderBy();
+    $ob = new OrderBy();
     $ob->interpretation();
   }
 
   /**
-   * @covers query\OrderBy::reestablish
+   * Должен восстанавливаться из строки вида: ORDER BY имяПоля[, имяПоля]* (ASC)|(DESC).
+   * @covers PPHP\tools\patterns\database\query\OrderBy::reestablish
    */
-  public function testReestablish(){
-    $ob = query\OrderBy::reestablish('ORDER BY `fieldA`,`fieldB`, `fieldC` DESC');
+  public function testShouldRestorableForString(){
+    $ob = OrderBy::reestablish('ORDER BY `fieldA`,`fieldB`, `fieldC` DESC');
     $fields = $ob->getFields();
     $this->assertEquals('fieldA', $fields[0]->getName());
     $this->assertEquals('fieldC', $fields[2]->getName());
     $this->assertEquals('DESC', $ob->getSortedType());
-    $ob = query\OrderBy::reestablish('ORDER BY table.fieldA, table.fieldB DESC');
+    $ob = OrderBy::reestablish('ORDER BY table.fieldA, table.fieldB DESC');
     $fields = $ob->getFields();
     $this->assertEquals('table', $fields[0]->getTable()->getTableName());
   }
 
   /**
-   * @covers query\OrderBy::isReestablish
+   * Допустимой строкой является строка вида: ORDER BY имяПоля[, имяПоля]* (ASC)|(DESC).
+   * @covers PPHP\tools\patterns\database\query\OrderBy::isReestablish
    */
-  public function testIsReestablish(){
-    $this->assertTrue(query\OrderBy::isReestablish('ORDER BY `fieldA`,`fieldB`, table.fieldC DESC'));
-    $this->assertTrue(query\OrderBy::isReestablish('ORDER BY `fieldA`,`fieldB`, table.fieldC ASC'));
-    $this->assertFalse(query\OrderBy::isReestablish('ORDER `fieldA`,`fieldB`, table.fieldC DESC'));
-    $this->assertFalse(query\OrderBy::isReestablish('ORDER BY `fieldA`,`fieldB`, table.fieldC'));
-    $this->assertFalse(query\OrderBy::isReestablish('ORDER BY `fieldA`,`fieldB`, table.fieldC DSC'));
-    $this->assertFalse(query\OrderBy::isReestablish('ORDER BY `fieldA`,`fieldB`, table.fieldC AC'));
+  public function testGoodString(){
+    $this->assertTrue(OrderBy::isReestablish('ORDER BY `fieldA`,`fieldB`, table.fieldC DESC'));
+    $this->assertTrue(OrderBy::isReestablish('ORDER BY `fieldA`,`fieldB`, table.fieldC ASC'));
+  }
+
+  /**
+   * Должен возвращать false при недопустимой структуре строки.
+   * @covers PPHP\tools\patterns\database\query\OrderBy::isReestablish
+   */
+  public function testBedString(){
+    $this->assertFalse(OrderBy::isReestablish('ORDER `fieldA`,`fieldB`, table.fieldC DESC'));
+    $this->assertFalse(OrderBy::isReestablish('ORDER BY `fieldA`,`fieldB`, table.fieldC'));
+    $this->assertFalse(OrderBy::isReestablish('ORDER BY `fieldA`,`fieldB`, table.fieldC DSC'));
+    $this->assertFalse(OrderBy::isReestablish('ORDER BY `fieldA`,`fieldB`, table.fieldC AC'));
   }
 }

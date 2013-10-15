@@ -16,20 +16,23 @@ trait TOriginator{
    */
   protected abstract function getSavedState();
 
+  /*
+  // Метод следует реализовать, в использующем данный trait классе, следующим образом.
+  protected function getSavedState(){
+    $state = get_object_vars($this);
+    // $state = $state + parent::getSavedState(); // Расскоментируйте в дочерних классах.
+    return $state;
+  }
+  */
   /**
-   * Метод создает хранителя с текущим состоянием объекта и возвращает его.
-   * @abstract
-   * @return Memento Хранитель текущего состояния вызываемого объекта.
+   * @prototype \PPHP\tools\patterns\memento\Originator
    */
   public function createMemento(){
     return new Memento($this, $this->getSavedState());
   }
 
   /**
-   * Метод восстанавливает состояние вызываемого объекта из переданного хранителя.
-   * @abstract
-   * @param Memento $memento Хранитель, являющийся основой для восстановления.
-   * @throws AccessException Выбрасывается в случае, если вызываемый объект пытается получить доступ к чужому хранителю.
+   * @prototype \PPHP\tools\patterns\memento\Originator
    */
   public function restoreFromMemento(Memento $memento){
     try{
@@ -42,7 +45,7 @@ trait TOriginator{
   }
 
   /**
-   * Метод позволяет восстановить состояние объекта по данным ассоциативного массива.
+   * Метод позволяет восстановить состояние объекта на основании ассоциативного массива.
    * Необходимо понимать, что реализация данного метода в вершине иерархии классов делает private свойства дочерних классов недоступными для сохранения. Для решения этой проблемы, достаточно переопределить этот метод в дочернем классе передав полученный параметр в переопределенный метод родителя и реализовав его в переопределяющем метода.
    * @param mixed[] $state Ассоциативный массив, содержащий восстанавливаемое состояние объекта.
    */
@@ -54,9 +57,9 @@ trait TOriginator{
     }
   }
   /*
-  // Переопределить метод данным при необходимости доступа к private свойтсвам родительских объектов.
+  // Переопределите метод данным при необходимости доступа к private свойтсвам родительских объектов.
   protected function setSavedState(array $state){
-    // parent::setSavedState($state); // Расскоментировать в дочерних классах
+    // parent::setSavedState($state); // Расскоментируйте в дочерних классах.
 
     foreach($state as $k => $v){
       if(property_exists($this, $k) && $this::getReflectionProperty($k)->getDeclaringClass()->getName() === get_class()){

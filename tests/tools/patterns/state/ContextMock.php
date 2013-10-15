@@ -15,7 +15,7 @@ class ContextMock implements state\StatesContext, ContextInterfaceMock{
   }
 
   function __construct(){
-    $this->statesBuffer = new StateBufferMock;
+    $this->statesFactory = new StateBufferMock;
     $this->passageState('Close', $this);
   }
 }

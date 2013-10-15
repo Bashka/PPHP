@@ -16,7 +16,7 @@ class RootDirectory extends Directory{
 
   /**
    * Метод всегда возвращает домен ресурса.
-   * @return string
+   * @return string Домен ресурса.
    */
   public function getLocationAddress(){
     return $_SERVER['DOCUMENT_ROOT'];
@@ -24,7 +24,7 @@ class RootDirectory extends Directory{
 
   /**
    * Метод всегда возвращает домен ресурса.
-   * @return string
+   * @return string Домен ресурса.
    */
   public function getAddress(){
     return $this->getLocationAddress();
@@ -32,8 +32,7 @@ class RootDirectory extends Directory{
 
   /**
    * Метод запрещен в данном классе и генерирует исключение при обращении к нему.
-   * @param string $newName
-   * @throws UpdatingRoodException Выбрасывается при попытке изменения или удаления корневого каталога.
+   * @prototype \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem
    */
   public function rename($newName){
     throw new UpdatingRoodException('Невозможно модифицировать корневой каталог.');
@@ -41,8 +40,7 @@ class RootDirectory extends Directory{
 
   /**
    * Метод запрещен в данном классе и генерирует исключение при обращении к нему.
-   * @param Directory $location
-   * @throws UpdatingRoodException Выбрасывается при попытке изменения или удаления корневого каталога.
+   * @prototype \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem
    */
   public function move(Directory $location){
     throw new UpdatingRoodException('Невозможно модифицировать корневой каталог.');
@@ -58,8 +56,7 @@ class RootDirectory extends Directory{
 
   /**
    * Метод запрещен в данном классе и генерирует исключение при обращении к нему.
-   * @param Directory $location
-   * @throws UpdatingRoodException Выбрасывается при попытке изменения или удаления корневого каталога.
+   * @prototype \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem
    */
   public function copyPaste(Directory $location){
     throw new UpdatingRoodException('Невозможно модифицировать корневой каталог.');
@@ -67,7 +64,7 @@ class RootDirectory extends Directory{
 
   /**
    * Метод всегда возвращает 0.
-   * @return integer
+   * @prototype \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem
    */
   public function getSize(){
     return 0;
@@ -75,8 +72,7 @@ class RootDirectory extends Directory{
 
   /**
    * Метод запрещен в данном классе и генерирует исключение при обращении к нему.
-   * @param int $mode
-   * @throws UpdatingRoodException Выбрасывается при попытке изменения или удаления корневого каталога.
+   * @prototype \PPHP\tools\classes\standard\fileSystem\Directory
    */
   public function create($mode = 0777){
     throw new UpdatingRoodException('Невозможно модифицировать корневой каталог.');

@@ -5,7 +5,7 @@
 YUI.add('PJS.classes.Controller', function(Y){
   /**
    * Данный класс представляет контроллер экрана и позволяет инициализировать экран и его компоненты.
-   * Класс должен быть расширен конкретными контроллерами экранов с добавлением метода initScreen, который должен инициализировать экран.
+   * Класс должен быть расширен конкретными контроллерами экранов с добавлением метода initScreen, который должен инициализировать экран, и метода syncScreen, который должен синхронзировать отображение экрана с его состоянием.
    * @param {Object} cnf Параметры класса.
    * @constructor
    * @this {Controller}
@@ -32,7 +32,7 @@ YUI.add('PJS.classes.Controller', function(Y){
       }
     },
     /**
-     * Массив внедренных компонентов экрана с атрибутом dHandling:get.
+     * Массив внедренных компонентов экрана с атрибутом dHandling:filling.
      * Ключами данного массива являются значения атрибута dHandling:filling.
      * @public
      * @type {Node[]}
@@ -63,6 +63,9 @@ YUI.add('PJS.classes.Controller', function(Y){
         this.get('screen').fire('PJS.widgets.Screen:ControllerReady');
         this.set('isComplete', true);
       }
+    },
+
+    syncScreen: function(){
     },
 
     query: function(mehtod, options){

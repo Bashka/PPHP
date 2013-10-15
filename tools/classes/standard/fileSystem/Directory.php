@@ -4,20 +4,18 @@ namespace PPHP\tools\classes\standard\fileSystem;
 use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 
 /**
- * Класс представляет каталог файловой системы в программе и предоставляет механизмы доступа к его содержимому.
+ * Класс представляет каталог файловой и предоставляет механизмы доступа к его содержимому.
  * @author  Artur Sh. Mamedbekov
  * @package PPHP\tools\classes\standard\fileSystem
  */
 class Directory extends ComponentFileSystem{
   /**
-   * Метод изменяет имя компонента на заданное, если это возможно.
-   * @param string $newName Новое имя компонента.
-   * @throws exceptions\DuplicationException Выбрасывается в случае, если переименование компонента приведет к дублированию.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @return boolean true - в случае успешного завершения операции, иначе - false.
+   * @prototype \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem
    */
   public function rename($newName){
+    if(strpos($newName, '/') > -1){
+      throw exceptions\InvalidArgumentException::getValidException('[^/]', $newName);
+    }
     if($this->getLocation()->isDirExists($newName)){
       throw new exceptions\DuplicationException('Невозможно выполнить действие. Компонент с данным именем уже существует.');
     }
@@ -26,12 +24,7 @@ class Directory extends ComponentFileSystem{
   }
 
   /**
-   * Метод перемещает компонент в данный каталог.
-   * @param Directory $location Целевой каталог.
-   * @throws exceptions\DuplicationException Выбрасывается в случае, если целевой каталог уже содержит компонент с тем же именем, что и перемещаемый.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @throws exceptions\RuntimeException Выбрасывается в случае нарушения логики работы файловой системы путем перемещения компонента в себя.
-   * @return boolean true - в случае успешного завершения операции, иначе - false.
+   * @prototype \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem
    */
   public function move(Directory $location){
     if($location->isDirExists($this->getName())){
@@ -45,9 +38,7 @@ class Directory extends ComponentFileSystem{
   }
 
   /**
-   * Метод определяет, существует ли вызывающий компонент на момент вызова метода.
-   * @throws NotExistsException Выбрасывается в случае, если родительского каталога не существует.
-   * @return boolean true - если компонент на момент вызова метода существует в файловой системе, иначе - false.
+   * @prototype \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem
    */
   public function isExists(){
     try{
@@ -59,11 +50,7 @@ class Directory extends ComponentFileSystem{
   }
 
   /**
-   * Метод копирует компонента в данный каталог.
-   * @param Directory $location Целевой каталог.
-   * @throws exceptions\DuplicationException Выбрасывается в случае, если целевой каталог уже содержит копируемый компонент.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @return boolean true - в случае успешного завершения операции, иначе - false.
+   * @prototype \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem
    */
   public function copyPaste(Directory $location){
     // Проверка на выбрасывание исключений используемыми методами не выполняется из за рекурсивности
@@ -84,6 +71,9 @@ class Directory extends ComponentFileSystem{
     }
     // Дальнейшая проверка не выполняется в связи с наличием проверки возможных исключений в начале метода
     $iterator = $this->getDirectoryIterator();
+    /**
+     * @var \DirectoryIterator $component
+     */
     foreach($iterator as $component){
       if($component == '.' || $component == '..'){
         continue;
@@ -97,14 +87,11 @@ class Directory extends ComponentFileSystem{
       }
     }
 
-    return true;
+    return $copyDirRoot;
   }
 
   /**
-   * Метод удаляет текущий компонент из файловой системы.
-   * @abstract
-   * @throws NotExistsException Выбрасывается в случае, если удаляемого компонента не существует.
-   * @return boolean true - в случае успешного завершения операции, иначе - false.
+   * @prototype \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem
    */
   public function delete(){
     if(!$this->isExists()){
@@ -115,15 +102,18 @@ class Directory extends ComponentFileSystem{
   }
 
   /**
-   * Метод отчищает директорую от содержимого.
-   * @return boolean true - если метод выполнен успешно, иначе - false.
-   * @throws NotExistsException Выбрасывается в случае, если удаляемого компонента не существует.
+   * Метод рекурсивно удаляет все содержимое каталога.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если вызываемого каталога не существует.
+   * @return boolean true - если все содержимое каталога удалено.
    */
   public function clear(){
     if(!$this->isExists()){
       throw new NotExistsException('Невозможно выполнить действие. В файловой системе компонент не найден.');
     }
     $iterator = $this->getDirectoryIterator();
+    /**
+     * @var \DirectoryIterator $component
+     */
     foreach($iterator as $component){
       if($component == '.' || $component == '..'){
         continue;
@@ -141,9 +131,7 @@ class Directory extends ComponentFileSystem{
   }
 
   /**
-   * Метод возвращает размер в байтах данного компонента.
-   * @throws NotExistsException Выбрасывается в случае, если на момент вызова метода компонента или родительского каталога компонента не существовало.
-   * @return integer Размер компонента в байтах.
+   * @prototype \PPHP\tools\classes\standard\fileSystem\ComponentFileSystem
    */
   public function getSize(){
     if(!$this->isExists()){
@@ -151,6 +139,9 @@ class Directory extends ComponentFileSystem{
     }
     $iterator = $this->getDirectoryIterator();
     $size = 0;
+    /**
+     * @var \DirectoryIterator $component
+     */
     foreach($iterator as $component){
       if($component == '.' || $component == '..'){
         continue;
@@ -168,11 +159,11 @@ class Directory extends ComponentFileSystem{
   }
 
   /**
-   * Метод пытается создать вызывающий каталог в файловой системе.
-   * @param int $mode Маска доступа.
-   * @throws exceptions\DuplicationException Выбрасывается в случае, если создание компонента приведет к дублированию.
-   * @throws exceptions\InvalidArgumentException Выбрасывает в случае, если в качестве маски доступа передано значение не integer типа.
-   * @return bool true - в случае успеха, иначе - false.
+   * Метод пытается создать вызываемый каталог в файловой системе.
+   * @param integer $mode Маска доступа.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\DuplicationException Выбрасывается в случае, если создание компонента приведет к дублированию.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывает в случае, если в качестве маски доступа передано значение не integer типа.
+   * @return boolean true - в случае успеха, иначе - false.
    */
   public function create($mode = 0777){
     exceptions\InvalidArgumentException::verifyType($mode, 'i');
@@ -187,12 +178,11 @@ class Directory extends ComponentFileSystem{
   /**
    * Метод пытается создать новый каталог в вызывающем каталоге и возвращает его представление в случае успеха.
    * @param string $dirName Имя создаваемого каталога.
-   * @param int $mode Маска доступа
-   * .
-   * @throws NotExistsException Выбрасывается в случае, если вызываемого каталога не существует.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
-   * @throws exceptions\DuplicationException Выбрасывает в случае, если указанный каталог уже существует.
-   * @return Directory Созданный каталог.
+   * @param integer $mode Маска доступа.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если вызываемого каталога не существует.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\DuplicationException Выбрасывает в случае, если указанный каталог уже существует.
+   * @return \PPHP\tools\classes\standard\fileSystem\Directory Созданный каталог.
    */
   public function createDir($dirName, $mode = 0777){
     exceptions\InvalidArgumentException::verifyType($mode, 'i');
@@ -210,12 +200,11 @@ class Directory extends ComponentFileSystem{
   /**
    * Метод пытается создать новый файл в вызывающем каталоге и возвращает его представление в случае успеха.
    * @param string $dirName Имя создаваемого файла.
-   * @param int $mode Маска доступа
-   * .
-   * @throws NotExistsException Выбрасывается в случае, если вызываемого каталога не существует.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
-   * @throws exceptions\DuplicationException Выбрасывает в случае, если указанный файл уже существует.
-   * @return File Созданный файл.
+   * @param integer $mode Маска доступа.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если вызываемого каталога не существует.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\DuplicationException Выбрасывает в случае, если указанный файл уже существует.
+   * @return \PPHP\tools\classes\standard\fileSystem\File Созданный файл.
    */
   public function createFile($fileName, $mode = 0777){
     exceptions\InvalidArgumentException::verifyType($mode, 'i');
@@ -239,11 +228,11 @@ class Directory extends ComponentFileSystem{
   }
 
   /**
-   * Возвращает компонент каталога, имя которого заданно в аргументе.
+   * Возвращает файл, содержащийся в вызываемом каталоге, имя которого заданно в аргументе.
    * @param string $fileName Имя компонента.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
-   * @throws NotExistsException Выбрасывается в случае, если вызываемого или получаемого каталога на момент вызова метода не существует.
-   * @return File Получаемый компонент.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если вызываемого каталога или получаемого файла на момент вызова метода не существует.
+   * @return \PPHP\tools\classes\standard\fileSystem\File Получаемый файл.
    */
   public function getFile($fileName){
     exceptions\InvalidArgumentException::verifyType($fileName, 'S');
@@ -256,11 +245,11 @@ class Directory extends ComponentFileSystem{
   }
 
   /**
-   * Возвращает компонент каталога, имя которого заданно в аргементе.
+   * Возвращает каталог, содержащийся в вызываемом каталоге, имя которого заданно в аргументе.
    * @param string $dirName Имя компонента.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
-   * @throws NotExistsException Выбрасывается в случае, если вызываемого или получаемого каталога на момент вызова метода не существует.
-   * @return Directory Получаемый компонент.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если вызываемого или получаемого каталога на момент вызова метода не существует.
+   * @return \PPHP\tools\classes\standard\fileSystem\Directory Получаемый каталог.
    */
   public function getDir($dirName){
     exceptions\InvalidArgumentException::verifyType($dirName, 'S');
@@ -273,11 +262,11 @@ class Directory extends ComponentFileSystem{
   }
 
   /**
-   * Метод возвращает массив имен компонентов вызывающего каталога.
+   * Метод возвращает массив имен компонентов в вызывающем каталоге.
    * @param string $mask Маска поиска.
-   * @throws exceptions\InvalidArgumentException Выбрасывает в случае, если в качестве маски передано значение не string типа.
-   * @throws NotExistsException Выбрасывается в случае, если вызываемого компонента не существует.
-   * @return string[] Массив имен компонентов вызывающего каталога.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывает в случае, если в качестве маски передано значение не string типа.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если вызываемого компонента не существует.
+   * @return string[] Массив имен компонентов в вызывающем каталоге.
    */
   public function getNamesComponents($mask = '*'){
     exceptions\InvalidArgumentException::verifyType($mask, 'S');
@@ -296,9 +285,9 @@ class Directory extends ComponentFileSystem{
   /**
    * Метод проверяет, имеется ли в вызывающем каталоге заданный файл.
    * @param string $fileName Имя проверяемого файла.
-   * @throws NotExistsException Выбрасывается в случае, если вызываемого компонента не существует.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
-   * @return bool true - если в вызывающем каталоге имеется заданный файл, иначе - false.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если вызываемого компонента не существует.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @return boolean true - если в вызывающем каталоге имеется заданный файл, иначе - false.
    */
   public function isFileExists($fileName){
     exceptions\InvalidArgumentException::verifyType($fileName, 'S');
@@ -313,9 +302,9 @@ class Directory extends ComponentFileSystem{
   /**
    * Метод проверяет, имеется ли в вызывающем каталоге заданный каталог.
    * @param string $dirName Имя проверяемого каталога.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
-   * @throws NotExistsException Выбрасывается в случае, если вызываемого компонента не существует.
-   * @return bool true - если в вызывающем каталоге имеется заданный каталог, иначе - false.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается в случае получения параметра недопустимого типа.
+   * @throws \PPHP\tools\classes\standard\fileSystem\NotExistsException Выбрасывается в случае, если вызываемого компонента не существует.
+   * @return boolean true - если в вызывающем каталоге имеется заданный каталог, иначе - false.
    */
   public function isDirExists($dirName){
     exceptions\InvalidArgumentException::verifyType($dirName, 'S');

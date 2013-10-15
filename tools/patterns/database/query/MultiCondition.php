@@ -1,7 +1,8 @@
 <?php
 namespace PPHP\tools\patterns\database\query;
 
-use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
+use PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
+use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
 
 /**
  * Множественное логическое выражение.
@@ -10,48 +11,36 @@ use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  */
 class MultiCondition extends Condition{
   /**
-   * Левый логический операнд.
-   * @var Condition
+   * @var \PPHP\tools\patterns\database\query\Condition Левый логический операнд.
    */
   private $leftOperand;
 
   /**
-   * Правый логический операнд.
-   * @var Condition
+   * @var \PPHP\tools\patterns\database\query\Condition Правый логический операнд.
    */
   private $rightOperand;
 
   /**
-   * Логический оператор. Одно из следующих значений: AND, OR.
-   * @var string
+   * @var string Логический оператор. Одно из следующих значений: AND, OR.
    */
   private $logicOperator;
 
   /**
-   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getMasks($driver = null){
     return ['\((' . Condition::getPatterns()['condition'] . ') ' . self::getPatterns()['operator'] . ' (' . Condition::getPatterns()['condition'] . ')\)'];
   }
 
   /**
-   * Метод возвращает массив шаблонов, описывающих различные компоненты шаблонов верификации.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getPatterns($driver = null){
     return ['operator' => '(AND|OR)'];
   }
 
   /**
-   * Метод восстанавливает объект из строки.
-   * @param string $string Исходная строка.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return static Результирующий объект.
+   * @prototype \PPHP\tools\patterns\interpreter\Restorable
    */
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
@@ -61,34 +50,30 @@ class MultiCondition extends Condition{
   }
 
   /**
-   * @param Condition $leftOperand Левый логический операнд.
+   * @param \PPHP\tools\patterns\database\query\Condition $leftOperand Левый логический операнд.
    * @param string $logicOperator Логический оператор. Одно из следующих значений: AND, OR.
-   * @param Condition $rightOperand Правый логический операнд.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @param \PPHP\tools\patterns\database\query\Condition $rightOperand Правый логический операнд.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct(Condition $leftOperand, $logicOperator, Condition $rightOperand){
-    exceptions\InvalidArgumentException::verifyVal($logicOperator, 's # AND|OR');
+    InvalidArgumentException::verifyVal($logicOperator, 's # AND|OR');
     $this->leftOperand = $leftOperand;
     $this->logicOperator = $logicOperator;
     $this->rightOperand = $rightOperand;
   }
 
   /**
-   * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return string Результат интерпретации.
+   * @prototype \PPHP\tools\patterns\interpreter\Interpreter
    */
   public function interpretation($driver = null){
-    exceptions\InvalidArgumentException::verifyType($driver, 'Sn');
+    InvalidArgumentException::verifyType($driver, 'Sn');
     try{
       return '(' . $this->leftOperand->interpretation($driver) . ' ' . $this->logicOperator . ' ' . $this->rightOperand->interpretation($driver) . ')';
     }
-    catch(exceptions\NotFoundDataException $exc){
+    catch(NotFoundDataException $exc){
       throw $exc;
     }
-    catch(exceptions\InvalidArgumentException $exc){
+    catch(InvalidArgumentException $exc){
       throw $exc;
     }
   }

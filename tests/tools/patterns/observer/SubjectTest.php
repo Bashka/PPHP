@@ -3,45 +3,74 @@ namespace PPHP\tests\tools\patterns\observer;
 
 use PPHP\tools\patterns\observer\TSubject;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')) . 'PPHP/dev/autoload/autoload.php';
 class SubjectTest extends \PHPUnit_Framework_TestCase{
   /**
    * @var SubjectMock
    */
-  protected $subject;
+  protected $object;
 
   protected function setUp(){
-    $this->subject = new SubjectMock;
+    $this->object = new SubjectMock;
   }
 
   /**
-   * @covers TSubject::attach
+   * Должен добавлять подписчика в список слушателей.
+   * @covers \PPHP\tools\patterns\observer\TSubject::attach
    */
-  public function testAttach(){
-    $this->subject->attach(new ObserverMock);
-    $this->assertEquals(1, $this->subject->getObservers()->count());
+  public function testShouldAddObserverInListenersList(){
+    $o = new ObserverMock;
+    $this->object->attach($o);
+    $ol = $this->object->getObservers();
+    $this->assertEquals(1, $ol->count());
+    $ol->rewind();
+    $this->assertEquals($o, $ol->current());
   }
 
   /**
-   * @covers TSubject::detach
+   * Должен предотвращать повторное добавление подписчика в список слушателей.
+   * @covers \PPHP\tools\patterns\observer\TSubject::attach
    */
-  public function testDetach(){
-    $observer = new ObserverMock;
-    $this->subject->attach($observer);
-    $this->subject->detach($observer);
-    $this->assertEquals(0, $this->subject->getObservers()->count());
+  public function testShouldPreventDuplication(){
+    $o = new ObserverMock;
+    $this->object->attach($o);
+    $this->object->attach($o);
+    $ol = $this->object->getObservers();
+    $this->assertEquals(1, $ol->count());
+    $ol->rewind();
+    $this->assertEquals($o, $ol->current());
   }
 
   /**
-   * @covers TSubject::notify
+   * Должен удалять подписчика из списка слушателей.
+   * @covers \PPHP\tools\patterns\observer\TSubject::detach
    */
-  public function testNotify(){
-    $this->subject->attach(new ObserverMock);
-    $this->subject->attach(new ObserverMock);
-    $this->subject->notify();
-    $this->assertEquals(2, ObserverMock::$state);
+  public function testShouldRemoveObserverFromListenersList(){
+    $o = new ObserverMock;
+    $this->object->attach($o);
+    $this->object->detach($o);
+    $ol = $this->object->getObservers();
+    $this->assertEquals(0, $ol->count());
+  }
+
+  /**
+   * Не должен реагировать при отсутствии указанного подписчика в листе слушателей.
+   * @covers \PPHP\tools\patterns\observer\TSubject::detach
+   */
+  public function testShouldBeSilentIfObserverNotFound(){
+    $o = new ObserverMock;
+    $this->object->detach($o);
+  }
+
+  /**
+   * Должен информировать всех подписчиков в листе слушателей.
+   * @covers \PPHP\tools\patterns\observer\TSubject::notify
+   */
+  public function testShouldNotifyWholeListenersList(){
+    $this->object->attach(new ObserverMock);
+    $this->object->attach(new ObserverMock);
+    $this->object->attach(new ObserverMock);
+    $this->object->notify();
+    $this->assertEquals(3, ObserverMock::$state);
   }
 }

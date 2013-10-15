@@ -1,88 +1,141 @@
 <?php
 namespace PPHP\tests\tools\patterns\database\query;
 
-use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use PPHP\tools\patterns\database\query as query;
+use PPHP\tools\patterns\database\query\Field;
+use PPHP\tools\patterns\database\query\INLogicOperation;
+use PPHP\tools\patterns\database\query\Select;
+use PPHP\tools\patterns\database\query\Table;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')) . 'PPHP/dev/autoload/autoload.php';
 class INLogicOperationTest extends \PHPUnit_Framework_TestCase{
   /**
-   * @covers query\INLogicOperation::__construct
+   * Должен определять сравниваемое поле.
+   * @covers PPHP\tools\patterns\database\query\INLogicOperation::__construct
    */
-  public function testConstruct(){
-    $f = new query\Field('test');
-    $i = new query\INLogicOperation($f);
+  public function testShouldSetField(){
+    $f = new Field('test');
+    $i = new INLogicOperation($f);
     $this->assertEquals($f, $i->getField());
   }
 
   /**
-   * @covers query\INLogicOperation::addValue
+   * Должен добавлять значение в контрольный список.
+   * @covers PPHP\tools\patterns\database\query\INLogicOperation::addValue
    */
-  public function testAddValue(){
-    $i = new query\INLogicOperation(new query\Field('test'));
+  public function testShouldAddValueInList(){
+    $i = new INLogicOperation(new Field('test'));
+    $i->addValue(5);
+    $this->assertEquals(5, $i->getValues()[0]);
+  }
+
+  /**
+   * В качестве значения могут выступать следующие типы: integer, float, boolean, string.
+   * @covers PPHP\tools\patterns\database\query\INLogicOperation::addValue
+   */
+  public function testValueCanBeIntegerFloatBooleanString(){
+    $i = new INLogicOperation(new Field('test'));
     $i->addValue(5);
     $i->addValue('a');
     $i->addValue(true);
     $i->addValue(1.1);
-    $this->assertEquals('test', $i->getField()->getName());
     $this->assertEquals(5, $i->getValues()[0]);
+  }
+
+  /**
+   * Должен выбрасывать исключение если передан неверный тип.
+   * @covers PPHP\tools\patterns\database\query\INLogicOperation::addValue
+   */
+  public function testShouldThrowExceptionIfBadValue(){
+    $i = new INLogicOperation(new Field('test'));
     $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
     $i->addValue([1, 2, 3]);
   }
 
   /**
-   * @covers query\INLogicOperation::setSelectQuery
+   * Должен определять инструкцию Select в качестве источника допустимых значений.
+   * @covers PPHP\tools\patterns\database\query\INLogicOperation::setSelectQuery
    */
-  public function testSetSelectQuery(){
-    $i = new query\INLogicOperation(new query\Field('test'));
-    $s = new query\Select();
+  public function testShouldSetSelect(){
+    $i = new INLogicOperation(new Field('test'));
+    $s = new Select();
     $i->setSelectQuery($s);
     $this->assertEquals($s, $i->getSelectQuery());
   }
 
   /**
-   * @covers query\INLogicOperation::interpretation
+   * Должен возвращать строку вида: имяПоля IN ((значение[, значение]*)|(selectИнструкция)).
+   * @covers PPHP\tools\patterns\database\query\INLogicOperation::interpretation
    */
-  public function testInterpretation(){
-    $i = new query\INLogicOperation(new query\Field('test'));
+  public function testShouldInterpretation(){
+    $i = new INLogicOperation(new Field('test'));
     $i->addValue(5);
     $i->addValue('a');
     $i->addValue(true);
     $i->addValue(1.1);
     $this->assertEquals('(`test` IN ("5","a","true","1.1"))', $i->interpretation());
-    $i = new query\INLogicOperation(new query\Field('test'));
-    $s = new query\Select();
+    $i = new INLogicOperation(new Field('test'));
+    $s = new Select();
     $s->addAllField();
-    $s->addTable(new query\Table('table'));
+    $s->addTable(new Table('table'));
     $i->setSelectQuery($s);
-    $this->assertEquals('(`test` IN ("SELECT * FROM `table`"))', $i->interpretation());
+    $this->assertEquals('(`test` IN (SELECT * FROM `table`))', $i->interpretation());
   }
 
   /**
-   * @covers query\INLogicOperation::reestablish
+   * Должен выбрасывать исключение в случае отсутствия хотя бы одного допустимого значения.
+   * @covers PPHP\tools\patterns\database\query\INLogicOperation::interpretation
    */
-  public function testReestablish(){
-    $o = query\INLogicOperation::reestablish('(table.field IN ("a", "b", "1"))');
+  public function testShouldThrowExceptionIfNotValues(){
+    $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException');
+    $i = new INLogicOperation(new Field('test'));
+    $i->interpretation();
+  }
+
+  /**
+   * Инструкция Select имеет больший приоритет.
+   * @covers PPHP\tools\patterns\database\query\INLogicOperation::interpretation
+   */
+  public function testShouldResetValues(){
+    $i = new INLogicOperation(new Field('test'));
+    $i->addValue(5);
+    $s = new Select;
+    $s->addTable(new Table('test'));
+    $s->addAllField();
+    $i->setSelectQuery($s);
+    $this->assertEquals('(`test` IN (SELECT * FROM `test`))', $i->interpretation());
+  }
+
+  /**
+   * Должен восстанавливаться из строки вида: имяПоля IN ((значение[, значение]*)).
+   * @covers PPHP\tools\patterns\database\query\INLogicOperation::reestablish
+   */
+  public function testShouldRestorableForString(){
+    $o = INLogicOperation::reestablish('(table.field IN ("a", "b", "1"))');
     $this->assertEquals('field', $o->getField()->getName());
     $this->assertEquals('a', $o->getValues()[0]);
   }
 
   /**
-   * @covers query\INLogicOperation::isReestablish
+   * Допустимой строкой является строка вида: имяПоля IN ((значение[, значение]*)).
+   * @covers PPHP\tools\patterns\database\query\INLogicOperation::isReestablish
    */
-  public function testIsReestablish(){
-    $this->assertTrue(query\INLogicOperation::isReestablish('(`field` IN ("a"))'));
-    $this->assertTrue(query\INLogicOperation::isReestablish('(table.field IN ("a","b", "1"))'));
-    $this->assertTrue(query\INLogicOperation::isReestablish('(table.field IN
+  public function testGoodString(){
+    $this->assertTrue(INLogicOperation::isReestablish('(`field` IN ("a"))'));
+    $this->assertTrue(INLogicOperation::isReestablish('(table.field IN ("a","b", "1"))'));
+    $this->assertTrue(INLogicOperation::isReestablish('(table.field IN
                                                               ("a",
                                                               "b",
                                                               "1"))'));
-    $this->assertFalse(query\INLogicOperation::isReestablish('`field` IN ("a")'));
-    $this->assertFalse(query\INLogicOperation::isReestablish('(`field` ("a"))'));
-    $this->assertFalse(query\INLogicOperation::isReestablish('(`field` IN "a")'));
-    $this->assertFalse(query\INLogicOperation::isReestablish('(`field` IN ("a" "b"))'));
+  }
+
+  /**
+   * Должен возвращать false при недопустимой структуре строки.
+   * @covers PPHP\tools\patterns\database\query\INLogicOperation::isReestablish
+   */
+  public function testBedString(){
+    $this->assertFalse(INLogicOperation::isReestablish('`field` IN ("a")'));
+    $this->assertFalse(INLogicOperation::isReestablish('(`field` ("a"))'));
+    $this->assertFalse(INLogicOperation::isReestablish('(`field` IN "a")'));
+    $this->assertFalse(INLogicOperation::isReestablish('(`field` IN ("a" "b"))'));
   }
 }

@@ -3,14 +3,13 @@ namespace PPHP\tools\patterns\memento;
 
 /**
  * Класс позволяет сохранять состояние объекта в себе и возвращать его по требованию хозяина.
- * Хранитель представляет собой "снимок" состояния хозяина на конкретный момент времени.
- * С его помощью объект-хозяин может быть восстановлен в сохраненное состояние.
+ * С помощью объекто данного класса объект-хозяин может быть восстановлен в сохраненное состояние.
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\memento
  */
 class Memento{
   /**
-   * @var mixed[] Ассоциативный массив значений хранимых полей.
+   * @var mixed[] Ассоциативный массив имен и значений хранимых свойств.
    */
   private $properties;
 
@@ -21,7 +20,7 @@ class Memento{
 
   /**
    * @param Originator $originator Хозяин хранителя.
-   * @param array $savedProperties Ассоциативный массив, ключами которого являются имена свойств хозяина, а значениями их значения.
+   * @param mixed[] $savedProperties Ассоциативный массив, ключами которого являются имена свойств хозяина, а значениями их значения.
    */
   function __construct(Originator $originator, array $savedProperties){
     $this->originator = $originator;
@@ -31,7 +30,7 @@ class Memento{
   /**
    * Метод возвращает хранимые значения свойств хранителю.
    * @param Originator $originator Хозяин хранителя. Метод вернет значения полей только если в данном аргументе передан истинный хозяин хранителя.
-   * @throws AccessException Выбрасывается в случае, если в качестве хозяина передан не истинный хозяин хранителя.
+   * @throws \PPHP\tools\patterns\memento\AccessException Выбрасывается в случае, если в качестве хозяина передан не истинный хозяин хранителя.
    * @return mixed[] Ассоциативный массив значений полей хозяина.
    */
   public final function getState(Originator $originator){

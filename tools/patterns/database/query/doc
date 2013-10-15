@@ -1,0 +1,202 @@
+h1: Терминология
+- Диалект SQL - конкретная реализация SQL некоторой СУБД;
+- Объектная SQL инструкция - объект, представляющий SQL инструкцию (один из SQL операторов Select, Update, Delete или Insert), способный интерпретировать себя в SQL запрос строчного формата согласно требуемому диалекту;
+- Объектный SQL компонент - объект, представляющий компонент SQL инструкции, способный интерпретировать себя в компонент SQL запрос строчного формата согласно требуемому диалекту;
+- Унифицированный SQL диалект - SQL запрос строчного формата, из которого может быть восстановлена объектная SQL инструкция.
+
+h1: Унификация SQL диалектов
+В связи с тем, что современные системы управления базами данных (СУБД) используют различные диалекты SQL, использование полиморфных интерфейсов взаимодействия с ними (такими как класс PDO) не позволяет полностью абстрагироваться от различий в СУБД. Решить данную проблему можно с помощью унифицированного SQL диалекта, который может быть интерпретирован в диалект той СУБД, которая используется системой. Для этих целей создан данный пакет, который включает унифицирующие, интерпретируемые классы для операций типа - Data Manipulation Language (операторы манипуляции данными).
+В пакете реализованы следующие операторы:
+- Select - операция запроса данных;
+- Update - операция изменения данных;
+- Delete - операция удаления данных;
+- Insert - операция добавления данных.
+Так же в пакете реализованы следующие инструкции (компоненты операций):
+- Table - целевая таблица запроса;
+- Field и AliasField - целевые поля запроса и их псевдонимы;
+- Limit - ограничение на число отбираемых записей;
+- OrderBy - способ сортировки по целевым полям;
+- Join - объединение данных;
+- Where - условие отбора. Сюда входят следующие инструкции: LogicOperation (логическое сравнение), INLogicOperation (вхождение в множество), MultiCondition (логическое выражение), AndMultiCondition (логическое выражение типа И), OrMultiCondition (логическое выражение типа ИЛИ).
+Пакет позволяет формировать SQL запросы так, чтобы они могли быть использованы в одной из следующих СУБД: MySQL, MS SQL, Oracle DB, DB2, FireBirdSQL, PostgreSQL.
+Пакет так же включает механизм преобразования унифицированной SQL инструкции, записанной в виде строки, к любому SQL диалекту указанных выше СУБД.
+
+h1: Особенности реализации
+Для унификации SQL инструкций в системе используется иерархически-организованная, интерпретируемая структура из объектов, каждый из которых описывает некоторый конкретный компонент инструкции и может быть интерпретирован в строку согласно реализуемому им интерфейсу Interpreter (см. PPHP\tools\patterns\interpreter\Interpreter).
+Данный механизм позволяет создавать SQL инструкции путем создания объектов и определения между ними ассоциаций. Корневой, объектный SQL компонент (как правило это один из SQL операторов) при интерпретации формирует из своих объектных SQL компонентов строки и объединяет их в готовую SQL инструкцию в соответствии с выбранным диалектом. Схематически это выглядит следующим образом:
+img: interpretation.png
+Другими словами, объект, представляющий SQL инструкцию (на пример Select), включает вложенные объекты - объектные SQL компоненты (на схеме это Table, Field, Limit). При интерпретации объекта Select он интерпретирует вложенные объекты и объединяет результат в готовую SQL инструкцию. Процесс интерпретации так же учитывает выбранный SQL диалект, то есть в зависимости от используемой СУБД, объект-инструкция возвращать подходящую для данной СУБД инструкцию.
+Реализованное решение требует больше вычислительных мощностей и памяти для хранения и интерпретации объектных SQL инструкций, а так же не столь удобен в написании, чем обычный SQL запрос, но позволяет легко перейти на другую СУБД прямо в процессе работы системы без необходимости изменения используемых SQL инструкций. Если вы планируете использовать только определенную СУБД, то можно обойтись без унификации SQL инструкции, стоит лишь помнить, что все используемые в системе механизмы, работающие с базами данных (такие как DataMapper) используют данное решение.
+Пакет так же включает собственный SQL диалект (унифицированный SQL диалект), аналогичный классическому SQL, который может быть преобразован в любой из диалектов СУБД, поддерживаемых системой. Это возможно благодаря реализации интерфейса Restorable (см. PPHP\tools\patterns\interpreter\Restorable) всеми объектными SQL инструкциями и компонентами.
+Процесс преобразования унифицированной SQL инструкции представлен на следующей схеме:
+img: restorable.png
+Как видно, для создания объектной SQL инструкции класса Select используется статичный метод reestablish (определенный интерфейсом Restorable), который последовательно вызывается для вложенных объектных SQL компонентов и возвращает результирующие объекты, из которых формируется Select объект.
+Данное решение довольно ресурсоемко и применяется только в том случае, если необходимо быстро составить унифицированную SQL инструкцию, во всех остальных случаях лучше формировать объектную SQL инструкцию программно.
+
+h1: Интерпретация
+Для понимания механизма, позволяющего формировать SQL инструкции различных диалектов из объектов, рассмотрим несколько примеров. Предположим нам необходимо выполнить SQL запрос в СУБД MySQL с помощью следующей инструкци: SELECT * FROM people ORDER BY `name`. Для этих целей создадим объектную SQL инструкцию:
+code: php 120
+$select = new Select; // Создаем корневой, объектный SQL компонент.
+$select->addAllField(); // Определяем, что необходимо получить все поля таблицы (SELECT *).
+$select->addTable(new Table('people')); // Определяем целевую таблицу (SELECT * FROM people).
+$orderBy = new OrderBy; // Формируем компонент Order by.
+$orderBy->addField(new Field('name')); // Определяем поле сортировки (ORDER BY `name`).
+$select->insertOrderBy($orderBy); // Добавляем компонент Order by в Select инструкцию (SELECT * FROM people ORDER BY `name`).
+echo $select->interpretation('mysql'); // SELECT * FROM people ORDER BY `name` - SQL инструкция, созданная в соответствии с диалектом MySQL.
+code: end
+Как можно заметить, объектная SQL инструкция Select формируется путем добавления в нее различных компонентов (Field, Table, OrderBy).
+prt: Рассмотрим более сложную SQL инструкцию: SELECT people.name, student.course FROM people JOIN student ON people.OID = student.OID WHERE student.course > 2 AND student.course < 5 ORDER BY student.course
+code: php 420
+$select = new Select; // Создаем корневой, объектный SQL компонент.
+$peopleTable = new Table('people'); // Определяем используемые в инструкции таблицы.
+$studentTable = new Table('student');
+
+$nameField = new Field('name'); // Определяем используемые в инструкции поля
+$nameField->setTable($peopleTable); // Определяем отношение полей к таблицам.
+$courseField = new Field('course');
+$courseField->setTable($studentTable);
+
+$peopleOID = new Field('OID'); // Определяем поля для Join компоненты.
+$peopleOID->setTable($peopleTable);
+$studentOID = new Field('OID');
+$studentOID->setTable($studentTable);
+
+$join = new Join(Join::INNER, $studentTable, new LogicOperation($peopleOID, '=', $studentOID)); // Формируем Join компонент.
+$where = new Where(new MultiCondition(new LogicOperation($courseField, '>', 2), 'AND', new LogicOperation($courseField, '<', 5))); // Формируем логическое выражение.
+$orderBy = new OrderBy(); // Формируем Order By компонент.
+$orderBy->addField($courseField);
+$limit = new Limit(10); // Формируем Limit компонент.
+
+// Объединяем все в SQL инструкцию.
+$select->addField($nameField);
+$select->addField($courseField);
+$select->addTable($peopleTable);
+$select->addJoin($join);
+$select->insertWhere($where);
+$select->insertOrderBy($orderBy);
+$select->insertLimit($limit);
+echo $select->interpretation('mysql'); // SELECT people.name,student.course FROM `people` INNER JOIN `student` ON (people.OID = student.OID) WHERE ((student.course > "2") AND (student.course < "5")) ORDER BY student.course ASC LIMIT 10 - Результат работы интерпретатора.
+code: end
+Можно заметить, что результат можно было бы упростить (на пример не использовать лишние круглые скобки в Where компоненте), но строгая структура позволяет без ошибок формировать сложные SQL запросы.
+Теперь продемонстрируем как будет выглядить та же объектная SQL инструкция для СУБД Oracle DB:
+code: php 40
+echo $select->interpretation('oci'); // SELECT people.name,student.course FROM `people` INNER JOIN `student` ON (people.OID = student.OID) WHERE ((student.course > "2") AND (student.course < "5"))  AND (ROWNUM <= 10) ORDER BY student.course ASC
+code: end
+Как можно заметить, интерпретатор изменил диалект SQL и использовал условие вместо констуркции Limit (которой нет в Oracle DB).
+Приведем еще несколько примеров для различных SQL инструкций:
+code: php 60
+$delete = new Delete(new Table('people'));
+$delete->insertWhere(new Where(new LogicOperation(new Field('name'), '=', 'Ivan')));
+echo $delete->interpretation('mysql'); // DELETE FROM `people` WHERE (`name` = "Ivan")
+code: end
+code: php 70
+$insert = new Insert(new Table('people'));
+$insert->addData(new Field('name'), 'maksim');
+$insert->addData(new Field('phone'), '12345');
+echo $insert->interpretation('sqlsrv'); // INSERT INTO `people` (`name`,`phone`) VALUES ("maksim","12345")
+code: end
+code: php 70
+$update = new Update(new Table('people'));
+$update->addData(new Field('phone'), '54321');
+$update->insertWhere(new Where(new LogicOperation(new Field('name'), '=', 'Ivan')));
+echo $update->interpretation('pgsql'); // UPDATE `people` SET `phone` = "54321" WHERE (`name` = "Ivan")
+code: end
+
+h1: Особенности использования механизма интерпретации
+- Методы, добавляющие объектные SQL компоненты в инструкцию (такие методы начинаются на insert) при повторном вызове заменяют ранее определенные компоненты;
+code: php 100
+$select = new Select;
+$select->addAllField();
+$select->addTable(new Table('people'));
+$select->insertLimit(new Limit(10));
+$select->insertLimit(new Limit(5)); // Замена
+echo $select->interpretation('mysql'); // SELECT * FROM `people` LIMIT 5
+code: end
+
+h2: Select
+- Для определения псевдонима поля используется метод addAliasField объекта Select. Данный метод принимает объект класса FieldAlias и определяет запрашиваемое поле с псевдонимом;
+code: php 80
+$select = new Select;
+$select->addAliasField(new FieldAlias(new Filed('name'), 'fieldName'));
+$select->addTable(new Table('people'));
+echo $select->interpretation('mysql'); // SELECT `name` as fieldName FROM `people`
+code: end
+- Для определения запроса всех полей таблицы, используется метод addAllField;
+code: php 80
+$select = new Select;
+$select->addAllField();
+$select->addTable(new Table('people'));
+echo $select->interpretation('mysql'); // SELECT * FROM `people`
+code: end
+
+h2: Insert
+- Метод setSelect позволяет определить запрос, результаты которого будут использованы в качестве добавляемых строк в Insert инструкции;
+code: php 100
+$insert = new Insert(new Table('people'));
+$select = new Select;
+$select->addAllField();
+$select->addTable(new Table('people'));
+$insert->setSelect($select);
+echo $insert->interpretation('mysql'); // INSERT INTO `people` (SELECT * FROM `people`)
+code: end
+Для более подробного ознакомления с возможностями тех или иных объектных SQL инструкций обращайтесь к документации API соответствующих классов.
+
+h1: Восстановление
+Многим может показаться, что для формирования объектных SQL инструкций требуется громоздкий код, который сложно писать и читать. Для решения подобной проблемы применяется два подхода:
+- Фабрика - специальный класс, позволяющий создавать сложные объекты с помощью простого объектного интерфейса;
+- Языковая конструкция - текст, понятный человеку, представляющий некоторую команду (SQL как раз является языковой конструкцией).
+Данный пакет реализует оба подхода:
+- Фабрика реализована в пакете builder (см. PPHP\tools\patterns\database\query\builder);
+- Интерпретатор строки реализован в данном пакете путем использования интерфейса Restorable всеми объектными SQL компонентами.
+Рассмотрим пример:
+code: php 60
+$table = Table::reestablish('people');
+echo get_class($table); // PPHP\tools\patterns\database\query\Table
+echo $table->getTableName(); // people
+code: end
+В примере продемонстрирован процесс восстановления объекта Table из строки.
+Рассмотрим более сложный пример:
+code: php 40
+$select = Select::reestablish('SELECT * FROM `people`');
+echo $select->getTables()[0]->getTableName(); // people - имя целевой таблицы запроса.
+code: end
+Как можно заметить, объект Select восстанавливается вместе с вложенными объектами, такими как Table.
+Все присутствующие в системе объектные SQL инструкции и компоненты могут быть восстановлены подобным образом из унифицированной SQL инструкции, главно следовать правилам, определенным в описании классов объектных SQL инструкций (Select, Insert, Delete и Update).
+Приведем еще несколько примеров восстановления объектных SQL инструкций из унифицированной SQL инструкции:
+code: php 70
+$select = Select::reestablish('SELECT `OID`, `name` FROM `people` LIMIT 10 WHERE (`OID` > "10")');
+$delete = Delete::reestablish('DELETE FROM `people` WHERE ((`OID` > "5") AND (`OID` < "10"))');
+$insert = Insert::reestablish('INSERT INTO `people` (people.name, people.phone) VALUES ("igor", "12345")');
+$update = Update::reestablish('UPDATE `people` SET `phone` = "12345" WHERE (`OID` = "2")');
+code: end
+
+h1: Особенности использования механизма восстановления
+h2: Select
+Допустимая структура унифицированной SQL инструкции Select имеет вид:
+SELECT (`имяПоля`[ as псевдоним])|(имяТаблицы.имяПоля)+ FROM (`имяТаблицы`)+[ JOIN `имяТаблицы` ON условиеОбъединения][ ORDER BY (`имяПоля`)|(имяТаблицы.имяПоля)+ (ASC)|(DESC)][ LIMIT количествоСтрок][ WHERE условноеВыражение]
+
+h2: Update
+Допустимая структура унифицированной SQL инструкции Update имеет вид:
+UPDATE `имяТаблицы` SET (`имяПоля` = "значение")+[ WHERE логическоеВыражение]
+
+h2: Insert
+Допустимая структура унифицированной SQL инструкции Insert имеет вид:
+INSERT INTO `имяТаблицы` \(`имяПоля`(, `имяПоля`)*\) VALUES \("значение"(, "значение")*\)
+
+h2: Delete
+Допустимая структура унифицированной SQL инструкции Delete имеет вид:
+DELETE FROM `имяТаблицы`[ WHERE логическоеВыражение]
+
+h1: Структура объектных SQL инструкций и компонентов
+На схеме ниже показано дерево наследования объектных SQL инструкций и компонентов:
+img: inheritanceHierarchy.png
+На схеме ниже показаны ассоциации, доступные для объектной SQL инструкции Select:
+img: select.png
+На схеме ниже показаны ассоциации, доступные для объектной SQL инструкции Update:
+img: update.png
+На схеме ниже показаны ассоциации, доступные для объектной SQL инструкции Insert:
+img: insert.png
+На схеме ниже показаны ассоциации, доступные для объектной SQL инструкции Delete:
+img: delete.png
+На схеме ниже показаны ассоциации, доступные для объектного SQL компонента Where:
+img: conditions.png

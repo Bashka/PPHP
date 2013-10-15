@@ -3,10 +3,8 @@ namespace PPHP\tests\tools\classes\standard\fileSystem;
 
 use PPHP\tools\classes\standard\fileSystem as fileSystem;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')).'PPHP/dev/autoload/autoload.php';
+
 class RootDirectoryTest extends \PHPUnit_Framework_TestCase{
   /**
    * @var fileSystem\RootDirectory
@@ -18,61 +16,69 @@ class RootDirectoryTest extends \PHPUnit_Framework_TestCase{
   }
 
   /**
-   * @covers fileSystem\RootDirectory::getLocationAddress
+   * Должен возвращать домен ресурса.
+   * @covers PPHP\tools\classes\standard\fileSystem\RootDirectory::getLocationAddress
    */
-  public function testGetLocationAddress(){
+  public function testShouldReturnDomainName(){
     $this->assertEquals($_SERVER['DOCUMENT_ROOT'], $this->object->getLocationAddress());
   }
 
   /**
-   * @covers fileSystem\RootDirectory::getAddress
+   * Должен возвращать домен ресурса.
+   * @covers PPHP\tools\classes\standard\fileSystem\RootDirectory::getAddress
    */
-  public function testGetAddress(){
+  public function testShouldReturnDomainName2(){
     $this->assertEquals($_SERVER['DOCUMENT_ROOT'], $this->object->getLocationAddress());
   }
 
   /**
-   * @covers fileSystem\RootDirectory::rename
+   * Должен выбрасывать исключение при вызове.
+   * @covers PPHP\tools\classes\standard\fileSystem\RootDirectory::rename
    */
-  public function testRename(){
+  public function testShouldThrowException(){
     $this->setExpectedException('\PPHP\tools\classes\standard\fileSystem\UpdatingRoodException');
     $this->object->rename('NewName');
   }
 
   /**
-   * @covers fileSystem\RootDirectory::move
+   * Должен выбрасывать исключение при вызове.
+   * @covers PPHP\tools\classes\standard\fileSystem\RootDirectory::move
    */
-  public function testMove(){
+  public function testShouldThrowException2(){
     $this->setExpectedException('\PPHP\tools\classes\standard\fileSystem\UpdatingRoodException');
     $this->object->move($this->object);
   }
 
   /**
-   * @covers fileSystem\RootDirectory::isExists
+   * Должен вернуть true.
+   * @covers PPHP\tools\classes\standard\fileSystem\RootDirectory::isExists
    */
-  public function testIsExists(){
+  public function testShouldReturnTrue(){
     $this->assertTrue($this->object->isExists());
   }
 
   /**
-   * @covers fileSystem\RootDirectory::copyPaste
+   * Должен выбрасывать исключение при вызове.
+   * @covers PPHP\tools\classes\standard\fileSystem\RootDirectory::copyPaste
    */
-  public function testCopyPaste(){
+  public function testShouldThrowException3(){
     $this->setExpectedException('\PPHP\tools\classes\standard\fileSystem\UpdatingRoodException');
     $this->object->copyPaste($this->object);
   }
 
   /**
-   * @covers fileSystem\RootDirectory::getSize
+   * Должен вернуть 0.
+   * @covers PPHP\tools\classes\standard\fileSystem\RootDirectory::getSize
    */
-  public function testGetSize(){
+  public function testShouldReturnZero(){
     $this->assertEquals(0, $this->object->getSize());
   }
 
   /**
-   * @covers fileSystem\RootDirectory::create
+   * Должен выбрасывать исключение при вызове.
+   * @covers PPHP\tools\classes\standard\fileSystem\RootDirectory::create
    */
-  public function testCreate(){
+  public function testShouldThrowException4(){
     $this->setExpectedException('\PPHP\tools\classes\standard\fileSystem\UpdatingRoodException');
     $this->object->create();
   }

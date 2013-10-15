@@ -1,8 +1,8 @@
 <?php
 namespace PPHP\tools\patterns\interpreter;
 
-use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
 use PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException;
+use PPHP\tools\classes\standard\baseType\exceptions\NotFoundDataException;
 
 /**
  * Объекты классов, реализующие данный интерфейс, могут быть восстановлены из других объектов.

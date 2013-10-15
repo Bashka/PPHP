@@ -1,9 +1,9 @@
 <?php
 namespace PPHP\tests\tools\patterns\state;
 
-use PPHP\tools\patterns\state as state;
+use PPHP\tools\patterns\state\StateCache;
 
-class StateBufferMock extends state\StateCache{
+class StateBufferMock extends StateCache{
   protected function getFromSource($key, array $arguments = null){
     switch($key){
       case 'Open':

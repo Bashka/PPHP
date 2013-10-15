@@ -3,62 +3,188 @@ namespace PPHP\tests\tools\classes\standard\storage\session;
 
 use PPHP\tools\classes\standard\storage\session\SessionProvider;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
-session_start();
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')).'PPHP/dev/autoload/autoload.php';
+
+ob_start();
 class SessionProviderTest extends \PHPUnit_Framework_TestCase{
   /**
    * @var SessionProvider
    */
   protected $object;
 
+  public static function tearDownAfterClass(){
+    ob_end_flush();
+  }
+
   protected function setUp(){
     $this->object = SessionProvider::getInstance();
   }
 
-  protected function tearDown(){
-    $_SESSION = [];
-  }
-
-  public static function tearDownAfterClass(){
-    $_SESSION = [];
-    unset($_COOKIE[session_name()]);
-    session_destroy();
+  /**
+   * Должен открывать сессию.
+   * @covers PPHP\tools\classes\standard\storage\session\SessionProvider::start
+   */
+  public function testShouldOpenSession(){
+    $this->object->start();
+    $this->assertEquals([], $_SESSION);
+    $this->object->destroy();
   }
 
   /**
-   * @covers SessionProvider::set
+   * Должен установить указанное имя сессии, если оно переданно.
+   * @covers PPHP\tools\classes\standard\storage\session\SessionProvider::start
    */
-  public function testSet(){
-    $this->object->set('Test', 'Test');
-    $this->assertEquals('Test', $_SESSION['Test']);
+  public function testShouldSetSessionName(){
+    $this->object->start('MySession');
+    $this->assertEquals('MySession', session_name());
+    $this->object->destroy();
   }
 
   /**
-   * @covers SessionProvider::get
+   * Должен установить идентификатор сессии, если он передан.
+   * @covers PPHP\tools\classes\standard\storage\session\SessionProvider::start
    */
-  public function testGet(){
-    $_SESSION['Test'] = 'Test';
-    $this->assertEquals('Test', $this->object->get('Test'));
+  public function testShouldSetSessionID(){
+    $this->object->start('MySession', 'sessionID');
+    $this->assertEquals('sessionID', session_id());
+    $this->object->destroy();
   }
 
   /**
-   * @covers SessionProvider::reset
+   * Должен возвращать идентификатор сессии.
+   * @covers PPHP\tools\classes\standard\storage\session\SessionProvider::getID
    */
-  public function testReset(){
-    $_SESSION['Test'] = 'Test';
-    $this->object->reset('Test');
-    $this->assertFalse(isset($_SESSION['Test']));
+  public function testShouldReturnIDSession(){
+    $this->object->start('MySession', 'sessionID');
+    $this->assertEquals('sessionID', $this->object->getID());
+    $this->object->destroy();
   }
 
   /**
-   * @covers SessionProvider::isExists
+   * Должен возвращать пустую строку, если сессия не открыта.
+   * @covers PPHP\tools\classes\standard\storage\session\SessionProvider::getID
    */
-  public function testIsExists(){
-    $this->assertFalse($this->object->isExists('Test'));
-    $_SESSION['Test'] = 'Test';
-    $this->assertTrue($this->object->isExists('Test'));
+  public function testShouldReturnEmptyStringIfSessionClose(){
+    $this->assertEquals('', $this->object->getID());
+  }
+
+  /**
+   * Должен возвращать имя текущей сессии.
+   * @covers PPHP\tools\classes\standard\storage\session\SessionProvider::getName
+   */
+  public function testShouldReturnSessionName(){
+    $this->object->start('MySession');
+    $this->assertEquals('MySession', $this->object->getName());
+    $this->object->destroy();
+  }
+
+  /**
+   * Должен возвращать пустую строку, если сессия не открыта.
+   * @covers PPHP\tools\classes\standard\storage\session\SessionProvider::getName
+   */
+  public function testShouldReturnEmptyStringIfSessionClose2(){
+    $this->assertEquals('', $this->object->getName());
+  }
+
+  /**
+   * Должен закрывать сессию и уничтожать всю связанную с ней информацию.
+   * @covers PPHP\tools\classes\standard\storage\session\SessionProvider::destroy
+   */
+  public function testShouldDestroySession(){
+    $this->object->start();
+    $this->object->destroy();
+    $this->assertTrue(session_status() == PHP_SESSION_NONE);
+  }
+
+  /**
+   * Должен устанавливать значение в сессии.
+   * @covers PPHP\tools\classes\standard\storage\session\SessionProvider::set
+   */
+  public function testShouldSetValueSession(){
+    $this->object->start();
+    $this->object->set('key', 'value');
+    $this->assertEquals('value', $_SESSION['key']);
+    $this->object->destroy();
+  }
+
+  /**
+   * Должен вернуть данные из сессии.
+   * @covers PPHP\tools\classes\standard\storage\session\SessionProvider::get
+   */
+  public function testShouldGetValueSession(){
+    $this->object->start();
+    $_SESSION['key'] = 'value';
+    $this->assertEquals('value', $this->object->get('key'));
+    $this->object->destroy();
+  }
+
+  /**
+   * Должен удалить данные из сессии.
+   * @covers PPHP\tools\classes\standard\storage\session\SessionProvider::remove
+   */
+  public function testShouldRemoveValueSession(){
+    $this->object->start();
+    $_SESSION['key'] = 'value';
+    $this->object->remove('key');
+    $this->assertFalse(array_key_exists('key', $_SESSION));
+    $this->object->destroy();
+  }
+
+  /**
+   * Должен возвращать true - если заданный ключ установлен в сессии.
+   * @covers PPHP\tools\classes\standard\storage\session\SessionProvider::isExists
+   */
+  public function testShouldReturnTrueIfValueExists(){
+    $this->object->start();
+    $this->assertFalse($this->object->isExists('key'));
+    $_SESSION['key'] = 'value';
+    $this->assertTrue($this->object->isExists('key'));
+    $this->object->destroy();
+  }
+
+  /**
+   * Должен вернуть данные из сессии.
+   * @covers PPHP\tools\classes\standard\storage\session\SessionProvider::__set
+   */
+  public function testShouldSetValueSession2(){
+    $this->object->start();
+    $this->object->key = 'value';
+    $this->assertEquals('value', $_SESSION['key']);
+    $this->object->destroy();
+  }
+
+  /**
+   * Должен устанавливать значение в сессии.
+   * @covers PPHP\tools\classes\standard\storage\session\SessionProvider::__get
+   */
+  public function testShouldGetValueSession2(){
+    $this->object->start();
+    $_SESSION['key'] = 'value';
+    $this->assertEquals('value', $this->object->key);
+    $this->object->destroy();
+  }
+
+  /**
+   * Должен удалить данные из сессии.
+   * @covers PPHP\tools\classes\standard\storage\session\SessionProvider::__unset
+   */
+  public function testShouldRemoveValueSession2(){
+    $this->object->start();
+    $_SESSION['key'] = 'value';
+    unset($this->object->key);
+    $this->assertFalse(array_key_exists('key', $_SESSION));
+    $this->object->destroy();
+  }
+
+  /**
+   * Должен возвращать true - если заданный ключ установлен в сессии.
+   * @covers PPHP\tools\classes\standard\storage\session\SessionProvider::__isset
+   */
+  public function testShouldReturnTrueIfValueExists2(){
+    $this->object->start();
+    $this->assertFalse(isset($this->object->key));
+    $_SESSION['key'] = 'value';
+    $this->assertTrue(isset($this->object->key));
+    $this->object->destroy();
   }
 }

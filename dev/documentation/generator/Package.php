@@ -58,17 +58,23 @@ class Package implements Interpreter, Metamorphosis{
         if($subPackage->isDir()){
           $subNodes .= Package::metamorphose($this->dir->getDir($subPackage->getFilename()), $this->namespace.'\\'.$this->name)->interpretation();
         }
-        elseif(substr($subPackage->getFilename(), -4) == '.php'){
+      }
+    }
+
+    foreach($this->dir->getDirectoryIterator() as $subPackage){
+      if($subPackage != '.' && $subPackage != '..'){
+        if($subPackage->isFile() && substr($subPackage->getFilename(), -4) == '.php'){
           $subNodes .= Element::metamorphose($this->dir->getFile($subPackage->getFilename()), $this->namespace.'\\'.$this->name)->interpretation();
         }
       }
     }
+
     if($this->dir->isFileExists('doc')){
       $docPackage = DocFile::reestablish($this->dir->getFile('doc')->getReader()->readAll(), $this->namespace.'\\'.$this->name)->interpretation();
     }
     else{
       $docPackage = '';
     }
-    return '<node name="'.$this->name.'\\" prog_lang="custom-colors" readonly="False" tags="" unique_id="'.Generator::getUniqueId().'">'.$docPackage.$subNodes.'</node>';
+    return '<node name="['.$this->name.']" prog_lang="custom-colors" readonly="False" tags="" unique_id="'.Generator::getUniqueId().'">'.$docPackage.$subNodes.'</node>';
   }
 }

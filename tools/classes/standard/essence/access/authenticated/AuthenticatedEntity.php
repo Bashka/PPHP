@@ -15,7 +15,7 @@ use \PPHP\tools\classes\standard\baseType\exceptions as exceptions;
  * @ORM\Table AuthenticatedEntity
  * @ORM\PK OID
  */
-abstract class AuthenticatedEntity extends database\LongObject{
+abstract class AuthenticatedEntity extends database\persistent\LongObject{
   /**
    * Пароль.
    * @var string

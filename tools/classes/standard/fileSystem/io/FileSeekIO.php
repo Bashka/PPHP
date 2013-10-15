@@ -1,7 +1,7 @@
 <?php
 namespace PPHP\tools\classes\standard\fileSystem\io;
 
-use \PPHP\tools\patterns\io as io;
+use PPHP\tools\patterns\io as io;
 
 /**
  * Реализация интерфейса SeekIO для файловых потоков.
@@ -10,19 +10,14 @@ use \PPHP\tools\patterns\io as io;
  */
 trait FileSeekIO{
   /**
-   * Метод устанавливает указатель символа на указанную позицию.
-   * @param integer $position Позиция символа.
-   * @throws io\IOException Выбрасывается в случае ошибки при работе с потоком.
-   * @return boolean true - если позиция установлена, иначе - false.
+   * @prototype \PPHP\tools\patterns\io\SeekIO
    */
   public function setPosition($position){
     return (boolean) (fseek($this->resource, $position) + 1);
   }
 
   /**
-   * Метод возвращает текущую позицию указателя символа.
-   * @throws io\IOException Выбрасывается в случае ошибки при работе с потоком.
-   * @return integer Позиция указателя в виде целого числа.
+   * @prototype \PPHP\tools\patterns\io\SeekIO
    */
   public function getPosition(){
     $result = ftell($this->resource);

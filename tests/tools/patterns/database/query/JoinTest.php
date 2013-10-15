@@ -1,54 +1,84 @@
 <?php
 namespace PPHP\tests\tools\patterns\database\query;
 
-use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
-use PPHP\tools\patterns\database\query as query;
+use PPHP\tools\patterns\database\query\Field;
+use PPHP\tools\patterns\database\query\Join;
+use PPHP\tools\patterns\database\query\LogicOperation;
+use PPHP\tools\patterns\database\query\Table;
 
-spl_autoload_register(function ($className){
-  require_once $_SERVER['DOCUMENT_ROOT'] . '/' . str_replace('\\', '/', $className) . '.php';
-});
-$_SERVER['DOCUMENT_ROOT'] = '/var/www';
+require_once substr(__DIR__, 0, strpos(__DIR__, 'PPHP')) . 'PPHP/dev/autoload/autoload.php';
 class JoinTest extends \PHPUnit_Framework_TestCase{
   /**
-   * @covers query\Join::__construct
+   * Должен поределять тип, целевую таблицу и условие объединения.
+   * @covers PPHP\tools\patterns\database\query\Join::__construct
    */
-  public function testConstruct(){
-    $o = new query\Join(query\Join::INNER, new query\Table('table'), new query\LogicOperation(new query\Field('fieldA'), '=', new query\Field('fieldB')));
-    $this->assertEquals(query\Join::INNER, $o->getType());
+  public function testShouldSetJoinComponents(){
+    $o = new Join(Join::INNER, new Table('table'), new LogicOperation(new Field('fieldA'), '=', new Field('fieldB')));
+    $this->assertEquals(Join::INNER, $o->getType());
     $this->assertEquals('table', $o->getTable()->getTableName());
-    $this->assertEquals('fieldB', $o->getCondition()->getValue()->getName());
+    /**
+     * @var \PPHP\tools\patterns\database\query\LogicOperation $c
+     */
+    $c = $o->getCondition();
+    $this->assertEquals('fieldB', $c->getValue()->getName());
   }
 
   /**
-   * @covers query\Join::interpretation
+   * В качестве типа может быть только: CROSS, INNER, LEFT, RIGHT, FULL.
+   * @covers PPHP\tools\patterns\database\query\Join::__construct
    */
-  public function testInterpretation(){
-    $o = new query\Join(query\Join::INNER, new query\Table('table'), new query\LogicOperation(new query\Field('fieldA'), '=', new query\Field('fieldB')));
+  public function testTestShouldBeCROSSorINNERorLEFTorRIGHTorFULL(){
+    $this->setExpectedException('\PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException');
+    new Join('TEST', new Table('table'), new LogicOperation(new Field('fieldA'), '=', new Field('fieldB')));
+  }
+
+  /**
+   * Должен возвращать строку вида: тип JOIN `таблица` ON условие.
+   * @covers PPHP\tools\patterns\database\query\Join::interpretation
+   */
+  public function testShouldInterpretation(){
+    $o = new Join(Join::INNER, new Table('table'), new LogicOperation(new Field('fieldA'), '=', new Field('fieldB')));
     $this->assertEquals('INNER JOIN `table` ON (`fieldA` = `fieldB`)', $o->interpretation());
   }
 
   /**
-   * @covers query\Join::reestablish
+   * Должен восстанавливаться из строки вида: тип JOIN `таблица` ON условие
+   * @covers PPHP\tools\patterns\database\query\Join::reestablish
    */
-  public function testReestablish(){
-    $j = query\Join::reestablish('INNER JOIN `table` ON (`fieldA` = `fieldB`)');
-    $this->assertEquals(query\Join::INNER, $j->getType());
+  public function testShouldRestorableForString(){
+    /**
+     * @var \PPHP\tools\patterns\database\query\Join $j
+     */
+    $j = Join::reestablish('INNER JOIN `table` ON (`fieldA` = `fieldB`)');
+    $this->assertEquals(Join::INNER, $j->getType());
     $this->assertEquals('table', $j->getTable()->getTableName());
-    $this->assertEquals('fieldB', $j->getCondition()->getValue()->getName());
+    /**
+     * @var \PPHP\tools\patterns\database\query\LogicOperation $c
+     */
+    $c = $j->getCondition();
+    $this->assertEquals('fieldB', $c->getValue()->getName());
   }
 
   /**
-   * @covers query\Join::isReestablish
+   * Допустимой строкой является строка вида: тип JOIN `таблица` ON условие
+   * @covers PPHP\tools\patterns\database\query\Join::isReestablish
    */
-  public function testIsReestablish(){
-    $this->assertTrue(query\Join::isReestablish('INNER JOIN `table` ON (`fieldA` = `fieldB`)'));
-    $this->assertTrue(query\Join::isReestablish('LEFT JOIN `table` ON (table.fieldA = table.fieldB)'));
-    $this->assertTrue(query\Join::isReestablish('LEFT JOIN `table`
+  public function testGoodString(){
+    $this->assertTrue(Join::isReestablish('INNER JOIN `table` ON (`fieldA` = `fieldB`)'));
+    $this->assertTrue(Join::isReestablish('LEFT JOIN `table` ON (table.fieldA = table.fieldB)'));
+    $this->assertTrue(Join::isReestablish('LEFT JOIN `table`
                                                  ON (table.fieldA = table.fieldB)'));
-    $this->assertFalse(query\Join::isReestablish('X JOIN `table` ON (`fieldA` = `fieldB`)'));
-    $this->assertFalse(query\Join::isReestablish('CROSI JOIN `table` ON (`fieldA` = `fieldB`)'));
-    $this->assertFalse(query\Join::isReestablish('INNER J `table` ON (`fieldA` = `fieldB`)'));
-    $this->assertFalse(query\Join::isReestablish('INNER JOIN `table` (`fieldA` = `fieldB`)'));
-    $this->assertFalse(query\Join::isReestablish('INNER JOIN `table` ON `fieldA` = `fieldB`'));
+  }
+
+  /**
+   * Должен возвращать false при недопустимой структуре строки.
+   * @covers PPHP\tools\patterns\database\query\Join::isReestablish
+   */
+  public function testBedString(){
+    $this->assertFalse(Join::isReestablish('X JOIN `table` ON (`fieldA` = `fieldB`)'));
+    $this->assertFalse(Join::isReestablish('CROSI JOIN `table` ON (`fieldA` = `fieldB`)'));
+    $this->assertFalse(Join::isReestablish('INNER J `table` ON (`fieldA` = `fieldB`)'));
+    $this->assertFalse(Join::isReestablish('INNER JOIN `table` (`fieldA` = `fieldB`)'));
+    $this->assertFalse(Join::isReestablish('INNER JOIN `table` ON `fieldA` = `fieldB`'));
   }
 }

@@ -121,8 +121,7 @@ YUI.add('PJS.widgets.Screen', function(Y){
      * @type {bool}
      */
     hasHTML: {
-      value: true,
-      writeOnce: 'initOnly'
+      value: false
     },
     /**
      * Определение наличия файла стиля экрана.
@@ -130,8 +129,7 @@ YUI.add('PJS.widgets.Screen', function(Y){
      * @type {bool}
      */
     hasCSS: {
-      value: false,
-      writeOnce: 'initOnly'
+      value: false
     },
     /**
      * Определение наличия контроллера экрана.
@@ -139,8 +137,7 @@ YUI.add('PJS.widgets.Screen', function(Y){
      * @type {bool}
      */
     hasController: {
-      value: true,
-      writeOnce: 'initOnly'
+      value: false
     },
     /**
      * Определение наличия визуальной панели управления модулем.
@@ -209,9 +206,8 @@ YUI.add('PJS.widgets.Screen', function(Y){
      */
     _loadCSS: function(){
       if(this.get('hasCSS')){
-        Y.Get.css(this.get('location') + this.get('screen') + '.css', {
-          timeout: 500
-        });
+        var css = Y.Node.create('<link rel="stylesheet" href="'+this.get('location') + this.get('screen') + '.css'+'" />');
+        Y.Node.one('head').append(css);
       }
     },
 
@@ -499,13 +495,57 @@ YUI.add('PJS.widgets.Screen', function(Y){
         context._transformDOM();
       });
 
-      // 1 Загрузка DOM
-      this._loadDOM();
+      this.once('PJS.widgets.Screen:INILoad', function(){
+        // 1 Загрузка DOM
+        this._loadDOM();
 
-      // 1 Загрузка стиля
-      this._loadCSS();
+        // 1 Загрузка стиля
+        this._loadCSS();
+      });
+
+      // 0 Загрузка информации о структуре экрана из файла состояния
+      Y.io(this.get('location')+'state.ini', {
+        method: 'GET',
+        context: this,
+        on: {
+          complete: function(id, xhr){
+            // Поиск html, css, js
+            var conf = xhr.responseText.split("\n");
+            for(var i in conf){
+              // Границы диапазона вычисляются исходя из длины ключевого слова detail.
+              if(conf[i].substring(0,6) == 'detail'){
+                var detail = conf[i].substring(7).split(',');
+                for(var j in detail){
+                  detail[j] = detail[j].trim();
+                  switch(detail[j]){
+                    case 'html':
+                      this.set('hasHTML', true);
+                      break;
+                    case 'css':
+                      this.set('hasCSS', true);
+                      break;
+                    case 'js':
+                      this.set('hasController', true);
+                      break;
+                  }
+                }
+                break;
+              }
+            }
+            // Поиск admin panel
+            Y.PJS.services.Query.query('SystemPackages', 'hasScreen', {
+              data: [this.get('module'), 'admin'],
+              context: this,
+              success: function(answer){
+                this.set('hasAdminPanel', answer);
+                this.fire('PJS.widgets.Screen:INILoad');
+              }
+            });
+          }
+        }
+      });
     }
   });
 
   Y.namespace('PJS.widgets').Screen = Screen;
-}, '1.0', {requires: ['widget', 'node', 'event',  'node-load', 'get', 'PJS.classes.Controller', 'PJS.services.Transformer', 'PJS.services.User']});
+}, '1.2', {requires: ['widget', 'node', 'event',  'node-load', 'get', 'io-base', 'PJS.classes.Controller', 'PJS.services.Transformer', 'PJS.services.User', 'PJS.services.Query']});

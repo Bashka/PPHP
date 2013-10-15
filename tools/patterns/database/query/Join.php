@@ -5,7 +5,8 @@ use PPHP\tools\classes\standard\baseType\exceptions as exceptions;
 use PPHP\tools\classes\standard\baseType\String;
 
 /**
- * Операция объединения записей.
+ * Класс представляет компонент объединения записей.
+ * Объекты данного класса могут быть восстановлены из строки следующего формата: CROSS|INNER|LEFT|RIGHT|FULL JOIN  `имяТаблицы` ON (`имяПоля`|имяТаблицы.имяПоля = `имяПоля`|имяТаблицы.имяПоля)|(`имяПоля`|имяТаблицы.имяПоля = "значение").
  * @author Artur Sh. Mamedbekov
  * @package PPHP\tools\patterns\database\query
  */
@@ -21,27 +22,22 @@ class Join extends ComponentQuery{
   const FULL = 'FULL';
 
   /**
-   * Тип связи.
-   * @var string
+   * @var string Тип связи.
    */
   protected $type;
 
   /**
-   * Связываемая таблица.
-   * @var Table
+   * @var \PPHP\tools\patterns\database\query\Table Связываемая таблица.
    */
   protected $table;
 
   /**
-   * Условие связывания.
-   * @var Condition
+   * @var \PPHP\tools\patterns\database\query\Condition Условие связывания.
    */
   protected $condition;
 
   /**
-   * Метод возвращает массив шаблонов, любому из которых должна соответствовать строка, из которой можно интерпретировать объект вызываемого класса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getMasks($driver = null){
     // Условие объединения ограничено одним логическим выражением.
@@ -49,21 +45,14 @@ class Join extends ComponentQuery{
   }
 
   /**
-   * Метод возвращает массив шаблонов, описывающих различные компоненты шаблонов верификации.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @return string[]
+   * @prototype \PPHP\tools\patterns\interpreter\TRestorable
    */
   public static function getPatterns($driver = null){
     return ['types' => '(?:(?:' . self::CROSS . ')|(?:' . self::INNER . ')|(?:' . self::LEFT . ')|(?:' . self::RIGHT . ')|(?:' . self::FULL . '))'];
   }
 
   /**
-   * Метод восстанавливает объект из строки.
-   * @param string $string Исходная строка.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходной строки.
-   * @throws exceptions\StructureException Выбрасывается в случае, если исходная строка не отвечает требования структуры.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return Join Результирующий объект.
+   * @prototype \PPHP\tools\patterns\interpreter\Restorable
    */
   public static function reestablish($string, $driver = null){
     // Контроль типа и верификация выполняется в вызываемом родительском методе.
@@ -79,9 +68,9 @@ class Join extends ComponentQuery{
 
   /**
    * @param string $type Тип соединения. CROSS, INNER, LEFT, RIGHT или FULL.
-   * @param Table $table Связываемая таблица.
-   * @param Condition $condition Условие связывания.
-   * @throws exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
+   * @param \PPHP\tools\patterns\database\query\Table $table Связываемая таблица.
+   * @param \PPHP\tools\patterns\database\query\Condition $condition Условие связывания.
+   * @throws \PPHP\tools\classes\standard\baseType\exceptions\InvalidArgumentException Выбрасывается при передаче параметра неверного типа.
    */
   function __construct($type, Table $table, Condition $condition){
     if($type != 'CROSS' && $type != 'INNER' && $type != 'LEFT' && $type != 'RIGHT' && $type != 'FULL'){
@@ -93,11 +82,7 @@ class Join extends ComponentQuery{
   }
 
   /**
-   * Метод возвращает представление элемента в виде части SQL запроса.
-   * @param mixed $driver [optional] Данные, позволяющие изменить логику интерпретации исходного объекта.
-   * @throws exceptions\NotFoundDataException Выбрасывается в случае, если отсутствуют обязательные компоненты объекта.
-   * @throws exceptions\InvalidArgumentException Выбрасывается в случае получения параметра неверного типа.
-   * @return string Результат интерпретации.
+   * @prototype \PPHP\tools\patterns\interpreter\Interpreter
    */
   public function interpretation($driver = null){
     exceptions\InvalidArgumentException::verifyType($driver, 'Sn');
@@ -113,14 +98,14 @@ class Join extends ComponentQuery{
   }
 
   /**
-   * @return Condition
+   * @return \PPHP\tools\patterns\database\query\Condition
    */
   public function getCondition(){
     return $this->condition;
   }
 
   /**
-   * @return Table
+   * @return \PPHP\tools\patterns\database\query\Table
    */
   public function getTable(){
     return $this->table;

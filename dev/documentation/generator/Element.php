@@ -106,7 +106,11 @@ class Element implements Interpreter, Metamorphosis{
         // Поиск документации к методу.
         $doc = new ReflectionDoc($method->getDocComment());
         if($doc->hasTag('prototype')){
+          $detail = $doc->getDescription();
           $doc = new ReflectionDoc((new \ReflectionMethod($doc->getTag('prototype')[0], $method->getName()))->getDocComment());
+        }
+        else{
+          $detail = '';
         }
 
         // Маркер видимости
@@ -159,7 +163,8 @@ class Element implements Interpreter, Metamorphosis{
 
         // Описание
         $nodeMethod .= '<rich_text underline="single">Описание:'."\n".'</rich_text>';
-        $nodeMethod .= '<rich_text>'.htmlspecialchars(trim($doc->getDescription()))."\n".'</rich_text>';
+        $description = trim($doc->getDescription().$detail);
+        $nodeMethod .= '<rich_text>'.htmlspecialchars($description)."\n".'</rich_text>';
 
         // Аргументы
         if($doc->hasTag('param')){
